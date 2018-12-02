@@ -1,0 +1,12 @@
+image: clojure:lein-2.8.1
+
+before_script:
+  - lein deps
+
+test:
+  script:
+    - lein test
+  cache:
+    key: "$CI_JOB_NAME"
+    paths:
+      - .m2

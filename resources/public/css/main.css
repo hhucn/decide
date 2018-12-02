@@ -1,0 +1,28 @@
+.bubble-area {
+    width: 100%;
+    background-color: #EEEEEE;
+}
+
+.bubble {
+    display: inline-block;
+    padding: .5em;
+    border-radius: 5px;
+}
+
+.bubble-system {
+    text-align: left;
+    background-color: #C5E1A5;
+    margin-left: auto;
+}
+
+.bubble-user {
+    text-align: left;
+    background-color: #CFD8DC;
+    margin-right: auto;
+}
+
+.bubble-status {
+    text-align: center;
+    background-color: #B2EBF2;
+    margin: auto auto;
+}
