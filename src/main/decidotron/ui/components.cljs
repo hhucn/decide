@@ -1,8 +1,10 @@
 (ns decidotron.ui.components
   (:require
+    [cljs.core.async :refer [go <!] :as async]
     [fulcro.client.primitives :as prim :refer [defsc get-query]]
     [fulcro.client.dom :as dom]
     [fulcro.client.mutations :as m :refer [defmutation]]
+    [decidotron.ui.mutations :as ms]
     [decidotron.ui.mdc-components :as material]
     [fulcro.tempid :refer [tempid]]))
 
@@ -84,12 +86,11 @@
 ; ========================================
 
 (defsc InputField
-  [this {:keys [db/id input/value ui/label ui/type]}]
-  {:query [:db/id :input/value :ui/label :ui/type]
-   :ident [:input-field/by-id :db/id]
-   :initial-state (fn [{:keys [id value label type]
-                        :or {id (prim/tempid) value "" type "text"}}]
-                    {:db/id id :input/value value :ui/label label :ui/type type})}
+  [this {:keys [db/id input/value] :as props} {:keys [ui/label ui/type] :as computed}]
+  {:query [:db/id :input/value]
+   :ident [:input/by-id :db/id]
+   :initial-state (fn [{:keys [id value] :or {id (prim/tempid) value ""}}]
+                    {:db/id id :input/value value})}
   (material/text-field #js {:label label}
     (material/input #js {:type type
                          :value value
@@ -97,33 +98,33 @@
 
 (def ui-input-field (prim/factory InputField))
 
-(defmutation login [{:keys [nickname password]}]
-  (action [{:keys [state]}]
-    (swap! state update :dbas/connection dbas.client/login nickname password)))
-
-
 (defsc LoginForm
-  [this {:keys [db/id login-form/nickname login-form/password dbas/connection]}]
+  [this {:keys [db/id login-form/nickname-field login-form/password-field] :as props}]
   {:query [:db/id
+           {:login-form/nickname-field (prim/get-query InputField)}
            {:login-form/nickname (prim/get-query InputField)}
-           {:login-form/password (prim/get-query InputField)}
-           [:dbas/connection '_]]
+           {:login-form/password-field (prim/get-query InputField)}]
    :ident [:login-form/by-id :db/id]
    :initial-state (fn [{:keys [id nickname password]
                         :or {id (prim/tempid) nickname "" password ""}}]
                     {:db/id id
-                     :login-form/nickname (prim/get-initial-state InputField {:label "Nickname" :value nickname})
-                     :login-form/password (prim/get-initial-state InputField {:label "Password" :value password :type "password"})})}
+                     :login-form/nickname-field (prim/get-initial-state InputField {:id 1 :value nickname})
+                     :login-form/password-field (prim/get-initial-state InputField {:id 2 :value password})})}
   (dom/form :.mdc-elevation--z2
     (material/grid #js {:align "right"}
       (material/row #js {}
         (material/cell #js {:columns 12}
-          (ui-input-field nickname))
+          (ui-input-field (prim/computed nickname-field
+                            {:ui/label "Nickname"
+                             :ui/type "text"})))
         (material/cell #js {:columns 12}
-          (ui-input-field password))
+          (ui-input-field (prim/computed password-field
+                            {:ui/label "Password"
+                             :ui/type "password"})))
         (material/cell #js {:columns 6 :align "bottom"}
           (material/button #js {:href "#"
                                 :raised true
                                 :outlined true
-                                :onClick (fn [e] (js/console.log this))}
+                                :onClick #(prim/transact! this `[(ms/login {:nickname ~(:input/value nickname-field)
+                                                                            :password ~(:input/value password-field)})])}
             "Login"))))))

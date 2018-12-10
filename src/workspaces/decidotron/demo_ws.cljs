@@ -8,7 +8,8 @@
             [fulcro.client.mutations :as fm]
             [decidotron.ui.components :as ui]
             [dbas.client :as dbas]
-            [fulcro.client.primitives :as prim]))
+            [fulcro.client.primitives :as prim]
+            [fulcro.client.network :as net]))
 
 (fp/defsc FulcroDemo
   [this {:keys [counter]}]
@@ -76,13 +77,14 @@
 (ws/defcard input-field
   (ct.fulcro/fulcro-card
     {::f.portal/root ui/InputField
-     ::f.portal/initial-state {:db/id 1 :label "Nickname"}}))
+     ::f.portal/initial-state (fn [] (prim/computed {:db/id 1 :input/value ""} {:ui/label "Nickname"}))}))
 
 (ws/defcard login-form
   {::wsm/card-width  4
    ::wsm/card-height 9
    ::wsm/align       {:flex 1}}
   (ct.fulcro/fulcro-card
-    {::f.portal/root          ui/LoginForm
-     ::f.portal/app           {:initial-state {:dbas/connection dbas/connection
-                                               :ui/root (prim/get-initial-state ui/LoginForm {:id 1 :nickname "bjebb100" :password "heimlich"})}}}))
+    {::f.portal/root ui/LoginForm
+     ::f.portal/app  {:networking    {:dbas (net/fulcro-http-remote {:url "/api"})}
+                      :initial-state {:dbas/connection dbas/connection
+                                      :ui/root         (prim/get-initial-state ui/LoginForm {:id 1 :nickname "bjebb" :password "secret"})}}}))
