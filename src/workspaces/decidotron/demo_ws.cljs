@@ -6,7 +6,9 @@
             [nubank.workspaces.card-types.fulcro :as ct.fulcro]
             [nubank.workspaces.lib.fulcro-portal :as f.portal]
             [fulcro.client.mutations :as fm]
-            [decidotron.ui.components :as ui :refer [DBASChoice DBASChoiceList ui-choice-list]]))
+            [decidotron.ui.components :as ui]
+            [dbas.client :as dbas]
+            [fulcro.client.primitives :as prim]))
 
 (fp/defsc FulcroDemo
   [this {:keys [counter]}]
@@ -24,12 +26,12 @@
 
 (ws/defcard choice-card
    (ct.fulcro/fulcro-card
-     {::f.portal/root          DBASChoice
+     {::f.portal/root          ui/DBASChoice
       ::f.portal/initial-state {:choice/text "Cats are bad!"}}))
 
 (ws/defcard choices-card
    (ct.fulcro/fulcro-card
-     {::f.portal/root          DBASChoiceList
+     {::f.portal/root          ui/DBASChoiceList
       ::f.portal/initial-state {:choice-list/choices
                                 [{:choice/text "Cats are great"}
                                  {:choice/text "Dogs a great"}]}}))
@@ -41,6 +43,9 @@
                                 :bubble/type "system"}}))
 
 (ws/defcard bubble-area
+   {::wsm/card-width  4
+    ::wsm/card-height 7
+    ::wsm/align       {:flex 1}}
    (ct.fulcro/fulcro-card
      {::f.portal/root ui/DBASBubbleArea
       ::f.portal/wrap-root? false
@@ -52,6 +57,9 @@
                                                        :bubble/type "user"}]}}))
 
 (ws/defcard dialog-area
+   {::wsm/card-width  4
+    ::wsm/card-height 11
+    ::wsm/align       {:flex 1}}
    (ct.fulcro/fulcro-card
      {::f.portal/root ui/DBASDialogArea
       ::f.portal/initial-state {:bubble-area {:bubble-area/bubbles [{:bubble/text "I want to talk about the position that ... "
@@ -64,3 +72,17 @@
                                               [{:choice/text "Cats are great"}
                                                {:choice/text "Dogs a great"}
                                                {:choice/text "Neither of them is great, we should banish both!"}]}}}))
+
+(ws/defcard input-field
+  (ct.fulcro/fulcro-card
+    {::f.portal/root ui/InputField
+     ::f.portal/initial-state {:db/id 1 :label "Nickname"}}))
+
+(ws/defcard login-form
+  {::wsm/card-width  4
+   ::wsm/card-height 9
+   ::wsm/align       {:flex 1}}
+  (ct.fulcro/fulcro-card
+    {::f.portal/root          ui/LoginForm
+     ::f.portal/app           {:initial-state {:dbas/connection dbas/connection
+                                               :ui/root (prim/get-initial-state ui/LoginForm {:id 1 :nickname "bjebb100" :password "heimlich"})}}}))

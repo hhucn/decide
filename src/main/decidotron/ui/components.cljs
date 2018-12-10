@@ -1,7 +1,10 @@
 (ns decidotron.ui.components
   (:require
     [fulcro.client.primitives :as prim :refer [defsc get-query]]
-    [fulcro.client.dom :as dom]))
+    [fulcro.client.dom :as dom]
+    [fulcro.client.mutations :as m :refer [defmutation]]
+    [decidotron.ui.mdc-components :as material]
+    [fulcro.tempid :refer [tempid]]))
 
 (defsc PlaceholderImage
   "Generates an SVG image placeholder of the given size and with the given label
@@ -77,3 +80,50 @@
       (ui-choice-list choice-area)))
 
 (def ui-dialog-area (prim/factory DBASDialogArea))
+
+; ========================================
+
+(defsc InputField
+  [this {:keys [db/id input/value ui/label ui/type]}]
+  {:query [:db/id :input/value :ui/label :ui/type]
+   :ident [:input-field/by-id :db/id]
+   :initial-state (fn [{:keys [id value label type]
+                        :or {id (prim/tempid) value "" type "text"}}]
+                    {:db/id id :input/value value :ui/label label :ui/type type})}
+  (material/text-field #js {:label label}
+    (material/input #js {:type type
+                         :value value
+                         :onChange (fn [e] (m/set-string! this :input/value :event e))})))
+
+(def ui-input-field (prim/factory InputField))
+
+(defmutation login [{:keys [nickname password]}]
+  (action [{:keys [state]}]
+    (swap! state update :dbas/connection dbas.client/login nickname password)))
+
+
+(defsc LoginForm
+  [this {:keys [db/id login-form/nickname login-form/password dbas/connection]}]
+  {:query [:db/id
+           {:login-form/nickname (prim/get-query InputField)}
+           {:login-form/password (prim/get-query InputField)}
+           [:dbas/connection '_]]
+   :ident [:login-form/by-id :db/id]
+   :initial-state (fn [{:keys [id nickname password]
+                        :or {id (prim/tempid) nickname "" password ""}}]
+                    {:db/id id
+                     :login-form/nickname (prim/get-initial-state InputField {:label "Nickname" :value nickname})
+                     :login-form/password (prim/get-initial-state InputField {:label "Password" :value password :type "password"})})}
+  (dom/form :.mdc-elevation--z2
+    (material/grid #js {:align "right"}
+      (material/row #js {}
+        (material/cell #js {:columns 12}
+          (ui-input-field nickname))
+        (material/cell #js {:columns 12}
+          (ui-input-field password))
+        (material/cell #js {:columns 6 :align "bottom"}
+          (material/button #js {:href "#"
+                                :raised true
+                                :outlined true
+                                :onClick (fn [e] (js/console.log this))}
+            "Login"))))))
