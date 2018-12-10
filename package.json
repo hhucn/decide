@@ -8,7 +8,10 @@
     "react-grid-layout": "^0.16.6",
     "react-icons": "^2.2.7",
     "reakit": "^0.11.2",
-    "material-components-web": "^0.41.1"
+    "@material/react-button": "^0.7.1",
+    "@material/react-floating-label": "^0.7.1",
+    "@material/react-text-field": "^0.7.1",
+    "@material/react-layout-grid": "^0.7.1"
   },
   "devDependencies": {
     "intl-messageformat": "^2.2.0",
