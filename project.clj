@@ -31,6 +31,7 @@
                  [fulcrologic/fulcro-spec "2.1.3" :scope "test"]
 
                  ; for dbas client
+                 [com.wsscode/pathom "2.2.2"]
                  [cljs-http "0.1.45"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.reader "1.3.2"]]

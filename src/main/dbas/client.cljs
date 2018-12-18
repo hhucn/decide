@@ -13,9 +13,9 @@
 
 (comment
   (logged-in? {::base "https://dbas.cs.uni-duesseldorf.de/api"})
-  (logged-in? {::base "https://dbas.cs.uni-duesseldorf.de/api"
+  (logged-in? {::base     "https://dbas.cs.uni-duesseldorf.de/api"
                ::nickname "Björn"
-               ::token "abcTOKEN123"}))
+               ::token    "abcTOKEN123"}))
 
 (defn- api-call
   ([method-fn conn path] (api-call method-fn conn path nil))
@@ -40,14 +40,13 @@
     (let [body (<! (api-post conn "/login" {:nickname username
                                             :password password}))]
       (cond-> conn
-        (:token body) (assoc ::nickname (:nickname body)
+        (:token body) (assoc ::id (:id body)
+                             ::nickname (:nickname body)
                              ::token (:token body))))))
 
 (defn logout [conn]
-  #_(api-post conn "/logout") ; this is broken in D-BAS
-  (go (-> conn
-        (dissoc ::token)
-        (dissoc ::nickname))))
+  #_(api-post conn "/logout")                               ; this is broken in D-BAS
+  (go (dissoc conn ::id ::token ::nickname)))
 
 (defn issues [conn]
   (api-get conn "/issues"))

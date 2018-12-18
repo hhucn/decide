@@ -1,12 +1,10 @@
 (ns decidotron.ui.components
   (:require
-    [cljs.core.async :refer [go <!] :as async]
     [fulcro.client.primitives :as prim :refer [defsc get-query]]
     [fulcro.client.dom :as dom]
     [fulcro.client.mutations :as m :refer [defmutation]]
-    [decidotron.ui.mutations :as ms]
-    [decidotron.ui.mdc-components :as material]
-    [fulcro.tempid :refer [tempid]]))
+    [decidotron.mutations :as ms]
+    [decidotron.ui.mdc-components :as material]))
 
 (defsc PlaceholderImage
   "Generates an SVG image placeholder of the given size and with the given label
@@ -122,9 +120,9 @@
                             {:ui/label "Password"
                              :ui/type "password"})))
         (material/cell #js {:columns 6 :align "bottom"}
-          (material/button #js {:href "#"
-                                :raised true
+          (material/button #js {:href     "#"
+                                :raised   true
                                 :outlined true
-                                :onClick #(prim/transact! this `[(ms/login {:nickname ~(:input/value nickname-field)
-                                                                            :password ~(:input/value password-field)})])}
+                                :onClick  #(prim/transact! this `[(ms/login {:nickname ~(:input/value nickname-field)
+                                                                             :password ~(:input/value password-field)})])}
             "Login"))))))
