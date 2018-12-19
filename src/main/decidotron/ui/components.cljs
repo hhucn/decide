@@ -10,10 +10,12 @@
   [this {:keys [choice/text] :as props}]
   {:initial-state (fn [{:keys [choice/text]}] {:choice/text text})
    :query         [:choice/text]}
-  (material/list-item #js {}
-    (dom/a {:onClick #()})
-    (material/list-item-graphic #js {:graphic (material/radio #js {}
-                                                (material/native-radio #js {:checked false}))})
+  (material/list-item #js {:role "radio"}
+    (material/list-item-graphic #js
+        {:graphic
+         (material/radio #js {}
+           (material/native-radio #js {:checked  false
+                                       :readOnly true}))})
     (material/list-item-text #js {:primaryText text})))
 
 (def ui-choice (prim/factory DBASChoice))
@@ -22,7 +24,8 @@
   [this {:keys [choice-list/choices] :as props}]
   {:initial-state (fn [{:keys [choice-list/choices]}] {:choice-list/choices choices})
    :query         [{:choice-list/choices (get-query DBASChoice)}]}
-  (material/mdc-list #js {:aria-orientation "vertical"}
+  (material/mdc-list #js {:role             "radiogroup"
+                          :aria-orientation "vertical"}
     (map ui-choice choices)))
 
 (def ui-choice-list (prim/factory DBASChoiceList))
@@ -83,14 +86,13 @@
   [this {:keys [db/id login-form/nickname-field login-form/password-field] :as props}]
   {:query         [:db/id
                    {:login-form/nickname-field (prim/get-query InputField)}
-                   {:login-form/nickname (prim/get-query InputField)}
                    {:login-form/password-field (prim/get-query InputField)}]
    :ident         [:login-form/by-id :db/id]
    :initial-state (fn [{:keys [id nickname password]
                         :or   {id (prim/tempid) nickname "" password ""}}]
                     {:db/id                     id
-                     :login-form/nickname-field (prim/get-initial-state InputField {:id 1 :value nickname})
-                     :login-form/password-field (prim/get-initial-state InputField {:id 2 :value password})})}
+                     :login-form/nickname-field (prim/get-initial-state InputField {:value nickname})
+                     :login-form/password-field (prim/get-initial-state InputField {:value password})})}
   (dom/form :.mdc-elevation--z2
     (material/grid #js {:align "right"}
       (material/row #js {}
