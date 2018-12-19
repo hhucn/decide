@@ -5,7 +5,8 @@
     ["@material/react-layout-grid" :as react-grid-layout]
     ["@material/react-list" :as react-list]
     ["@material/react-radio" :as react-radio]
-    ["@material/react-material-icon" :as react-icon]))
+    ["@material/react-material-icon" :as react-icon]
+    ["@material/react-top-app-bar" :as react-topbar]))
 
 (defn factory-apply [class]
   (fn [props & children]
@@ -29,3 +30,6 @@
 (def native-radio (factory-apply react-radio/NativeRadioControl))
 
 (def icon (factory-apply react-icon/default))
+
+(def top-app-bar (factory-apply react-topbar/default))
+(def top-app-bar-fixed-adjust (factory-apply react-topbar/TopAppBarFixedAdjust))
