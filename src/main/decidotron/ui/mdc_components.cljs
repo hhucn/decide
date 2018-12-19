@@ -6,7 +6,8 @@
     ["@material/react-list" :as react-list]
     ["@material/react-radio" :as react-radio]
     ["@material/react-material-icon" :as react-icon]
-    ["@material/react-top-app-bar" :as react-topbar]))
+    ["@material/react-top-app-bar" :as react-topbar]
+    ["@material/react-icon-button" :as react-icon-button]))
 
 (defn factory-apply [class]
   (fn [props & children]
@@ -15,7 +16,11 @@
 
 (def text-field (factory-apply react-text-field/default))
 (def input (factory-apply react-text-field/Input))
+
 (def button (factory-apply react-button/default))
+(def icon-button (factory-apply react-icon-button/default))
+(def icon-toggle (factory-apply react-icon-button/IconToggle))
+
 (def grid (factory-apply react-grid-layout/Grid))
 (def row (factory-apply react-grid-layout/Row))
 (def cell (factory-apply react-grid-layout/Cell))
