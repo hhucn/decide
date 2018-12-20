@@ -43,12 +43,15 @@
   (html5
     [:html {:lang "en"}
      [:head {:lang "en"}
-      [:title "Application"]
+      [:title "Decidotron"]
       [:meta {:charset "utf-8"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}]
       [:link {:href "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
               :rel  "stylesheet"}]
       [:link {:rel "shortcut icon" :href "data:image/x-icon;," :type "image/x-icon"}]
+      [:link {:rel "stylesheet" :href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"}]
+      [:link {:rel "stylesheet" :href "https://fonts.googleapis.com/icon?family=Material+Icons"}]
+      [:link {:rel "stylesheet" :href "/css/main.css"}]
       [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]]
      [:body
       [:div#app]

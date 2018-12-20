@@ -7,7 +7,8 @@
     ["@material/react-radio" :as react-radio]
     ["@material/react-material-icon" :as react-icon]
     ["@material/react-top-app-bar" :as react-topbar]
-    ["@material/react-icon-button" :as react-icon-button]))
+    ["@material/react-icon-button" :as react-icon-button]
+    ["@material/react-menu-surface" :as react-menu-surface]))
 
 (defn factory-apply [class]
   (fn [props & children]
@@ -38,3 +39,5 @@
 
 (def top-app-bar (factory-apply react-topbar/default))
 (def top-app-bar-fixed-adjust (factory-apply react-topbar/TopAppBarFixedAdjust))
+
+(def menu-surface (factory-apply react-menu-surface/default))

@@ -1,7 +1,8 @@
 (ns decidotron.client
   (:require [fulcro.client :as fc]
             [decidotron.ui.root :as root]
-            [fulcro.client.network :as net]))
+            [fulcro.client.network :as net]
+            [decidotron.remotes.dbas :refer [dbas-remote]]))
 
 (defonce app (atom nil))
 
@@ -23,5 +24,6 @@
                 ;; See middleware.clj to see how the token is embedded into the HTML
                 :networking {:remote (net/fulcro-http-remote
                                        {:url                "/api"
-                                        :request-middleware secured-request-middleware})}))
+                                        :request-middleware secured-request-middleware})
+                             :dbas   dbas-remote}))
   (start))

@@ -7,6 +7,7 @@
             [nubank.workspaces.lib.fulcro-portal :as f.portal]
             [fulcro.client.mutations :as fm]
             [decidotron.ui.components :as ui]
+            [decidotron.ui.root :as root-ui]
             [dbas.client :as dbas]
             [fulcro.client.primitives :as prim]
             [decidotron.remotes.dbas :refer [dbas-remote]]))
@@ -24,6 +25,13 @@
   (ct.fulcro/fulcro-card
     {::f.portal/root FulcroDemo}))
 
+(ws/defcard root-card
+  {::wsm/align {:flex 1}}
+  (ct.fulcro/fulcro-card
+    {::f.portal/root       root-ui/Root
+     ::f.portal/wrap-root? false
+     ::f.portal/app        {:networking    {:dbas dbas-remote}
+                            :initial-state (prim/get-initial-state root-ui/Root {:connection dbas/connection})}}))
 
 (ws/defcard choice-card
   (ct.fulcro/fulcro-card
@@ -78,8 +86,7 @@
 
 (ws/defcard input-field
   (ct.fulcro/fulcro-card
-    {::f.portal/root          ui/InputField
-     ::f.portal/initial-state (fn [] (prim/computed {:db/id 1 :input/value ""} {:ui/label "Nickname"}))}))
+    {::f.portal/root ui/InputField}))
 
 (ws/defcard login-form
   {::wsm/card-width  4
