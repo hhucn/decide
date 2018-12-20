@@ -110,3 +110,17 @@
             "Login"))))))
 
 (def ui-login-form (prim/factory LoginForm))
+
+(defsc Drawer [this {:keys [db/id drawer/open?]}]
+  {:query         [:db/id :drawer/open?]
+   :ident         [:drawer-by-id :db/id]
+   :initial-state (fn [{:keys [id]}]
+                    {:db/id id
+                     :drawer/open? false})}
+  (material/drawer #js {:modal   true
+                        :open    open?
+                        :onClose #(m/set-value! this :drawer/open? false)}
+    (material/mdc-list #js {}
+      [(material/list-item #js {} (material/list-item-text #js {:primaryText "First"}))])))
+
+(def ui-drawer (prim/factory Drawer))
