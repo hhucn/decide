@@ -8,7 +8,8 @@
     ["@material/react-material-icon" :as react-icon]
     ["@material/react-top-app-bar" :as react-topbar]
     ["@material/react-icon-button" :as react-icon-button]
-    ["@material/react-menu-surface" :as react-menu-surface]))
+    ["@material/react-menu-surface" :as react-menu-surface]
+    ["@material/react-drawer" :as react-drawer]))
 
 (defn factory-apply [class]
   (fn [props & children]
@@ -41,3 +42,10 @@
 (def top-app-bar-fixed-adjust (factory-apply react-topbar/TopAppBarFixedAdjust))
 
 (def menu-surface (factory-apply react-menu-surface/default))
+
+(def drawer (factory-apply react-drawer/default))
+(def drawer-header (factory-apply react-drawer/DrawerHeader))
+(def drawer-subtitle (factory-apply react-drawer/DrawerSubtitle))
+(def drawer-title (factory-apply react-drawer/DrawerTitle))
+(def drawer-content (factory-apply react-drawer/DrawerContent))
+(def drawer-app-content (factory-apply react-drawer/DrawerAppContent))

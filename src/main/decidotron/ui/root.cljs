@@ -8,18 +8,6 @@
     [decidotron.ui.components :as comp]
     [fulcro.client.mutations :as m]))
 
-
-(defsc Dialog [this {:keys [dialog/open?]}]
-  {:query         [:dialog/open?]
-   :initial-state (fn [{:keys [open?]}] {:dialog/open? open?})}
-  (dom/div :.mdc-dialog {:role "alertdialog" :classes [(when open? :.mdc-dialog--open)]}
-    (dom/div :.mdc-dialog__container
-      (dom/div :.mdc-dialog__surface
-        (dom/div :.mdc-dialog__content
-          (dom/p "Hussa"))))))
-
-(def ui-dialog (prim/factory Dialog))
-
 (defn ui-login-button [this connection]
   (if (dbas.client/logged-in? connection)
     (material/icon-button #js {}
