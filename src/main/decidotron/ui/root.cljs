@@ -76,22 +76,33 @@
   {:query         [:dbas/connection
                    {:root/top-bar (prim/get-query TopBar)}
                    {:root/router (prim/get-query RootRouter)}
-                   {:root/drawer (prim/get-query comp/Drawer)}]
+                   {:root/drawer (prim/get-query comp/NavDrawer)}]
    :initial-state (fn [params]
                     {:root/router     (prim/get-initial-state RootRouter {})
-                     :root/drawer     (prim/get-initial-state comp/Drawer {:id drawer-id})
-                     :dbas/connection dbas/connection})}
-
+                     :dbas/connection dbas/connection
+                     :root/drawer     (prim/get-initial-state comp/NavDrawer {:id :main-drawer})})}
   (let [logged-in? (dbas/logged-in? connection)]
     (dom/div
-      (comp/ui-drawer drawer)
-      (ui-top-bar (prim/computed top-bar
-                    {:topbar/nav-icon
-                     (material/icon #js {:icon    "menu"
-                                         :onClick #(prim/transact! this `[(ms/open-drawer {:drawer/id ~drawer-id})])})}))
-      (material/button #js {:onClick #(prim/transact! this
-                                        `[(r/set-route {:router :root/router
-                                                        :target [:PAGE/discuss 1]})])} "Discuss")
+      (comp/ui-drawer drawer
+        (map-indexed (fn [i p] (comp/ui-drawer-item (assoc p :drawer-item/index (inc i))))
+          [(prim/computed {:drawer-item/text "Discuss"
+                           :drawer-item/icon "forum"}
+             {:ui/onClick #(prim/transact! this
+                             `[(r/set-route {:router :root/router
+                                             :target [:PAGE/discuss 1]})])})
+           (prim/computed {:drawer-item/text "Login"
+                           :drawer-item/icon "account_circle"}
+             {:ui/onClick #(prim/transact! this
+                             `[(r/set-route {:router :root/router
+                                             :target [:PAGE/login 1]})])})]))
+      (ui-top-bar
+        (prim/computed top-bar
+          {:topbar/nav-icon
+           (material/icon #js
+               {:icon    "menu"
+                :onClick #(prim/transact! this `[(ms/open-drawer {:drawer/id :main-drawer})])})}))
 
-      (ui-router router)
+      (material/grid #js {}
+        (ui-router router))
+
       (dom/p (if logged-in? (str "Logged in as: " (::dbas/nickname connection)) "Not logged in")))))

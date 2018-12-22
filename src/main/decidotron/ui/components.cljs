@@ -4,7 +4,8 @@
     [fulcro.client.dom :as dom]
     [fulcro.client.mutations :as m :refer [defmutation]]
     [decidotron.mutations :as ms]
-    [decidotron.ui.mdc-components :as material]))
+    [decidotron.ui.mdc-components :as material]
+    [fulcro.client.routing :as r]))
 
 (defsc DBASChoice
   [this {:keys [choice/text] :as props}]
@@ -91,7 +92,7 @@
                         :or   {nickname "" password ""}}]
                     {:login-form/nickname-field (prim/get-initial-state InputField {:value nickname})
                      :login-form/password-field (prim/get-initial-state InputField {:value password})})}
-  (dom/form :.mdc-elevation--z2
+  (dom/form
     (material/grid #js {:align "right"}
       (material/row #js {}
         (material/cell #js {:columns 12}
@@ -111,16 +112,30 @@
 
 (def ui-login-form (prim/factory LoginForm))
 
-(defsc Drawer [this {:keys [db/id drawer/open?]}]
+(defsc DrawerItem [this {:keys [drawer-item/text drawer-item/icon drawer-item/index]} {:keys [ui/onClick]}]
+  {:query [:drawer-item/text :drawer-item/icon :drawer-item/index]}
+  (material/list-item #js {:onClick onClick
+                           :tag "a"
+                           :tabIndex index
+                           :childrenTabIndex index}
+    (material/list-item-graphic #js {:graphic (material/icon #js {:icon icon})})
+    (material/list-item-text #js {:primaryText text})))
+
+(def ui-drawer-item (prim/factory DrawerItem {:keyfn :drawer-item/index}))
+
+(defsc NavDrawer [this {:keys [db/id drawer/open?]}]
   {:query         [:db/id :drawer/open?]
-   :ident         [:drawer-by-id :db/id]
+   :ident         [:drawer/by-id :db/id]
    :initial-state (fn [{:keys [id]}]
                     {:db/id id
                      :drawer/open? false})}
   (material/drawer #js {:modal   true
                         :open    open?
                         :onClose #(m/set-value! this :drawer/open? false)}
-    (material/mdc-list #js {}
-      [(material/list-item #js {} (material/list-item-text #js {:primaryText "First"}))])))
+    (material/drawer-content #js {}
+      (material/mdc-list #js {:tag "nav"
+                              :selectedIndex 0}
+        (prim/children this)))))
 
-(def ui-drawer (prim/factory Drawer))
+
+(def ui-drawer (prim/factory NavDrawer))

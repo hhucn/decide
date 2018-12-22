@@ -14,4 +14,4 @@
 
 (defmutation open-drawer [{:keys [drawer/id]}]
   (action [{:keys [state]}]
-    (swap! state assoc-in [:drawer-by-id id :drawer/open?] true)))
+    (swap! state assoc-in [:drawer/by-id id :drawer/open?] true)))
