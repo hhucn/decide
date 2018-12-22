@@ -112,30 +112,47 @@
 
 (def ui-login-form (prim/factory LoginForm))
 
-(defsc DrawerItem [this {:keys [drawer-item/text drawer-item/icon drawer-item/index]} {:keys [ui/onClick]}]
+(defsc NavDrawerItem [this {:keys [drawer-item/text drawer-item/icon drawer-item/index]} {:keys [ui/onClick]}]
   {:query [:drawer-item/text :drawer-item/icon :drawer-item/index]}
-  (material/list-item #js {:onClick onClick
-                           :tag "a"
-                           :tabIndex index
+  (material/list-item #js {:onClick          onClick
+                           :tag              "a"
+                           :tabIndex         index
                            :childrenTabIndex index}
     (material/list-item-graphic #js {:graphic (material/icon #js {:icon icon})})
     (material/list-item-text #js {:primaryText text})))
 
-(def ui-drawer-item (prim/factory DrawerItem {:keyfn :drawer-item/index}))
+(def ui-nav-drawer-item (prim/factory NavDrawerItem {:keyfn :drawer-item/index}))
 
-(defsc NavDrawer [this {:keys [db/id drawer/open?]}]
-  {:query         [:db/id :drawer/open?]
+(defsc NavDrawer [this {:keys [db/id drawer/open? dbas/connection]}]
+  {:query         [:db/id :drawer/open? [:dbas/connection '_]]
    :ident         [:drawer/by-id :db/id]
    :initial-state (fn [{:keys [id]}]
-                    {:db/id id
+                    {:db/id        id
                      :drawer/open? false})}
-  (material/drawer #js {:modal   true
-                        :open    open?
-                        :onClose #(m/set-value! this :drawer/open? false)}
-    (material/drawer-content #js {}
-      (material/mdc-list #js {:tag "nav"
-                              :selectedIndex 0}
-        (prim/children this)))))
+  (let [logged-in? (dbas.client/logged-in? connection)
+        close #(m/set-value! this :drawer/open? false)]
+    (material/drawer #js {:modal   true
+                          :open    open?
+                          :onClose #(m/set-value! this :drawer/open? false)}
+      (material/drawer-header #js {}
+        (material/drawer-title #js {}
+          (if logged-in?
+            (:dbas.client/nickname connection)
+            (material/button #js
+                {:onClick  #(do (close)
+                              (prim/transact! this
+                                `[(r/set-route {:router :root/router
+                                                :target [:PAGE/login 1]})
+                                  (ms/toggle-drawer {:drawer/id :main-drawer})]))}
+              "Login"))))
+      (material/drawer-content #js {}
+        (material/mdc-list #js {:tag "nav"}
+          (map-indexed (fn [i p] (ui-nav-drawer-item (assoc p :drawer-item/index (inc i))))
+            (cond-> [(prim/computed {:drawer-item/text "Discuss"
+                                     :drawer-item/icon "forum"}
+                       {:ui/onClick #(do (close) (prim/transact! this
+                                                   `[(r/set-route {:router :root/router
+                                                                   :target [:PAGE/discuss 1]})]))})])))))))
 
 
-(def ui-drawer (prim/factory NavDrawer))
+(def ui-nav-drawer (prim/factory NavDrawer))

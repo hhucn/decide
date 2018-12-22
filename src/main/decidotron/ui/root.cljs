@@ -83,26 +83,13 @@
                      :root/drawer     (prim/get-initial-state comp/NavDrawer {:id :main-drawer})})}
   (let [logged-in? (dbas/logged-in? connection)]
     (dom/div
-      (comp/ui-drawer drawer
-        (map-indexed (fn [i p] (comp/ui-drawer-item (assoc p :drawer-item/index (inc i))))
-          [(prim/computed {:drawer-item/text "Discuss"
-                           :drawer-item/icon "forum"}
-             {:ui/onClick #(prim/transact! this
-                             `[(r/set-route {:router :root/router
-                                             :target [:PAGE/discuss 1]})])})
-           (prim/computed {:drawer-item/text "Login"
-                           :drawer-item/icon "account_circle"}
-             {:ui/onClick #(prim/transact! this
-                             `[(r/set-route {:router :root/router
-                                             :target [:PAGE/login 1]})])})]))
+      (comp/ui-nav-drawer drawer)
       (ui-top-bar
         (prim/computed top-bar
           {:topbar/nav-icon
            (material/icon #js
                {:icon    "menu"
-                :onClick #(prim/transact! this `[(ms/open-drawer {:drawer/id :main-drawer})])})}))
+                :onClick #(prim/transact! this `[(ms/toggle-drawer {:drawer/id :main-drawer})])})}))
 
       (material/grid #js {}
-        (ui-router router))
-
-      (dom/p (if logged-in? (str "Logged in as: " (::dbas/nickname connection)) "Not logged in")))))
+        (ui-router router)))))
