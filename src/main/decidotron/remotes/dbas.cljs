@@ -6,8 +6,8 @@
             [com.wsscode.pathom.fulcro.network :as pfn]))
 
 (pc/defresolver issues [{{{connection :connection} :params} :ast} _]
-  {::pc/output [{:dbas/issues [[:dbas/date :dbas/description :dbas/language :dbas/slug :dbas/summary :dbas/title :dbas/url]]}]}
-  {:dbas/issues (dbas/issues connection)})
+  {::pc/output [{:dbas/issues [:dbas/date :dbas/description :dbas/language :dbas/slug :dbas/summary :dbas/title :dbas/url]}]}
+  {:dbas/issues (go (into {} (map #(vector (:slug %) %)) (<! (dbas/issues connection))))})
 
 (pc/defmutation login [_ {:keys [connection nickname password]}]
   {::pc/sym    'dbas/login
