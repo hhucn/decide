@@ -5,7 +5,9 @@
     [fulcro.client.mutations :as m :refer [defmutation]]
     [decidotron.mutations :as ms]
     [decidotron.ui.mdc-components :as material]
-    [fulcro.client.routing :as r]))
+    [decidotron.remotes.dbas :as remote-dbas]
+    [fulcro.client.routing :as r]
+    [fulcro.client.data-fetch :as df]))
 
 (defsc DBASChoice
   [this {:keys [choice/text] :as props}]
@@ -67,6 +69,22 @@
     (ui-choice-list choice-area)))
 
 (def ui-dialog-area (prim/factory DBASDialogArea))
+
+(defsc DBASIssueEntry [this {:keys [dbas/title dbas/slug]}]
+  {:query [:dbas/title :dbas/slug]
+   :ident [:dbas-issue-entry/by-slug :dbas/slug]}
+  (dom/li title))
+
+(def ui-issue-entry (prim/factory DBASIssueEntry {:keyfn :dbas/slug}))
+
+(defsc DBASIssueList [this {:keys [dbas/issues]}]
+  {:query [{:dbas/issues [(prim/get-query DBASIssueEntry)]}]
+   :initial-state {:dbas/issues []}}
+  (dom/div
+    (map ui-issue-entry issues)))
+
+(def ui-issue-list (prim/factory DBASIssueList))
+
 
 ; ========================================
 
@@ -150,9 +168,23 @@
           (map-indexed (fn [i p] (ui-nav-drawer-item (assoc p :drawer-item/index (inc i))))
             (cond-> [(prim/computed {:drawer-item/text "Discuss"
                                      :drawer-item/icon "forum"}
-                       {:ui/onClick #(do (close) (prim/transact! this
-                                                   `[(r/set-route {:router :root/router
-                                                                   :target [:PAGE/discuss 1]})]))})])))))))
+                       {:ui/onClick #(do (close)
+                                         (prim/transact! this
+                                           `[(r/set-route {:router :root/router
+                                                           :target [:PAGE/discuss 1]})]))})])))))))
 
 
 (def ui-nav-drawer (prim/factory NavDrawer))
+
+(defsc TempRoot [this {:keys [dbas/issues dbas/connection]}]
+  {:query [[:dbas/issues '_]
+           [:dbas/connection '_]]}
+  (dom/div
+    (material/button #js {:outlined true
+                          :onClick #(df/load this :dbas/issues nil
+                                      {:remote :dbas
+                                       :params {:connection connection}
+                                       :parallel true})} "Load")
+    (ui-issue-list issues)))
+
+(def ui-temp-root (prim/factory TempRoot))

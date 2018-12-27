@@ -73,16 +73,25 @@
    ::wsm/align       {:flex 1}}
   (ct.fulcro/fulcro-card
     {::f.portal/root          ui/DBASDialogArea
-     ::f.portal/initial-state {:bubble-area {:bubble-area/bubbles [{:bubble/text "I want to talk about the position that ... "
-                                                                    :bubble/type "system"}
-                                                                   {:bubble/text "Now"
-                                                                    :bubble/type "status"}
-                                                                   {:bubble/text "You said that: Now you say that.."
-                                                                    :bubble/type "user"}]}
-                               :choice-area {:choice-list/choices
-                                             [{:choice/text "Cats are great"}
-                                              {:choice/text "Dogs a great"}
-                                              {:choice/text "Neither of them is great, we should banish both!"}]}}}))
+     ::f.portal/app  {:networking    {:dbas dbas-remote}
+                      :initial-state {:ui/root (prim/get-initial-state ui/DBASDialogArea
+                                                 {:bubble-area {:bubble-area/bubbles [{:bubble/text "I want to talk about the position that ... "
+                                                                                       :bubble/type "system"}
+                                                                                      {:bubble/text "Now"
+                                                                                       :bubble/type "status"}
+                                                                                      {:bubble/text "You said that: Now you say that.."
+                                                                                       :bubble/type "user"}]}
+                                                  :choice-area {:choice-list/choices
+                                                                [{:choice/text "Cats are great"}
+                                                                 {:choice/text "Dogs a great"}
+                                                                 {:choice/text "Neither of them is great, we should banish both!"}]}})}}}))
+
+(ws/defcard live-issue-list
+  (ct.fulcro/fulcro-card
+    {::f.portal/root          ui/TempRoot
+     ::f.portal/app  {:networking    {:dbas dbas-remote}
+                      :initial-state {:dbas/connection dbas/connection
+                                      :ui/root (prim/get-initial-state ui/TempRoot {})}}}))
 
 (ws/defcard input-field
   (ct.fulcro/fulcro-card

@@ -20,6 +20,7 @@
 (defn- api-call
   ([method-fn conn path] (api-call method-fn conn path nil))
   ([method-fn conn path body]
+   {:pre [(some? conn)]}
    (go
      (let [response (<! (-> {:headers {}}
                             (cond-> (some? body)

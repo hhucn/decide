@@ -1,19 +1,21 @@
 (ns decidotron.remotes.dbas
-  (:require [fulcro.client.network :as net]
-            [cljs.core.async :refer [go <!] :as async]
+  (:require [cljs.core.async :refer [go <!] :as async]
             [dbas.client :as dbas]
-            [fulcro.client.primitives :as prim]
             [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc]
             [com.wsscode.pathom.fulcro.network :as pfn]))
 
-(pc/defmutation login [env {:keys [connection nickname password]}]
+(pc/defresolver issues [{{{connection :connection} :params} :ast} _]
+  {::pc/output [{:dbas/issues [[:dbas/date :dbas/description :dbas/language :dbas/slug :dbas/summary :dbas/title :dbas/url]]}]}
+  {:dbas/issues (dbas/issues connection)})
+
+(pc/defmutation login [_ {:keys [connection nickname password]}]
   {::pc/sym    'dbas/login
    ::pc/params [:connection :nickname :password]
    ::pc/output [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token]}
   (dbas/login connection nickname password))
 
-(def app-registry [login])
+(def app-registry [login issues])
 (def index (atom {}))
 
 (def parser
