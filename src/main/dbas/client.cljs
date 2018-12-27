@@ -2,6 +2,7 @@
   (:require
     [cljs-http.client :as http]
     [cljs.core.async :refer [go <!]]
+    [cljs.spec.alpha :as s]
     [goog.string :as gstring]))
 
 (defn new-connection [] {::base "https://dbas.cs.uni-duesseldorf.de/api"})
@@ -49,8 +50,19 @@
   #_(api-post conn "/logout")                               ; this is broken in D-BAS
   (go (dissoc conn ::id ::token ::nickname)))
 
+(s/def ::slug (s/and string? #(re-matches #"^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$" %)))
+(s/def ::date string?) ; for now
+(s/def ::description string?)
+(s/def ::title string?)
+(s/def ::url string?)
+(s/def ::summary string?)
+(s/def ::language (s/conformer keyword str))
+(s/def ::issue (s/keys :req-un [::slug ::date ::title ::description ::url ::summary ::language]))
+
 (defn issues [conn]
-  (api-get conn "/issues"))
+  (go (->> (<! (api-get conn "/issues"))
+           (map #(s/conform ::issue %))
+           (remove #{:cljs.spec.alpha/invalid}))))
 
 (defn positions [conn slug]
   (api-get conn (gstring/format "/%s" slug)))
