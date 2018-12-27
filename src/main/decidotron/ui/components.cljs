@@ -7,7 +7,8 @@
     [decidotron.ui.mdc-components :as material]
     [decidotron.remotes.dbas :as remote-dbas]
     [fulcro.client.routing :as r]
-    [fulcro.client.data-fetch :as df]))
+    [fulcro.client.data-fetch :as df]
+    [decidotron.loads :as loads]))
 
 (defsc DBASChoice
   [this {:keys [choice/text] :as props}]
@@ -181,10 +182,7 @@
            [:dbas/connection '_]]}
   (dom/div
     (material/button #js {:outlined true
-                          :onClick #(df/load this :dbas/issues nil
-                                      {:remote :dbas
-                                       :params {:connection connection}
-                                       :parallel true})} "Load")
+                          :onClick #(loads/load-issues this connection)} "Load")
     (ui-issue-list issues)))
 
 (def ui-temp-root (prim/factory TempRoot))
