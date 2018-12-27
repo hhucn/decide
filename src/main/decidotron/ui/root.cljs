@@ -1,13 +1,13 @@
 (ns decidotron.ui.root
   (:require
-    [fulcro.client.dom :as dom :refer [div]]
+    [fulcro.client.dom :as dom]
     [fulcro.client.primitives :as prim :refer [defsc]]
     [fulcro.client.routing :as r :refer [defsc-router]]
     [dbas.client :as dbas]
     [decidotron.ui.mdc-components :as material]
     [decidotron.ui.components :as comp]
-    [decidotron.mutations :as ms]
-    [fulcro.client.mutations :as m]))
+    [decidotron.ui.discuss.core :as discuss]
+    [decidotron.mutations :as ms]))
 
 (def drawer-id 1)
 
@@ -43,12 +43,12 @@
 (defsc Discuss [this {:keys [db/id router/page discuss/dialog-area]}]
   {:query         [:db/id
                    :router/page
-                   {:discuss/dialog-area (prim/get-query comp/DBASDialogArea)}]
+                   {:discuss/dialog-area (prim/get-query discuss/DBASDialogArea)}]
    :ident         (fn [] [page id])
    :initial-state (fn [params]
                     {:db/id               1
                      :router/page         :PAGE/discuss
-                     :discuss/dialog-area (prim/get-initial-state comp/DBASDialogArea
+                     :discuss/dialog-area (prim/get-initial-state discuss/DBASDialogArea
                                             {:bubble-area {:bubble-area/bubbles [{:bubble/text "I want to talk about the position that ... "
                                                                                   :bubble/type "system"}
                                                                                  {:bubble/text "Now"
@@ -60,7 +60,7 @@
                                                             {:choice/text "Dogs a great"}
                                                             {:choice/text "Neither of them is great, we should banish both!"}]}})})}
   (dom/div
-    (comp/ui-dialog-area dialog-area)))
+    (discuss/ui-dialog-area dialog-area)))
 
 (defsc-router RootRouter [this {:keys [db/id router/page]}]
   {:router-id      :root/router

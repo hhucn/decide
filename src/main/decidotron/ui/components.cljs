@@ -1,75 +1,12 @@
 (ns decidotron.ui.components
   (:require
-    [fulcro.client.primitives :as prim :refer [defsc get-query]]
+    [fulcro.client.primitives :as prim :refer [defsc]]
     [fulcro.client.dom :as dom]
     [fulcro.client.mutations :as m :refer [defmutation]]
     [decidotron.mutations :as ms]
     [decidotron.ui.mdc-components :as material]
-    [decidotron.remotes.dbas :as remote-dbas]
     [fulcro.client.routing :as r]
-    [fulcro.client.data-fetch :as df]
     [decidotron.loads :as loads]))
-
-(defsc DBASChoice
-  [this {:keys [choice/text] :as props}]
-  {:initial-state (fn [{:keys [choice/text]}] {:choice/text text})
-   :query         [:choice/text]}
-  (material/list-item #js {:role "radio"}
-    (material/list-item-graphic #js
-        {:graphic
-         (material/radio #js {}
-           (material/native-radio #js {:checked  false
-                                       :readOnly true}))})
-    (material/list-item-text #js {:primaryText text})))
-
-(def ui-choice (prim/factory DBASChoice))
-
-(defsc DBASChoiceList
-  [this {:keys [choice-list/choices] :as props}]
-  {:initial-state (fn [{:keys [choice-list/choices]}] {:choice-list/choices choices})
-   :query         [{:choice-list/choices (get-query DBASChoice)}]}
-  (material/mdc-list #js {:role             "radiogroup"
-                          :aria-orientation "vertical"}
-    (map ui-choice choices)))
-
-(def ui-choice-list (prim/factory DBASChoiceList))
-
-
-(def bubble-types {"system" [:.bubble-system]
-                   "status" [:.bubble-status]
-                   "user"   [:.bubble-user]})
-
-(defsc DBASBubble
-  [this {:keys [bubble/text bubble/type]}]
-  {:initial-state (fn [{:keys [bubble/text bubble/type]}] {:bubble/text text :bubble/type type})
-   :query         [:bubble/text :bubble/type]}
-  (material/list-item #js {}
-    (dom/div :.bubble.mdc-elevation--z2 {:classes (bubble-types type)}
-      (dom/span text))))
-
-(def ui-bubble (prim/factory DBASBubble))
-
-(defsc DBASBubbleArea
-  [this {:keys [bubble-area/bubbles]}]
-  {:initial-state (fn [{:keys [bubble-area/bubbles]}] {:bubble-area/bubbles bubbles})
-   :query         [{:bubble-area/bubbles (get-query DBASBubble)}]}
-  (dom/div :.bubble-area
-    (material/mdc-list #js {:nonInteractive true}
-      (map ui-bubble bubbles))))
-
-(def ui-bubble-area (prim/factory DBASBubbleArea))
-
-(defsc DBASDialogArea
-  [this {:keys [dialog-area/bubble-area dialog-area/choice-area]}]
-  {:initial-state (fn [{:keys [bubble-area choice-area]}] {:dialog-area/bubble-area bubble-area
-                                                           :dialog-area/choice-area choice-area})
-   :query         [{:dialog-area/bubble-area (get-query DBASBubbleArea)}
-                   {:dialog-area/choice-area (get-query DBASChoiceList)}]}
-  (dom/div :.dialog-area.mdc-elevation--z2
-    (ui-bubble-area bubble-area)
-    (ui-choice-list choice-area)))
-
-(def ui-dialog-area (prim/factory DBASDialogArea))
 
 (defsc DBASIssueEntry [this {:keys [dbas/title dbas/slug]}]
   {:query [:dbas/title :dbas/slug]
@@ -79,7 +16,7 @@
 (def ui-issue-entry (prim/factory DBASIssueEntry {:keyfn :dbas/slug}))
 
 (defsc DBASIssueList [this {:keys [dbas/issues]}]
-  {:query [{:dbas/issues [(prim/get-query DBASIssueEntry)]}]
+  {:query         [{:dbas/issues [(prim/get-query DBASIssueEntry)]}]
    :initial-state {:dbas/issues []}}
   (dom/div
     (map ui-issue-entry issues)))
@@ -149,7 +86,7 @@
                     {:db/id        id
                      :drawer/open? false})}
   (let [logged-in? (dbas.client/logged-in? connection)
-        close #(m/set-value! this :drawer/open? false)]
+        close      #(m/set-value! this :drawer/open? false)]
     (material/drawer #js {:modal   true
                           :open    open?
                           :onClose #(m/set-value! this :drawer/open? false)}
@@ -158,11 +95,11 @@
           (if logged-in?
             (:dbas.client/nickname connection)
             (material/button #js
-                {:onClick  #(do (close)
-                              (prim/transact! this
-                                `[(r/set-route {:router :root/router
-                                                :target [:PAGE/login 1]})
-                                  (ms/toggle-drawer {:drawer/id :main-drawer})]))}
+                {:onClick #(do (close)
+                               (prim/transact! this
+                                  `[(r/set-route {:router :root/router
+                                                  :target [:PAGE/login 1]})
+                                    (ms/toggle-drawer {:drawer/id :main-drawer})]))}
               "Login"))))
       (material/drawer-content #js {}
         (material/mdc-list #js {:tag "nav"}
@@ -182,7 +119,7 @@
            [:dbas/connection '_]]}
   (dom/div
     (material/button #js {:outlined true
-                          :onClick #(loads/load-issues this connection)} "Load")
+                          :onClick  #(loads/load-issues this connection)} "Load")
     (ui-issue-list issues)))
 
 (def ui-temp-root (prim/factory TempRoot))
