@@ -8,6 +8,17 @@
 (defn new-connection [] {::base "https://dbas.cs.uni-duesseldorf.de/api"})
 (def connection (new-connection))
 
+; from https://stackoverflow.com/a/43722784/3616102
+(defn- map->nsmap
+  [n m]
+  (reduce-kv (fn [acc k v]
+               (let [new-kw (if (and (keyword? k)
+                                  (not (qualified-keyword? k)))
+                              (keyword (str n) (name k))
+                              k)]
+                 (assoc acc new-kw v)))
+    {} m))
+
 (defn logged-in? [conn]
   (and (contains? conn ::token)
     (contains? conn ::nickname)))
@@ -50,19 +61,32 @@
   #_(api-post conn "/logout")                               ; this is broken in D-BAS
   (go (dissoc conn ::id ::token ::nickname)))
 
-(s/def ::slug (s/and string? #(re-matches #"^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$" %)))
-(s/def ::date string?) ; for now
-(s/def ::description string?)
-(s/def ::title string?)
-(s/def ::url string?)
-(s/def ::summary string?)
-(s/def ::language (s/conformer keyword str))
-(s/def ::issue (s/keys :req-un [::slug ::date ::title ::description ::url ::summary ::language]))
+(s/def :dbas.issue/slug (s/and string? #(re-matches #"^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$" %)))
+(s/def :dbas.issue/date string?) ; for now
+(s/def :dbas.issue/description string?)
+(s/def :dbas.issue/title string?)
+(s/def :dbas.issue/url string?)
+(s/def :dbas.issue/summary string?)
+(s/def :dbas.issue/language (s/conformer keyword str))
+(s/def :dbas/issue (s/keys :req [:dbas.issue/slug
+                                 :dbas.issue/date
+                                 :dbas.issue/title
+                                 :dbas.issue/description
+                                 :dbas.issue/url
+                                 :dbas.issue/summary
+                                 :dbas.issue/language]))
+(s/def :dbas/issues (s/coll-of :dbas/issue :kind vector?))
 
 (defn issues [conn]
-  (go (->> (<! (api-get conn "/issues"))
-           (map #(s/conform ::issue %))
-           (remove #{:cljs.spec.alpha/invalid}))))
+  (go (->>
+        (<! (api-get conn "/issues"))
+        (map (partial map->nsmap "dbas.issue"))
+        (map #(s/conform :dbas/issue %))
+        (remove #{:cljs.spec.alpha/invalid})
+        vec)))
+
+(s/fdef issues
+  :ret :dbas/issues)
 
 (defn positions [conn slug]
   (api-get conn (gstring/format "/%s" slug)))

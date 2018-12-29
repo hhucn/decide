@@ -7,6 +7,9 @@
             [nubank.workspaces.lib.fulcro-portal :as f.portal]
             [fulcro.client.mutations :as fm]
             [decidotron.ui.components :as ui]
+            [decidotron.ui.discuss.core :as ui-discuss]
+            [decidotron.ui.discuss.choices :as ui-choices]
+            [decidotron.ui.discuss.bubbles :as ui-bubbles]
             [decidotron.ui.root :as root-ui]
             [dbas.client :as dbas]
             [fulcro.client.primitives :as prim]
@@ -35,21 +38,21 @@
 
 (ws/defcard choice-card
   (ct.fulcro/fulcro-card
-    {::f.portal/root          ui/DBASChoice
+    {::f.portal/root          ui-choices/DBASChoice
      ::f.portal/initial-state {:choice/text "Cats are bad!"}}))
 
 (ws/defcard choices-card
   {::wsm/card-width  2
    ::wsm/card-height 5}
   (ct.fulcro/fulcro-card
-    {::f.portal/root          ui/DBASChoiceList
+    {::f.portal/root          ui-choices/DBASChoiceList
      ::f.portal/initial-state {:choice-list/choices
                                [{:choice/text "Cats are great"}
                                 {:choice/text "Dogs a great"}]}}))
 
 (ws/defcard bubble
   (ct.fulcro/fulcro-card
-    {::f.portal/root          ui/DBASBubble
+    {::f.portal/root          ui-bubbles/DBASBubble
      ::f.portal/initial-state {:bubble/text "I want to talk about the position that ... "
                                :bubble/type "system"}}))
 
@@ -58,7 +61,7 @@
    ::wsm/card-height 7
    ::wsm/align       {:flex 1}}
   (ct.fulcro/fulcro-card
-    {::f.portal/root          ui/DBASBubbleArea
+    {::f.portal/root          ui-bubbles/DBASBubbleArea
      ::f.portal/wrap-root?    false
      ::f.portal/initial-state {:bubble-area/bubbles [{:bubble/text "I want to talk about the position that ... "
                                                       :bubble/type "system"}
@@ -72,9 +75,9 @@
    ::wsm/card-height 11
    ::wsm/align       {:flex 1}}
   (ct.fulcro/fulcro-card
-    {::f.portal/root          ui/DBASDialogArea
+    {::f.portal/root          ui-discuss/DialogArea
      ::f.portal/app  {:networking    {:dbas dbas-remote}
-                      :initial-state {:ui/root (prim/get-initial-state ui/DBASDialogArea
+                      :initial-state {:ui/root (prim/get-initial-state ui-discuss/DialogArea
                                                  {:bubble-area {:bubble-area/bubbles [{:bubble/text "I want to talk about the position that ... "
                                                                                        :bubble/type "system"}
                                                                                       {:bubble/text "Now"

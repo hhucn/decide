@@ -40,33 +40,11 @@
                      :login/login-form (prim/get-initial-state comp/LoginForm {})})}
   (comp/ui-login-form login-form))
 
-(defsc Discuss [this {:keys [db/id router/page discuss/dialog-area]}]
-  {:query         [:db/id
-                   :router/page
-                   {:discuss/dialog-area (prim/get-query discuss/DBASDialogArea)}]
-   :ident         (fn [] [page id])
-   :initial-state (fn [params]
-                    {:db/id               1
-                     :router/page         :PAGE/discuss
-                     :discuss/dialog-area (prim/get-initial-state discuss/DBASDialogArea
-                                            {:bubble-area {:bubble-area/bubbles [{:bubble/text "I want to talk about the position that ... "
-                                                                                  :bubble/type "system"}
-                                                                                 {:bubble/text "Now"
-                                                                                  :bubble/type "status"}
-                                                                                 {:bubble/text "You said that: Now you say that.."
-                                                                                  :bubble/type "user"}]}
-                                             :choice-area {:choice-list/choices
-                                                           [{:choice/text "Cats are great"}
-                                                            {:choice/text "Dogs a great"}
-                                                            {:choice/text "Neither of them is great, we should banish both!"}]}})})}
-  (dom/div
-    (discuss/ui-dialog-area dialog-area)))
-
 (defsc-router RootRouter [this {:keys [db/id router/page]}]
   {:router-id      :root/router
-   :default-route  Discuss
+   :default-route  discuss/Discuss
    :ident          (fn [] [page id])
-   :router-targets {:PAGE/discuss Discuss
+   :router-targets {:PAGE/discuss discuss/Discuss
                     :PAGE/login   Login}}
   (dom/p "Unknown Route!"))
 

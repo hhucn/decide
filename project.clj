@@ -5,7 +5,7 @@
 
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [thheller/shadow-cljs "2.7.9"]
-                 [fulcrologic/fulcro "2.6.18"]
+                 [fulcrologic/fulcro "2.6.19"]
                  [com.wsscode/pathom "2.2.4"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
@@ -16,7 +16,7 @@
                  [http-kit "2.3.0"]
                  [ring/ring-core "1.7.1"]
                  [bk/ring-gzip "0.3.0"]
-                 [bidi "2.1.4"]
+                 [bidi "2.1.5"]
 
                  ;; the following 3 are not used directly, but are pinned to ensure consistency.
                  ;; delete then if you upgrade anything and reanalyze deps

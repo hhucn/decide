@@ -6,25 +6,8 @@
     [decidotron.mutations :as ms]
     [decidotron.ui.mdc-components :as material]
     [fulcro.client.routing :as r]
-    [decidotron.loads :as loads]))
-
-(defsc DBASIssueEntry [this {:keys [dbas/title dbas/slug]}]
-  {:query [:dbas/title :dbas/slug]
-   :ident [:dbas-issue-entry/by-slug :dbas/slug]}
-  (dom/li title))
-
-(def ui-issue-entry (prim/factory DBASIssueEntry {:keyfn :dbas/slug}))
-
-(defsc DBASIssueList [this {:keys [dbas/issues]}]
-  {:query         [{:dbas/issues [(prim/get-query DBASIssueEntry)]}]
-   :initial-state {:dbas/issues []}}
-  (dom/div
-    (map ui-issue-entry issues)))
-
-(def ui-issue-list (prim/factory DBASIssueList))
-
-
-; ========================================
+    [decidotron.loads :as loads]
+    [decidotron.ui.discuss.core :as discuss]))
 
 (defsc InputField
   [this {:keys [db/id input/value] :as props} {:keys [ui/label ui/type] :as computed}]
@@ -114,12 +97,23 @@
 
 (def ui-nav-drawer (prim/factory NavDrawer))
 
-(defsc TempRoot [this {:keys [dbas/issues dbas/connection]}]
-  {:query [[:dbas/issues '_]
-           [:dbas/connection '_]]}
+(defsc IssueList [this {:keys [dbas/issues dbas/connection]}]
+  {:query         [[:dbas/connection '_]
+                   {[:dbas/issues '_] (prim/get-query discuss/IssueEntry)}]}
+  (dom/div
+    (material/button #js {:onClick #(loads/load-issues this connection [:ui/root])} "LOAD!")
+    (js/console.log issues)
+    (map discuss/ui-issue-entry issues)))
+
+(def ui-issue-list (prim/factory IssueList))
+
+(defsc TempRoot [this {:keys [db/id dbas/connection issue-list]}]
+  {:query [:db/id
+           [:dbas/connection '_]
+           {:issue-list (prim/get-query IssueList)}]}
   (dom/div
     (material/button #js {:outlined true
-                          :onClick  #(loads/load-issues this connection)} "Load")
-    (ui-issue-list issues)))
+                          :onClick  #(loads/load-issues this connection [:ui/root])} "Load")
+    (ui-issue-list issue-list)))
 
 (def ui-temp-root (prim/factory TempRoot))
