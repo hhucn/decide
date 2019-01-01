@@ -1,10 +1,22 @@
-FROM clojure:openjdk-8-lein
+FROM clojure:openjdk-11-lein AS clj-build
+# Install node
+RUN apt-get update && apt-get install curl && curl -sL https://deb.nodesource.com/setup_11.x | bash && apt-get install -y nodejs
+
+# Install JS deps
+COPY package.json package.json
+RUN npm install
+
+# Install clj(s) deps
+COPY project.clj project.clj
+RUN lein with-profile cljs deps
+
+# Compile
 COPY . .
-RUN lein clean && lein uberjar
+RUN lein uberjar
 
-FROM openjdk:8-jre-alpine
-
-COPY --from=0 /tmp/target/decidotron.jar decidotron.jar
+### Production
+FROM openjdk:11-jre-slim
+COPY --from=clj-build /tmp/target/decidotron.jar decidotron.jar
 
 EXPOSE 8080
 CMD ["java", "-jar", "decidotron.jar"]
