@@ -1,9 +1,14 @@
 image: clojure:lein-2.8.1
 
-before_script:
-  - lein deps
+stages:
+  - build
+  - test
+  - build-images
+  - analysis
+  - deploy
 
 test:
+  stage: test
   script:
     - lein test
   cache:
@@ -12,6 +17,7 @@ test:
       - ~/.m2
 
 cljs-tests:
+  stage: test
   image: circleci/clojure:lein-2.8.1-node-browsers
   script:
     - npm install
@@ -23,3 +29,13 @@ cljs-tests:
     paths:
       - ~/.m2
       - ./node_modules
+
+build_production_images:
+  stage: build-images
+  image: docker
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE/decidotron:snapshot .
+    - docker push $CI_REGISTRY_IMAGE/decidotron:snapshot
+  only:
+    - master

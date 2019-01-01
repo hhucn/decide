@@ -1,4 +1,8 @@
 .shadow-cljs
 .idea
+.git
 node_modules
 out
+target
+resources/public/js/**
+!resources/public/js/test/index.html
