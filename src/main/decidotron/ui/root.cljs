@@ -7,6 +7,7 @@
     [decidotron.ui.mdc-components :as material]
     [decidotron.ui.components :as comp]
     [decidotron.ui.discuss.core :as discuss]
+    [decidotron.ui.routing :as routing]
     [decidotron.mutations :as ms]))
 
 (def drawer-id 1)
@@ -56,9 +57,11 @@
                    {:root/router (prim/get-query RootRouter)}
                    {:root/drawer (prim/get-query comp/NavDrawer)}]
    :initial-state (fn [params]
-                    {:root/router     (prim/get-initial-state RootRouter {})
-                     :dbas/connection dbas/connection
-                     :root/drawer     (prim/get-initial-state comp/NavDrawer {:id :main-drawer})})}
+                    (merge
+                      {:root/router     (prim/get-initial-state RootRouter {})
+                       :dbas/connection dbas/connection
+                       :root/drawer     (prim/get-initial-state comp/NavDrawer {:id :main-drawer})}
+                      routing/app-routing-tree))}
   (let [logged-in? (dbas/logged-in? connection)]
     (dom/div
       (comp/ui-nav-drawer drawer)

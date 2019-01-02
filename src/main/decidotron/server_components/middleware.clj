@@ -91,7 +91,9 @@
         (resp/content-type "text/html"))
 
       :else
-      (ring-handler req))))
+      (-> (resp/response (index anti-forgery-token))
+        (resp/content-type "text/html"))
+      #_(ring-handler req))))                               ; Default -> 403
 
 (defstate middleware
   :start

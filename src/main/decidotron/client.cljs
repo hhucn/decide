@@ -2,7 +2,9 @@
   (:require [fulcro.client :as fc]
             [decidotron.ui.root :as root]
             [fulcro.client.network :as net]
-            [decidotron.remotes.dbas :refer [dbas-remote]]))
+            [decidotron.remotes.dbas :refer [dbas-remote]]
+            [decidotron.ui.routing :as routing]
+            [fulcro.client.primitives :as prim]))
 
 (defonce app (atom nil))
 
@@ -25,5 +27,7 @@
                 :networking {:remote (net/fulcro-http-remote
                                        {:url                "/api"
                                         :request-middleware secured-request-middleware})
-                             :dbas   dbas-remote}))
+                             :dbas   dbas-remote}
+                :started-callback (fn [{:keys [reconciler] :as app}]
+                                    (routing/start-routing (prim/app-root reconciler)))))
   (start))

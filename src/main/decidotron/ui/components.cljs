@@ -7,7 +7,8 @@
     [decidotron.ui.mdc-components :as material]
     [fulcro.client.routing :as r]
     [decidotron.loads :as loads]
-    [decidotron.ui.discuss.core :as discuss]))
+    [decidotron.ui.discuss.core :as discuss]
+    [decidotron.ui.routing :as routing]))
 
 (defsc InputField
   [this {:keys [db/id input/value] :as props} {:keys [ui/label ui/type] :as computed}]
@@ -79,10 +80,7 @@
             (:dbas.client/nickname connection)
             (material/button #js
                 {:onClick #(do (close)
-                               (prim/transact! this
-                                  `[(r/set-route {:router :root/router
-                                                  :target [:PAGE/login 1]})
-                                    (ms/toggle-drawer {:drawer/id :main-drawer})]))}
+                               (routing/nav-to! this :login))}
               "Login"))))
       (material/drawer-content #js {}
         (material/mdc-list #js {:tag "nav"}
@@ -90,10 +88,7 @@
             (cond-> [(prim/computed {:drawer-item/text "Discuss"
                                      :drawer-item/icon "forum"}
                        {:ui/onClick #(do (close)
-                                         (prim/transact! this
-                                           `[(r/set-route {:router :root/router
-                                                           :target [:PAGE/discuss 1]})]))})])))))))
-
+                                         (routing/nav-to! this :discuss))})])))))))
 
 (def ui-nav-drawer (prim/factory NavDrawer))
 
