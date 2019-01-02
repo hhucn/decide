@@ -10,8 +10,8 @@
 (def app-routing-tree
   (r/routing-tree
     (r/make-route :login [(r/router-instruction :root/router [:PAGE/login 1])])
-    (r/make-route :discuss [(r/router-instruction :root/router [:PAGE/discuss 1])
-                            (r/router-instruction :discuss/router [:PAGE/issues 1])])))
+    (r/make-route :issues [(r/router-instruction :root/router [:PAGE/discuss 1])
+                           (r/router-instruction :discuss/router [:PAGE/issues 1])])))
 
 (def valid-handlers (-> (get app-routing-tree r/routing-tree-key) keys set))
 
@@ -27,8 +27,10 @@
   (branch "/"
     (leaf "login" :login)
     (branch "discuss"
-      (leaf "" :discuss))))
-
+      (leaf "" :issues)
+      (branch "/"
+        (param :slug)
+        (leaf "" :positions)))))
 
 (defn invalid-route?
   "Returns true if the given keyword is not a valid location in the routing tree."
@@ -55,7 +57,7 @@
     #_(not (:logged-in? state-map)) #_(-> state-map
                                         (assoc :loaded-uri (when @history (pushy/get-token @history)))
                                         (redirect* {:handler :login}))
-    (invalid-route? handler) (redirect* state-map {:handler :discuss})
+    (invalid-route? handler) (redirect* state-map {:handler :issues})
     :else (r/update-routing-links state-map bidi-match)))
 
 (defmutation set-route!

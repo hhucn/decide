@@ -88,7 +88,7 @@
             (cond-> [(prim/computed {:drawer-item/text "Discuss"
                                      :drawer-item/icon "forum"}
                        {:ui/onClick #(do (close)
-                                         (routing/nav-to! this :discuss))})])))))))
+                                         (routing/nav-to! this :issues))})])))))))
 
 (def ui-nav-drawer (prim/factory NavDrawer))
 
