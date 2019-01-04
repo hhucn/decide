@@ -4,12 +4,18 @@
     [decidotron.ui.routing :as routing]
     [bidi.bidi :as bidi]))
 
-(specification "Discussion routes"
-  (behavior "are resolved correctly"
+(specification "Discussion routes are resolved correctly"
+  (behavior "for issues"
     (assertions
-      "for discussion root"
-      (bidi/match-route routing/app-routes "/discuss") => {:handler :issues}
+      "without slash"
+      (bidi/match-route routing/app-routes "/discuss") => {:handler :issues}))
       ; (bidi/match-route routing/app-routes "/discuss/") => {:handler :issues} ; TODO allow trailing slash
-      "for discussion with slug"
+  (behavior "for positions"
+    (assertions "without slash"
       (bidi/match-route routing/app-routes "/discuss/cat-or-dog") => {:handler :positions
-                                                                      :route-params {:slug "cat-or-dog"}})))
+                                                                      :route-params {:slug "cat-or-dog"}}))
+  (behavior "for attitudes"
+    (assertions "without slash"
+      (bidi/match-route routing/app-routes "/discuss/cat-or-dog/attitude/10") => {:handler :attitude
+                                                                                  :route-params {:slug "cat-or-dog"
+                                                                                                 :position "10"}})))

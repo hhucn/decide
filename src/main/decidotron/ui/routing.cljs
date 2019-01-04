@@ -15,7 +15,10 @@
                            (r/router-instruction :discuss/router [:PAGE.discuss/issues 1])])
     (r/make-route :positions [(r/router-instruction :root/router [:PAGE/discuss 1])
                               (r/router-instruction :discuss/router [:PAGE.discuss/dialog 1])
-                              (r/router-instruction :discuss.dialog/router [:PAGE.discuss.dialog/positions 1])])))
+                              (r/router-instruction :discuss.dialog/router [:PAGE.discuss.dialog/positions 1])])
+    (r/make-route :attitude [(r/router-instruction :root/router [:PAGE/discuss 1])
+                             (r/router-instruction :discuss/router [:PAGE.discuss/dialog 1])
+                             (r/router-instruction :discuss.dialog/router [:PAGE.discuss.dialog/attitude 1])])))
 
 (def valid-handlers (-> (get app-routing-tree r/routing-tree-key) keys set))
 
@@ -34,7 +37,12 @@
       (leaf "" :issues)
       (branch "/"
         (param :slug)
-        (leaf "" :positions)))))
+        (leaf "" :positions)
+        (branch "/attitude/"
+          (param :position)
+          (leaf "" :attitude))))))
+
+app-routes
 
 (defn invalid-route?
   "Returns true if the given keyword is not a valid location in the routing tree."
