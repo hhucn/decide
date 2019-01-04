@@ -90,3 +90,6 @@
 
 (defn positions [conn slug]
   (api-get conn (gstring/format "/%s" slug)))
+
+(defn attitude [conn slug position]
+  (api-get conn (gstring/format "/%s/attitude/%s" slug (str position))))

@@ -39,5 +39,24 @@
     {:remote :dbas
      :params {:connection connection
               :slug slug}
-     :parallel false
+     :parallel true
+     :target where}))
+
+(defsc Attitude [_ {:keys [url]}]
+  {:query [:htmls :texts :url]})
+
+(defsc Attitudes [_ props]
+  {:query [{:bubbles (prim/get-query Bubble)}
+           {:attitudes [{:agree (prim/get-query Attitude)}
+                        {:disagree (prim/get-query Attitude)}
+                        {:dontknow (prim/get-query Attitude)}]}]})
+
+
+(defn load-attitudes [component connection where slug position]
+  (df/load component :dbas.issue.position/attitudes Attitudes
+    {:remote :dbas
+     :params {:connection connection
+              :slug slug
+              :position position}
+     :parallel true
      :target where}))

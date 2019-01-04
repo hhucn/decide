@@ -17,8 +17,11 @@
 
 (pc/defresolver positions [{{{:keys [connection slug] } :params} :ast} _]
   {::pc/output [{:dbas.issue/positions [:dbas.position/url]}]}
-  {:dbas.issue/positions (dbas/positions connection slug)
-   :router/page :PAGE.discuss/positions})
+  {:dbas.issue/positions (dbas/positions connection slug)})
+
+(pc/defresolver attitudes [{{{:keys [connection slug position] } :params} :ast} _]
+  {::pc/output [{:dbas.issue.position/attitudes [:bubbles :attitudes]}]}
+  {:dbas.issue.position/attitudes (dbas/attitude connection slug position)})
 
 (pc/defmutation login [_ {:keys [connection nickname password]}]
   {::pc/sym    'dbas/login
@@ -26,7 +29,7 @@
    ::pc/output [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token]}
   (dbas/login connection nickname password))
 
-(def app-registry [login issues positions])
+(def app-registry [login issues positions attitudes]) ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def index (atom {}))
 
 (def parser

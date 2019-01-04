@@ -55,7 +55,7 @@
       [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]]
      [:body
       [:div#app]
-      [:script {:src "js/main/main.js"}]
+      [:script {:src "/js/main/main.js"}]
       [:script "decidotron.client.init();"]]]))
 
 ;; ================================================================================

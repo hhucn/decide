@@ -23,18 +23,16 @@
 
 (def ui-dialog-area (prim/factory DialogArea))
 
-(defsc IssueEntry [this {:keys [dbas.issue/title dbas.issue/summary dbas.issue/slug] :as props} {:keys [onClick-load]}]
+(defsc IssueEntry [this {:keys [dbas.issue/title dbas.issue/summary dbas.issue/slug]}]
   {:query [:dbas.issue/title :dbas.issue/summary :dbas.issue/slug]
    :ident [:issue-entry/by-slug :dbas.issue/slug]}
-  (material/list-item #js {:onClick #(do (onClick-load slug)
-                                         (routing/nav-to! this :positions {:slug slug}))}
+  (material/list-item #js {:onClick #(routing/nav-to! this :positions {:slug slug})}
     (material/list-item-text #js {:primaryText   title
                                   :secondaryText summary})))
 
-
 (def ui-issue-entry (prim/factory IssueEntry {:keyfn :dbas.issue/slug}))
 
-(defsc IssueList [this {:keys [db/id router/page issues dbas/connection] :as props}]
+(defsc IssueList [this {:keys [db/id router/page issues dbas/connection]}]
   {:query         [:db/id :router/page
                    [:dbas/connection '_]
                    {:issues (prim/get-query loads/Issue)}]
@@ -44,31 +42,59 @@
                      :router/page :PAGE.discuss/issues})}
   (when (not (some? issues))
     (loads/load-issues this connection [page id :issues]))
-  (dom/div
-    (if (some? issues)
-      (material/mdc-list #js {:twoLine true}
-        (map #(ui-issue-entry
-                (prim/computed %
-                 {:onClick-load (partial loads/load-positions this connection
-                                  (df/multiple-targets
-                                    (df/replace-at [:PAGE.discuss/dialog 1 :bubbles]) ; TODO get rid of this
-                                    (df/replace-at [:PAGE.discuss.dialog/positions 1 :positions])))})) issues))
-      (dom/p "Issues could not be loaded. :-("))))
+  (if (some? issues)
+    (material/mdc-list #js {:twoLine true}
+      (map ui-issue-entry (filter (comp not empty?) issues)))
+    (dom/p "Issues could not be loaded. :-(")))
 
 (def ui-issue-list (prim/factory IssueList))
 
-(defsc Positions [this {:keys [db/id router/page slug positions]}]
-  {:query [:db/id :router/page :slug
+(defsc Positions [this {:keys [db/id router/page dbas/connection root/current-page positions]}]
+  {:query [:db/id :router/page
+           [:root/current-page '_]
+           [:dbas/connection '_]
            {:positions (prim/get-query loads/Positions)}]
+   :ident          (fn [] [page id])
    :initial-state {:db/id 1
                    :router/page :PAGE.discuss.dialog/positions}}
-  (choices/ui-choice-list {:choice-list/choices (:positions positions)}))
+  (dom/div
+    (let [slug (get-in current-page [:positions :route-params :slug])]
+      (when-not positions
+        (loads/load-positions this connection
+          (df/multiple-targets
+            (df/replace-at [:PAGE.discuss/dialog 1 :bubbles]) ; TODO get rid of this
+            (df/replace-at [:PAGE.discuss.dialog/positions 1 :positions]))
+          slug))
+      (if (:positions positions)
+        (choices/ui-choice-list (prim/computed
+                                  {:choice-list/choices (:positions positions)}
+                                  {:choices-onClick-fn
+                                   (fn [url]
+                                     ; /town-has-to-cut-spending/attitude/11?history=^
+                                     (let [position (-> url
+                                                      (clojure.string/split "?") first
+                                                      (clojure.string/split "/") (nth 3)
+                                                      js/parseInt)]
+                                       (routing/nav-to! this :attitude {:slug slug :position position})))}))
+        (dom/p "Still loading!")))))
 
-(defsc Attitude [this {:keys [db/id router/page]}]
-  {:query [:db/id :router/page :slug :positions]
+(defsc Attitude [this {:keys [db/id router/page dbas/connection attitudes root/current-page]}]
+  {:query [:db/id :router/page :attitudes [:dbas/connection '_] [:root/current-page '_]]
+   :ident          (fn [] [page id])
    :initial-state {:db/id 1
                    :router/page :PAGE.discuss.dialog/attitude}}
-  (choices/ui-choice-list {:choice-list/choices []}))
+  (let [params (get-in current-page [:attitude :route-params])]
+    (when-not attitudes
+      (loads/load-attitudes this connection (df/multiple-targets
+                                              (df/replace-at [:PAGE.discuss/dialog 1 :bubbles])
+                                              (df/replace-at [:PAGE.discuss.dialog/attitude 1 :attitudes]))
+        (:slug params) (:position params)))
+
+    (let [halves #js {:columns 2}]
+      (material/grid #js {}
+        (material/row #js {}
+          (material/cell halves (material/button #js {:raised true} "I agree"))
+          (material/cell halves (material/button #js {} "I disagree")))))))
 
 (defsc-router DialogRouter [this {:keys [db/id router/page]}]
   {:router-id :discuss.dialog/router

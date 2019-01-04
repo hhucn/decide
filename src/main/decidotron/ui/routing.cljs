@@ -2,7 +2,6 @@
   (:require
     [fulcro.client.routing :as r]
     [fulcro.client.mutations :as m :refer [defmutation]]
-    [decidotron.mutations :as mutations]
     [pushy.core :as pushy]
     [bidi.verbose :refer [branch leaf param]]
     [bidi.bidi :as bidi]
@@ -79,17 +78,23 @@ app-routes
   [bidi-match]
   (action [{:keys [state]}] (swap! state set-route!* bidi-match)))
 
+(defmutation set-page-params
+  "Sets the route-params as data on root level. From there you can query them in your components, if they need to"
+  [{:keys [handler] :as bidi-match}]
+  (action [{:keys [state]}]
+    (swap! state assoc-in [:root/current-page handler] bidi-match)))
+
 (defn nav-to!
   "Run a navigation mutation from the UI, but make sure that HTML5 routing is correctly honored so the components can be
   used as an app or in devcards. Use this in nav UI links instead of href or transact. "
   ([component page] (nav-to! component page {}))
   ([component page route-params]
+   (js/console.log [page route-params])
+   (prim/transact! component `[(set-page-params ~{:handler page :route-params route-params})])
    (if (and @history @use-html5-routing)
      (let [path (apply bidi/path-for app-routes page (flatten (seq route-params)))]
        (pushy/set-token! @history path))
-     (prim/transact! component `[(set-route! ~{:handler page :route-params route-params}) :pages]))
-   (js/console.log [page route-params])
-   (prim/transact! component `[(mutations/set-page-params ~{:handler page :route-params route-params})])))
+     (prim/transact! component `[(set-route! ~{:handler page :route-params route-params}) :pages]))))
 
 (defn start-routing [app-root]
   (when (and @use-html5-routing (not @history))
@@ -97,7 +102,8 @@ app-routes
           set-route! (fn [match]
                        ; Delay. history events should happen after a tx is processed, but a set token could happen during.
                        ; Time doesn't matter. This thread has to let go of the CPU before timeouts can process.
-                       (js/setTimeout #(prim/transact! app-root `[(set-route! ~match) :pages])
+                       (js/setTimeout #(prim/transact! app-root `[(set-route! ~match)
+                                                                  (set-page-params ~match) :pages])
                          10))]
       (reset! history (pushy/pushy set-route! (partial bidi/match-route app-routes)))
       (pushy/start! @history))))
