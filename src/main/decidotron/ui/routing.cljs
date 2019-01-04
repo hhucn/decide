@@ -2,6 +2,7 @@
   (:require
     [fulcro.client.routing :as r]
     [fulcro.client.mutations :as m :refer [defmutation]]
+    [decidotron.mutations :as mutations]
     [pushy.core :as pushy]
     [bidi.verbose :refer [branch leaf param]]
     [bidi.bidi :as bidi]
@@ -11,7 +12,10 @@
   (r/routing-tree
     (r/make-route :login [(r/router-instruction :root/router [:PAGE/login 1])])
     (r/make-route :issues [(r/router-instruction :root/router [:PAGE/discuss 1])
-                           (r/router-instruction :discuss/router [:PAGE/issues 1])])))
+                           (r/router-instruction :discuss/router [:PAGE.discuss/issues 1])])
+    (r/make-route :positions [(r/router-instruction :root/router [:PAGE/discuss 1])
+                              (r/router-instruction :discuss/router [:PAGE.discuss/dialog 1])
+                              (r/router-instruction :discuss.dialog/router [:PAGE.discuss.dialog/positions 1])])))
 
 (def valid-handlers (-> (get app-routing-tree r/routing-tree-key) keys set))
 
@@ -75,7 +79,9 @@
    (if (and @history @use-html5-routing)
      (let [path (apply bidi/path-for app-routes page (flatten (seq route-params)))]
        (pushy/set-token! @history path))
-     (prim/transact! component `[(set-route! ~{:handler page :route-params route-params}) :pages]))))
+     (prim/transact! component `[(set-route! ~{:handler page :route-params route-params}) :pages]))
+   (js/console.log [page route-params])
+   (prim/transact! component `[(mutations/set-page-params ~{:handler page :route-params route-params})])))
 
 (defn start-routing [app-root]
   (when (and @use-html5-routing (not @history))

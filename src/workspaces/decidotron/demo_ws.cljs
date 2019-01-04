@@ -52,7 +52,7 @@
 
 (ws/defcard bubble
   (ct.fulcro/fulcro-card
-    {::f.portal/root          ui-bubbles/DBASBubble
+    {::f.portal/root          ui-bubbles/Bubble
      ::f.portal/initial-state {:bubble/text "I want to talk about the position that ... "
                                :bubble/type "system"}}))
 

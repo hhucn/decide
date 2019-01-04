@@ -3,16 +3,16 @@
             [fulcro.client.primitives :as prim :refer [defsc]]))
 
 (defsc DBASChoice
-  [this {:keys [choice/text]}]
-  {:initial-state (fn [{:keys [choice/text]}] {:choice/text text})
-   :query         [:choice/text]}
+  [this {:keys [htmls texts url]}]
+  {:initial-state (fn [{:keys [texts]}] {:text texts})
+   :query         [:texts :htmls :url]}
   (material/list-item #js {:role "radio"}
     (material/list-item-graphic #js
         {:graphic
          (material/radio #js {}
            (material/native-radio #js {:checked  false
                                        :readOnly true}))})
-    (material/list-item-text #js {:primaryText text})))
+    (material/list-item-text #js {:primaryText (apply str htmls)})))
 
 (def ui-choice (prim/factory DBASChoice))
 

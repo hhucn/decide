@@ -13,9 +13,31 @@
            :dbas.issue/language]
    :ident [:dbas.issue/by-slug :dbas.issue/slug]})
 
+(defsc Bubble [_ _]
+  {:query [:html :text :type :url]})
+
+(defsc Position [_ {:keys [url]}]
+  {:query [:htmls :texts :url]
+   :ident (fn []
+            [:dbas.position/by-id (js/parseInt (nth (clojure.string/split url #"/") 3))])})
+
+(defsc Positions [_ {:keys [positions]}]
+  {:query [{:bubbles (prim/get-query Bubble)}
+           {:positions (prim/get-query Position)}]
+   :ident (fn []
+            [:dbas.positions/by-slug (nth (clojure.string/split (-> positions first :url) #"/") 1)])})
+
 (defn load-issues [component connection where]
   (df/load component :dbas/issues Issue
     {:remote :dbas
      :params {:connection connection}
      :parallel true
+     :target where}))
+
+(defn load-positions [component connection where slug]
+  (df/load component :dbas.issue/positions Positions
+    {:remote :dbas
+     :params {:connection connection
+              :slug slug}
+     :parallel false
      :target where}))

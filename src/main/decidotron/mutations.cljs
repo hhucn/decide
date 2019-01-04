@@ -15,3 +15,7 @@
 (defmutation toggle-drawer [{:keys [drawer/id]}]
   (action [{:keys [state]}]
     (swap! state update-in [:drawer/by-id id :drawer/open?] not)))
+
+(defmutation set-page-params [{:keys [handler] :as params}]
+  (action [{:keys [state]}]
+    (swap! state assoc-in [:root/current-page handler] params)))

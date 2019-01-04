@@ -15,13 +15,18 @@
                                :dbas.issue/url]}]}
   {:dbas/issues (go vec (<! (dbas/issues connection)))})
 
+(pc/defresolver positions [{{{:keys [connection slug] } :params} :ast} _]
+  {::pc/output [{:dbas.issue/positions [:dbas.position/url]}]}
+  {:dbas.issue/positions (dbas/positions connection slug)
+   :router/page :PAGE.discuss/positions})
+
 (pc/defmutation login [_ {:keys [connection nickname password]}]
   {::pc/sym    'dbas/login
    ::pc/params [:connection :nickname :password]
    ::pc/output [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token]}
   (dbas/login connection nickname password))
 
-(def app-registry [login issues])
+(def app-registry [login issues positions])
 (def index (atom {}))
 
 (def parser

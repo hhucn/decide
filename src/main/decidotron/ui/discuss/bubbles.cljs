@@ -7,20 +7,20 @@
                    "status" [:.bubble-status]
                    "user"   [:.bubble-user]})
 
-(defsc DBASBubble
-  [this {:keys [bubble/text bubble/type]}]
-  {:initial-state (fn [{:keys [bubble/text bubble/type]}] {:bubble/text text :bubble/type type})
-   :query         [:bubble/text :bubble/type]}
+(defsc Bubble
+  [this {:keys [html text type url]}]
+  {:initial-state (fn [{:keys [text type]}] {:text text :type type})
+   :query         [:html :text :type :url]}
   (material/list-item #js {}
     (dom/div :.bubble.mdc-elevation--z2 {:classes (bubble-types type)}
-      (dom/span text))))
+      (dom/span (or html text)))))
 
-(def ui-bubble (prim/factory DBASBubble))
+(def ui-bubble (prim/factory Bubble))
 
 (defsc DBASBubbleArea
   [this {:keys [bubble-area/bubbles]}]
   {:initial-state (fn [{:keys [bubble-area/bubbles]}] {:bubble-area/bubbles bubbles})
-   :query         [{:bubble-area/bubbles (prim/get-query DBASBubble)}]}
+   :query         [{:bubble-area/bubbles (prim/get-query Bubble)}]}
   (dom/div :.bubble-area
     (material/mdc-list #js {:nonInteractive true}
       (map ui-bubble bubbles))))
