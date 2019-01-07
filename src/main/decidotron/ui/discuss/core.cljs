@@ -49,34 +49,28 @@
 
 (def ui-issue-list (prim/factory IssueList))
 
-(defsc Positions [this {:keys [db/id router/page dbas/connection root/current-page positions]}]
+(defsc Positions [this {:keys [db/id router/page root/current-page positions]}]
   {:query [:db/id :router/page
            [:root/current-page '_]
-           [:dbas/connection '_]
            {:positions (prim/get-query loads/Positions)}]
    :ident          (fn [] [page id])
    :initial-state {:db/id 1
                    :router/page :PAGE.discuss.dialog/positions}}
-  (dom/div
-    (let [slug (get-in current-page [:positions :route-params :slug])]
-      (when-not positions
-        (loads/load-positions this connection
-          (df/multiple-targets
-            (df/replace-at [:PAGE.discuss/dialog 1 :bubbles]) ; TODO get rid of this
-            (df/replace-at [:PAGE.discuss.dialog/positions 1 :positions]))
-          slug))
-      (if (:positions positions)
-        (choices/ui-choice-list (prim/computed
-                                  {:choice-list/choices (:positions positions)}
-                                  {:choices-onClick-fn
-                                   (fn [url]
-                                     ; /town-has-to-cut-spending/attitude/11?history=^
-                                     (let [position (-> url
-                                                      (clojure.string/split "?") first
-                                                      (clojure.string/split "/") (nth 3)
-                                                      js/parseInt)]
-                                       (routing/nav-to! this :attitude {:slug slug :position position})))}))
-        (dom/p "Still loading!")))))
+  (let [slug (get-in current-page [:positions :route-params :slug])]
+    (prim/transact! this `[(loads/ensure-positions {:set-bubbles? true})])
+    (if (:positions positions)
+        (choices/ui-choice-list
+          (prim/computed
+            {:choice-list/choices (:positions positions)}
+            {:choices-onClick-fn
+             (fn [url]
+               ; /town-has-to-cut-spending/attitude/11?history=^
+               (let [position (-> url
+                                (clojure.string/split "?") first
+                                (clojure.string/split "/") (nth 3)
+                                js/parseInt)]
+                 (routing/nav-to! this :attitude {:slug slug :position position})))}))
+        (dom/p "Still loading!"))))
 
 (defsc Attitude [this {:keys [db/id router/page dbas/connection attitudes root/current-page]}]
   {:query [:db/id :router/page :attitudes [:dbas/connection '_] [:root/current-page '_]]
@@ -110,7 +104,7 @@
 
 (defsc DialogScreen [this {:keys [db/id router/page dbas/connection dialog-router slug bubbles] :as props}]
   {:query         [:db/id :router/page [:dbas/connection '_]
-                   {:bubbles (prim/get-query loads/Positions)}
+                   {:bubbles (prim/get-query loads/Bubble)}
                    {:dialog-router (prim/get-query DialogRouter)}
                    :slug]
    :ident         (fn [] [page id])
@@ -119,7 +113,7 @@
                      :router/page :PAGE.discuss/dialog
                      :dialog-router (prim/get-initial-state DialogRouter {})})}
   (dom/div :.dialog-area.mdc-elevation--z2
-    (bubbles/ui-bubble-area {:bubble-area/bubbles (:bubbles bubbles)})
+    (bubbles/ui-bubble-area {:bubble-area/bubbles bubbles})
     (ui-dialog-router dialog-router)))
 
 (defsc-router DiscussRouter [this {:keys [db/id router/page]}]
