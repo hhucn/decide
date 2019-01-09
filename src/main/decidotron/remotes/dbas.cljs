@@ -26,7 +26,7 @@
 (pc/defmutation login [_ {:keys [connection nickname password]}]
   {::pc/sym    'dbas/login
    ::pc/params [:connection :nickname :password]
-   ::pc/output [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token]}
+   ::pc/output [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token ::dbas/login-status]}
   (dbas/login connection nickname password))
 
 (def app-registry [login issues positions attitudes]) ; DON'T FORGET TO ADD EVERYTHING HERE!

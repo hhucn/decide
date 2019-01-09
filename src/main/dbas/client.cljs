@@ -5,7 +5,8 @@
     [cljs.spec.alpha :as s]
     [goog.string :as gstring]))
 
-(defn new-connection [] {::base "https://dbas.cs.uni-duesseldorf.de/api"})
+(defn new-connection [] {::base         "https://dbas.cs.uni-duesseldorf.de/api"
+                         ::login-status ::logged-out})
 (def connection (new-connection))
 
 ; from https://stackoverflow.com/a/43722784/3616102
@@ -21,7 +22,8 @@
 
 (defn logged-in? [conn]
   (and (contains? conn ::token)
-    (contains? conn ::nickname)))
+    (contains? conn ::nickname)
+    (= (conn ::login-status) ::logged-in)))
 
 (comment
   (logged-in? {::base "https://dbas.cs.uni-duesseldorf.de/api"})
@@ -42,7 +44,7 @@
                             (->> (method-fn (str (::base conn) path)))))]
        (if (:success response)
          (get response :body {})
-         (throw (js/Error. "Wrong / Missing credentials!")))))))
+         (js/Error. "Wrong / Missing credentials!"))))))
 
 (def api-get (partial api-call http/get))
 (def api-post (partial api-call http/post))
@@ -52,17 +54,22 @@
   (go
     (let [body (<! (api-post conn "/login" {:nickname username
                                             :password password}))]
-      (cond-> conn
-        (:token body) (assoc ::id (:id body)
-                             ::nickname (:nickname body)
-                             ::token (:token body))))))
+      (if (instance? js/Error body)
+        (assoc conn ::login-status ::failed)
+        (cond-> conn
+          (:token body) (assoc ::id (:id body)
+                               ::nickname (:nickname body)
+                               ::token (:token body)
+                               ::login-status ::logged-in))))))
 
 (defn logout [conn]
   #_(api-post conn "/logout")                               ; this is broken in D-BAS
-  (go (dissoc conn ::id ::token ::nickname)))
+  (go (-> conn
+        (dissoc ::id ::token ::nickname)
+        (assoc ::login-status ::logged-out))))
 
 (s/def :dbas.issue/slug (s/and string? #(re-matches #"^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$" %)))
-(s/def :dbas.issue/date string?) ; for now
+(s/def :dbas.issue/date string?)                            ; for now
 (s/def :dbas.issue/description string?)
 (s/def :dbas.issue/title string?)
 (s/def :dbas.issue/url string?)
