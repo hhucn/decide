@@ -32,6 +32,9 @@
 (def list-item-text (factory-apply react-list/ListItemText))
 (def list-item-graphic (factory-apply react-list/ListItemGraphic))
 (def list-item-meta (factory-apply react-list/ListItemMeta))
+(def list-group (factory-apply react-list/ListGroup))
+(def list-group-subheader (factory-apply react-list/ListGroupSubheader))
+(def list-divider (factory-apply react-list/ListDivider))
 
 (def radio (factory-apply react-radio/default))
 (def native-radio (factory-apply react-radio/NativeRadioControl))
