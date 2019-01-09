@@ -64,11 +64,15 @@ app-routes
   history events."
   [state-map {:keys [handler] :as bidi-match}]
   (cond
-    (or (= :new-user handler) (= :login handler)) (r/update-routing-links state-map bidi-match)
-    #_(not (:logged-in? state-map)) #_(-> state-map
-                                        (assoc :loaded-uri (when @history (pushy/get-token @history)))
-                                        (redirect* {:handler :login}))
+    (= :login handler) (r/update-routing-links state-map bidi-match)
+
+    #_(not (get-in state-map [:dbas/connection :dbas.client/token]))
+    #_(-> state-map
+          (assoc :loaded-uri (when @history (pushy/get-token @history)))
+          (redirect* {:handler :login}))
+
     (invalid-route? handler) (redirect* state-map {:handler :issues})
+
     :else (r/update-routing-links state-map bidi-match)))
 
 (defmutation set-route!

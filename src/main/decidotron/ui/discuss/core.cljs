@@ -72,28 +72,30 @@
                  (routing/nav-to! this :attitude {:slug slug :position position})))}))
         (dom/p "Still loading!"))))
 
-(defsc Attitude [this {:keys [db/id router/page dbas/connection attitudes root/current-page]}]
-  {:query [:db/id :router/page :attitudes [:dbas/connection '_] [:root/current-page '_]]
+(defsc Attitude [this {:keys [db/id router/page attitudes]}]
+  {:query [:db/id :router/page [:root/current-page '_]
+           {:attitudes [{:bubbles (prim/get-query loads/Bubble)}
+                        {:attitudes [{:agree (prim/get-query loads/Attitude)}
+                                     {:disagree (prim/get-query loads/Attitude)}
+                                     {:dontknow (prim/get-query loads/Attitude)}]}]}]
    :ident          (fn [] [page id])
    :initial-state {:db/id 1
                    :router/page :PAGE.discuss.dialog/attitude}}
-  (let [params (get-in current-page [:attitude :route-params])]
-    (when-not attitudes
-      (loads/load-attitudes this connection (df/multiple-targets
-                                              (df/replace-at [:PAGE.discuss/dialog 1 :bubbles])
-                                              (df/replace-at [:PAGE.discuss.dialog/attitude 1 :attitudes]))
-        (:slug params) (:position params)))
-
-    (let [halves #js {:columns 2}]
+  (prim/transact! this `[(loads/ensure-attitudes {:set-bubbles? true})])
+  (let [halves #js {:columns 2}]
+    (dom/div :.dialog-area.mdc-elevation--z2
+      (bubbles/ui-bubble-area {:bubble-area/bubbles (:bubbles attitudes)})
       (material/grid #js {}
         (material/row #js {}
           (material/cell halves (material/button #js {:raised true} "I agree"))
           (material/cell halves (material/button #js {} "I disagree")))))))
 
+
 (defsc-router DialogRouter [this {:keys [db/id router/page]}]
   {:router-id :discuss.dialog/router
    :default-route Positions
    :ident          (fn [] [page id])
+   :initial-state (fn [id] {:db/id id})
    :router-targets {:PAGE.discuss.dialog/positions Positions
                     :PAGE.discuss.dialog/attitude Attitude
                     :PAGE.discuss.dialog/justify Positions
@@ -112,9 +114,7 @@
                     {:db/id 1
                      :router/page :PAGE.discuss/dialog
                      :dialog-router (prim/get-initial-state DialogRouter {})})}
-  (dom/div :.dialog-area.mdc-elevation--z2
-    (bubbles/ui-bubble-area {:bubble-area/bubbles bubbles})
-    (ui-dialog-router dialog-router)))
+  (ui-dialog-router dialog-router))
 
 (defsc-router DiscussRouter [this {:keys [db/id router/page]}]
   {:router-id      :discuss/router

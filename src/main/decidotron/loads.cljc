@@ -55,22 +55,23 @@
     (let [state*     @state
           connection (:dbas/connection state*)
           slug       (get-in state* [:root/current-page :positions :route-params :slug])
-          target (conj ref :positions)]
+          target     (conj ref :positions)]
       (when-not (get-in state* (conj ref :positions) false)
         (df/load-action env :dbas.issue/positions Positions
           (merge
-            {:remote               :dbas
-             :params               {:connection connection
-                                    :slug       slug}
+            {:remote :dbas
+             :params {:connection connection
+                      :slug       slug}
              :target target}
             (when set-bubbles?
-             {:post-mutation        `move-bubbles-to-dialog
-              :post-mutation-params {:edge [:dbas.positions/by-slug slug :bubbles]}
-              :refresh              [[:PAGE.discuss/dialog 1]]}))))))
+              {:post-mutation        `move-bubbles-to-dialog
+               :post-mutation-params {:edge [:dbas.positions/by-slug slug :bubbles]}
+               :refresh              [[:PAGE.discuss/dialog 1]]}))))))
   (dbas [env] (df/remote-load env)))
 
 (defsc Attitude [_ {:keys [url]}]
-  {:query [:htmls :texts :url]})
+  {:query [:htmls :texts :url]
+   :ident [:dbas.attitude/by-url :url]})
 
 (defsc Attitudes [_ props]
   {:query [{:bubbles (prim/get-query Bubble)}
@@ -78,12 +79,16 @@
                         {:disagree (prim/get-query Attitude)}
                         {:dontknow (prim/get-query Attitude)}]}]})
 
-
-(defn load-attitudes [component connection where slug position]
-  (df/load component :dbas.issue.position/attitudes Attitudes
-    {:remote   :dbas
-     :params   {:connection connection
-                :slug       slug
-                :position   position}
-     :parallel true
-     :target   where}))
+(defmutation ensure-attitudes [{:keys [set-bubbles?] :or {set-bubbles? false}}]
+  (action [{:keys [ref state] :as env}]
+    (let [state*     @state
+          connection (:dbas/connection state*)
+          params     (get-in state* [:root/current-page :attitude :route-params])
+          target     (conj ref :attitudes)
+          snd-target [:PAGE.discuss.dialog/attitude params :attitudes]]
+      (when-not (get-in state* snd-target)
+        (df/load-action env :dbas.issue.position/attitudes Attitudes
+          {:remote        :dbas
+           :params        (merge {:connection connection} params)
+           :target        (df/multiple-targets target snd-target)}))))
+  (dbas [env] (df/remote-load env)))
