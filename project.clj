@@ -4,14 +4,16 @@
   :min-lein-version "2.7.0"
 
   :dependencies [[org.clojure/clojure "1.10.0"]
-                 [thheller/shadow-cljs "2.7.9"]
-                 [fulcrologic/fulcro "2.7.0"]
-                 [com.wsscode/pathom "2.2.5"]
+                 [thheller/shadow-cljs "2.7.14"]
+                 [fulcrologic/fulcro "2.7.2"]
+                 [com.wsscode/pathom "2.2.7"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
                  [garden "1.3.6"]
                  [mount "0.1.15"]
                  [hiccup "1.0.5"]
+                 [toucan "1.1.9"]
+                 [org.postgresql/postgresql "42.2.5"]
 
                  [http-kit "2.3.0"]
                  [ring/ring-core "1.7.1"]
@@ -28,10 +30,10 @@
                  [nubank/workspaces "1.0.2" :scope "test" :exclusions [com.cognitect/transit-java]]
 
                  ; only required if you want to use this for tests
-                 [fulcrologic/fulcro-spec "2.1.3" :scope "test"]
+                 [fulcrologic/fulcro-spec "2.2.0" :scope "test"]
 
                  ; for dbas client
-                 [com.wsscode/pathom "2.2.5"]
+                 [com.wsscode/pathom "2.2.7"]
                  [cljs-http "0.1.45"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.reader "1.3.2"]
