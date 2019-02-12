@@ -9,7 +9,8 @@
     ["@material/react-top-app-bar" :as react-topbar]
     ["@material/react-icon-button" :as react-icon-button]
     ["@material/react-menu-surface" :as react-menu-surface]
-    ["@material/react-drawer" :as react-drawer]))
+    ["@material/react-drawer" :as react-drawer]
+    ["@material/react-card" :as react-card]))
 
 (defn factory-apply [class]
   (fn [props & children]
@@ -52,3 +53,10 @@
 (def drawer-title (factory-apply react-drawer/DrawerTitle))
 (def drawer-content (factory-apply react-drawer/DrawerContent))
 (def drawer-app-content (factory-apply react-drawer/DrawerAppContent))
+
+(def card (factory-apply react-card/default))
+(def card-primary-content (factory-apply react-card/CardPrimaryContent))
+(def card-media (factory-apply react-card/CardMedia))
+(def card-actions (factory-apply react-card/CardActions))
+(def card-action-buttons (factory-apply react-card/CardActionButtons))
+(def card-action-icons (factory-apply react-card/CardActionIcons))

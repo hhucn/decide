@@ -5,6 +5,7 @@
     [fulcro-spec.selectors :as sel]
     [mount.core :as mount]
     ;; this is the top-level dependent component...mount will find the rest via ns requires
+    [decidotron.database.config]
     [decidotron.server-components.http-server :refer [http-server]]))
 
 ;; ==================== SERVER ====================

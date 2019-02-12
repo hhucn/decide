@@ -41,12 +41,22 @@
                      :login/login-form (prim/get-initial-state comp/LoginForm {})})}
   (comp/ui-login-form login-form))
 
+(defsc Welcome [this {:keys [db/id router/page]}]
+  {:query         [:db/id :router/page]
+   :ident         (fn [] [page id])
+   :initial-state (fn [_]
+                    {:db/id       1
+                     :router/page :PAGE/main})}
+  (dom/p "Welcome!"))
+
 (defsc-router RootRouter [this {:keys [db/id router/page]}]
   {:router-id      :root/router
    :default-route  discuss/Discuss
    :ident          (fn [] [page id])
-   :router-targets {:PAGE/discuss discuss/Discuss
-                    :PAGE/login   Login}}
+   :router-targets {:PAGE/discuss     discuss/Discuss
+                    :PAGE/login       Login
+                    :PAGE/main        Welcome
+                    :PAGE/preferences comp/PreferenceScreen}}
   (dom/p "Unknown Route!"))
 
 (def ui-router (prim/factory RootRouter))

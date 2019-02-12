@@ -26,3 +26,76 @@
     background-color: #B2EBF2;
     margin: auto auto;
 }
+
+.mdc-list-divider {
+    list-style-type: none;
+    margin: 10px;
+}
+
+.prefer-icon {
+    transform: translateY(-10px);
+}
+
+.mdc-list-item {
+    min-height: 48px;
+    height: auto;
+}
+
+.up-down {
+    padding: 10px;
+
+    display: grid;
+    grid-template-columns: 24px;
+    grid-template-rows: 24px auto 24px;
+    justify-items: center;
+    align-items: center;
+    grid-area: up-down;
+}
+
+.up-down > .level {
+    margin: 0;
+}
+
+.preferred-item {
+    display: grid;
+    grid-template-columns: 42px auto 75px;
+    grid-template-areas:
+        "up-down content price"
+        "up-down buttons buttons";
+
+
+}
+
+.preferred-item > .mdc-list-item__text {
+    width: 100%;
+    display: grid;
+}
+
+.preferred-item > .mdc-card__actions {
+    grid-area: buttons;
+}
+
+.preferred-item > .price {
+    grid-area: price;
+    align-self: end;
+    padding-right: 16px;
+}
+
+.price {
+    white-space: nowrap;
+}
+
+.preferred-item > .content {
+    grid-area: content;
+    padding: 10px;
+    margin: 0;
+}
+
+.content {
+    white-space: normal;
+}
+
+#layer1 {
+    color: rgba(0, 0, 0, 0.38)
+}
+

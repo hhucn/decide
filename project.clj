@@ -4,16 +4,20 @@
   :min-lein-version "2.7.0"
 
   :dependencies [[org.clojure/clojure "1.10.0"]
-                 [thheller/shadow-cljs "2.7.14"]
-                 [fulcrologic/fulcro "2.7.2"]
-                 [com.wsscode/pathom "2.2.7"]
+                 [thheller/shadow-cljs "2.7.32"]
+                 [fulcrologic/fulcro "2.8.0"]
+                 [com.wsscode/pathom "2.2.9"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
                  [garden "1.3.6"]
-                 [mount "0.1.15"]
+                 [mount "0.1.16"]
                  [hiccup "1.0.5"]
-                 [toucan "1.1.9"]
+                 [toucan "1.11.0"]
                  [org.postgresql/postgresql "42.2.5"]
+                 [clj-http "3.9.1"]
+                 [cheshire "5.8.1"]
+                 [buddy/buddy-sign "3.0.0"]
+                 [korma "0.4.3"]
 
                  [http-kit "2.3.0"]
                  [ring/ring-core "1.7.1"]
@@ -27,14 +31,13 @@
                  [com.google.errorprone/error_prone_annotations "2.3.2"]
                  [com.google.code.findbugs/jsr305 "3.0.2"]
 
-                 [nubank/workspaces "1.0.2" :scope "test" :exclusions [com.cognitect/transit-java]]
+                 [nubank/workspaces "1.0.4" :scope "test" :exclusions [com.cognitect/transit-java]]
 
                  ; only required if you want to use this for tests
                  [fulcrologic/fulcro-spec "2.2.0" :scope "test"]
 
                  ; for dbas client
-                 [com.wsscode/pathom "2.2.7"]
-                 [cljs-http "0.1.45"]
+                 [cljs-http "0.1.46"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/tools.reader "1.3.2"]
                  [org.clojure/spec.alpha "0.2.176"]]
@@ -56,8 +59,8 @@
              :production {}
              :cljs       {:source-paths ["src/main" "src/test" "src/workspaces"]
                           :dependencies [[binaryage/devtools "0.9.10"]
-                                         [org.clojure/clojurescript "1.10.439"]
-                                         [fulcrologic/fulcro-inspect "2.2.4"]]}
+                                         [org.clojure/clojurescript "1.10.516"]
+                                         [fulcrologic/fulcro-inspect "2.2.5"]]}
              :dev        {:source-paths ["src/dev" "src/main" "src/workspaces"]
                           :jvm-opts     ["-XX:-OmitStackTraceInFastThrow" "-Xmx1g"]
 

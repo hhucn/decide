@@ -1,13 +1,18 @@
 (ns decidotron.server-components.middleware
   (:require
+    [clojure.core.async :as async]
     [decidotron.server-components.config :refer [config]]
+    [decidotron.server-components.api :refer [server-parser]]
+    [decidotron.server-components.token :as token]
     [mount.core :refer [defstate]]
     [fulcro.server :as server]
     [ring.middleware.defaults :refer [wrap-defaults]]
     [ring.middleware.gzip :refer [wrap-gzip]]
     [ring.util.response :refer [response file-response resource-response]]
     [ring.util.response :as resp]
-    [hiccup.page :refer [html5]]))
+    [hiccup.page :refer [html5]]
+    [fulcro.logging :as log]
+    [buddy.core.keys :refer [str->public-key]]))
 
 (def ^:private not-found-handler
   (fn [req]
@@ -21,14 +26,13 @@
 ;; defined in the book, but you'll have a much better time parsing queries with
 ;; Pathom.
 ;; ================================================================================
-(def server-parser (server/fulcro-parser))
-
+(log/set-level! :all)
 (defn wrap-api [handler uri]
   (fn [request]
     (if (= uri (:uri request))
       (server/handle-api-request
         ;; Sub out a pathom parser here if you want to use pathom.
-        server-parser
+        (fn [env query] (let [result (async/<!! (server-parser env query))] result))
         ;; this map is `env`. Put other defstate things in this map and they'll be
         ;; in the mutations/query env on server.
         {:config config}
@@ -78,9 +82,24 @@
       [:div#app]
       [:script {:src "js/workspaces/main.js"}]]]))
 
+(defn ensure-token [req]
+  (let [query-token (get-in req [:params :token])]
+    (try
+      (when-let [payload (token/unsign query-token)]
+        (if (= "tmp" (:sub payload))
+            (token/refresh query-token)
+            query-token))
+      (catch Exception e))))
+
 (defn wrap-html-routes [ring-handler]
   (fn [{:keys [uri anti-forgery-token] :as req}]
     (cond
+      (get-in req [:params :token])
+      (let [response (resp/redirect uri)]
+        (if-let [t (ensure-token req)]
+          (resp/set-cookie response "decidotron-token" t {:path "/"})
+          response))
+
       (#{"/" "/index.html"} uri)
       (-> (resp/response (index anti-forgery-token))
         (resp/content-type "text/html"))
@@ -89,6 +108,9 @@
       (#{"/wslive.html"} uri)
       (-> (resp/response (wslive anti-forgery-token))
         (resp/content-type "text/html"))
+
+      (#{"/api"} uri)
+      (ring-handler req)
 
       :else
       (-> (resp/response (index anti-forgery-token))

@@ -1,14 +1,8 @@
 (ns decidotron.database.config
-  (:require [toucan.db :as db]
-            [toucan.models :as models]))
+  (:require [mount.core :refer [defstate]]
+            [korma.db :as kdb]))
 
-(db/set-default-db-connection!
-  {:classname   "org.postgresql.Driver"
-   :subprotocol "postgresql"
-   :subname     "//localhost:5432/postgres"
-   :user        "postgres"
-   :password    "password123"})
-
-(db/set-default-automatically-convert-dashes-and-underscores! true)
-
-(models/set-root-namespace! 'decidotron.database.config)
+(kdb/defdb kdatabase
+  (kdb/postgres {:db       "discussion"
+                 :user     "postgres"
+                 :password "DXxCNtfnt!MOo!f8LY1!P%sw3KGzt@s!"}))

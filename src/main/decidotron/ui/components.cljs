@@ -8,7 +8,10 @@
     [fulcro.client.routing :as r]
     [decidotron.loads :as loads]
     [decidotron.ui.discuss.core :as discuss]
-    [decidotron.ui.routing :as routing]))
+    [decidotron.ui.routing :as routing]
+    [fulcro.client.data-fetch :as df]
+    [decidotron.ui.models :as models]
+    [goog.string :as gstring]))
 
 (defsc InputField
   [this {:keys [db/id input/value] :as props} {:keys [ui/label ui/type] :as computed}]
@@ -93,8 +96,8 @@
 (def ui-nav-drawer (prim/factory NavDrawer))
 
 (defsc IssueList [this {:keys [dbas/issues dbas/connection]}]
-  {:query         [[:dbas/connection '_]
-                   {[:dbas/issues '_] (prim/get-query discuss/IssueEntry)}]}
+  {:query [[:dbas/connection '_]
+           {[:dbas/issues '_] (prim/get-query discuss/IssueEntry)}]}
   (dom/div
     (material/button #js {:onClick #(loads/load-issues this connection [:ui/root])} "LOAD!")
     (js/console.log issues)
@@ -112,3 +115,110 @@
     (ui-issue-list issue-list)))
 
 (def ui-temp-root (prim/factory TempRoot))
+
+(defsc PreferenceListItem [this {:keys [position]} {:keys [prefer-fn]}]
+  {:query [{:position (prim/get-query models/Position)}]}
+  (material/list-item #js {}
+    (material/list-item-graphic
+      #js {:graphic (material/icon-button
+                      #js {:onClick #(prefer-fn (:id position))}
+                      (material/icon #js {:icon "thumb_up" :className "material-icon prefer-icon"}))})
+    (material/list-item-text #js {:className   "content"
+                                  :primaryText (str "Ich bin dafür, dass " (:text position) ".")}) ; TODO translate
+    (material/list-item-meta #js {:className "price"
+                                  :meta      (str "€ " (:cost position))})))
+
+(def ui-pref-list-item (prim/factory PreferenceListItem {:keyfn :position}))
+
+(defsc UpDownButton [this {:keys [level last?] :or {last? false}} {:keys [up-fn down-fn]}]
+  (dom/div {:className "up-down"}
+    (material/icon-button #js {:className "up-down-button up-down-button__up"
+                               :dense     "true"
+                               :onClick   #(up-fn level)
+                               :disabled  (zero? level)}
+      (material/icon #js {:icon "keyboard_arrow_up"}))
+    (dom/p {:className "level"} (inc level))
+    (material/icon-button #js {:className "up-down-button up-down-button__down"
+                               :dense     "true"
+                               :onClick   #(down-fn level)
+                               :disabled  last?}
+      (material/icon #js {:icon "keyboard_arrow_down"}))))
+
+(def ui-updown-button (prim/factory UpDownButton))
+
+(defsc PreferredItem [this {:keys [ui/preferred-level position ui/last?] :or {last? false}} {:keys [un-prefer-fn] :as computed}]
+  {:query [:ui/preferred-level {:position (prim/get-query models/Position)} :ui/last?]}
+  (dom/li
+    (material/card #js {:outlined true}
+      (material/card-primary-content #js {:className "preferred-item"}
+        (ui-updown-button (prim/computed {:level preferred-level
+                                          :last? last?} computed))
+        (dom/p {:className "content"}
+          (str "Ich bin dafür, dass " (or (:text position) "") "."))
+        (material/list-item-meta #js {:className "price"
+                                      :meta      (str "€ " (:cost position))})
+        (material/card-actions #js {:fullBleed false}
+          (material/card-action-buttons #js {}
+            (material/button #js {:href (gstring/format "http://0.0.0.0:4284/discuss/%s/justify/%d/agree"
+                                          "was-sollen-wir-mit-20-000eur-anfangen" (:id position))}
+              "Unterstütze dies!"))
+          (material/card-action-icons #js {}
+            (dom/i {:onClick #(un-prefer-fn (:id position))}
+              (material/icon #js {:icon "close"}))))))))
+
+
+(def ui-preferred-item (prim/factory PreferredItem {:keyfn (comp :id :position)}))
+
+(defsc PreferenceList [this {:keys [dbas.issue/slug preferences dbas.issue/positions dbas/connection]}]
+  {:query [:dbas.issue/slug
+           {:preferences (prim/get-query PreferredItem)}
+           {[:dbas.issue/positions '_] (prim/get-query models/Position)}
+           [:dbas/connection '_]]
+   :ident [:preference-list/by-slug :dbas.issue/slug]}
+  (when-not preferences
+    (df/load this [:preference-list/by-slug slug] PreferenceList {:params  {:dbas.client/token (:dbas.client/token connection)}
+                                                                  :without #{[:dbas.issue/positions '_] [:dbas/connection '_]}}))
+  (let [preferred-ids  (set (map #(get-in % [:position :id]) preferences))
+        position-items (->> positions
+                         (remove #(preferred-ids (:id %)))
+                         (map #(hash-map :position %)))]
+    (material/list-group #js {}
+      (material/button
+        #js {:onClick #(df/load this [:preference-list/by-slug slug] PreferenceList {:params  {:dbas.client/token (:dbas.client/token connection)}
+                                                                                     :without #{[:dbas.issue/positions '_] [:dbas/connection '_]}})}
+        "Refresh!")
+      (material/list-group #js {}
+        (when (not-empty preferences)
+          (material/list-group-subheader #js {} "Diesen Positionen stimmst du zu."))
+        (material/mdc-list #js {:tag "ol"}
+          (->> preferences
+            (map-indexed (fn [i v] (assoc v :ui/preferred-level i :ui/last? (= i (dec (count preferences))))))
+            (map #(prim/computed % {:up-fn   (fn [level] (prim/transact! this `[(ms/preference-up {:level ~level})]))
+                                    :down-fn (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
+                                    :un-prefer-fn (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
+            (map ui-preferred-item))))
+      (material/list-divider #js {})
+      (material/list-group #js {}
+        (when (not-empty position-items)
+          (material/list-group-subheader #js {} "Diesen Positionen kannst du zustimmen."))
+        (material/mdc-list #js {}
+          (map #(ui-pref-list-item
+                  (prim/computed %
+                    {:prefer-fn (fn [position-id] (prim/transact! this `[(ms/prefer {:position/id ~position-id})]))}))
+            position-items))))))
+
+(def ui-pref-list (prim/factory PreferenceList))
+
+(defsc Position [this {:keys [id text cost]}]
+  {:query [:id :text :cost]
+   :ident [:position/by-id :id]})
+
+(defsc PreferenceScreen [this {:keys [db/id router/page pref-list]}]
+  {:query         [:db/id :router/page
+                   {:pref-list (prim/get-query PreferenceList)}]
+   :ident         (fn [] [page id])
+   :initial-state (fn [_] {:db/id       1
+                           :router/page :PAGE/preferences
+                           :pref-list   {:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"}})}
+  (dom/div
+    (ui-pref-list pref-list)))

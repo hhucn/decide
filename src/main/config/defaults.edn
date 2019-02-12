@@ -1,7 +1,7 @@
 {:http-kit      {:port 3000}
 
  ;; Legal Origins for API request.
- :legal-origins #{"localhost" "dev.lvh.me"}
+ :legal-origins #{"localhost" "dev.lvh.me" "0.0.0.0"}
 
  ;; The ssl-redirect defaulted to off, but for security should probably be on in production.
  :ring.middleware/defaults-config
@@ -21,4 +21,5 @@
                              :ssl-redirect   false
                              :frame-options  :sameorigin
                              :xss-protection {:enable? true
-                                              :mode    :block}}}}
+                                              :mode    :block}}}
+ :dbas {:base "https://dbas.cs.uni-duesseldorf.de"}}

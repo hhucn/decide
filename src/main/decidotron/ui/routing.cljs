@@ -10,6 +10,7 @@
 (def app-routing-tree
   (r/routing-tree
     (r/make-route :login [(r/router-instruction :root/router [:PAGE/login 1])])
+    (r/make-route :main [(r/router-instruction :root/router [:PAGE/main 1])])
     (r/make-route :issues [(r/router-instruction :root/router [:PAGE/discuss 1])
                            (r/router-instruction :discuss/router [:PAGE.discuss/issues 1])])
     (r/make-route :positions [(r/router-instruction :root/router [:PAGE/discuss 1])
@@ -17,7 +18,8 @@
                               (r/router-instruction :discuss.dialog/router [:PAGE.discuss.dialog/positions 1])])
     (r/make-route :attitude [(r/router-instruction :root/router [:PAGE/discuss 1])
                              (r/router-instruction :discuss/router [:PAGE.discuss/dialog 1])
-                             (r/router-instruction :discuss.dialog/router [:PAGE.discuss.dialog/attitude 1])])))
+                             (r/router-instruction :discuss.dialog/router [:PAGE.discuss.dialog/attitude 1])])
+    (r/make-route :preferences [(r/router-instruction :root/router [:PAGE/preferences 1])])))
 
 (def valid-handlers (-> (get app-routing-tree r/routing-tree-key) keys set))
 
@@ -31,7 +33,11 @@
   "The bidi routing map for the application. The leaf keywords are the route names. Parameters
   in the route are available for use in the routing algorithm as :param/param-name."
   (branch "/"
+    (leaf "" :main)
     (leaf "login" :login)
+    (branch "preferences/"
+      (param :slug)
+      (leaf "" :preferences))
     (branch "discuss"
       (leaf "" :issues)
       (branch "/"
@@ -40,8 +46,6 @@
         (branch "/attitude/"
           (param :position)
           (leaf "" :attitude))))))
-
-app-routes
 
 (defn invalid-route?
   "Returns true if the given keyword is not a valid location in the routing tree."
@@ -63,6 +67,7 @@ app-routes
   Updates the UI only, unless the URI is invalid, in which case it redirects the UI and possibly generates new HTML5
   history events."
   [state-map {:keys [handler] :as bidi-match}]
+  (js/console.log bidi-match)
   (cond
     (= :login handler) (r/update-routing-links state-map bidi-match)
 
@@ -71,7 +76,7 @@ app-routes
           (assoc :loaded-uri (when @history (pushy/get-token @history)))
           (redirect* {:handler :login}))
 
-    (invalid-route? handler) (redirect* state-map {:handler :issues})
+    (invalid-route? handler) (redirect* state-map {:handler :main})
 
     :else (r/update-routing-links state-map bidi-match)))
 
