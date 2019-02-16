@@ -11,19 +11,14 @@
                {"was-sollen-wir-mit-20-000eur-anfangen"
                 {:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"
                  :preferences [{:position [:position/by-id 87]}]}}})
-@state
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(pc/defmutation update-preferences [e {:keys [preference-list token] :as ps}]
+(pc/defmutation update-preferences [_ {:keys [preference-list token]}]
   {::pc/sym 'update-preferences
    ::pc/params [:preference-list :token]}
-  (clojure.pprint/pprint (keys e))
-  (clojure.pprint/pprint ps)
-  (let [user-id (:id (t/unsign token))
-        s (swap! state assoc-in [user-id (:dbas.issue/slug preference-list)] preference-list)]
-    (clojure.pprint/pprint s)
-    (s user-id)))
-
+  (let [user-id (:id (t/unsign token))]
+    (get (swap! state assoc-in [user-id (:dbas.issue/slug preference-list)] preference-list) user-id)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
