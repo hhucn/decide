@@ -137,7 +137,6 @@
                                :onClick   #(up-fn level)
                                :disabled  (zero? level)}
       (material/icon #js {:icon "keyboard_arrow_up"}))
-    (dom/p {:className "level"} (inc level))
     (material/icon-button #js {:className "up-down-button up-down-button__down"
                                :dense     "true"
                                :onClick   #(down-fn level)
