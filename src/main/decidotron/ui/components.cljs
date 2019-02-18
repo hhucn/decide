@@ -173,23 +173,25 @@
 
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn (comp :id :position)}))
 
-(defsc PreferenceList [this {:keys [dbas.issue/slug preferences dbas.issue/positions dbas/connection]}]
+(defsc PreferenceList [this {:keys [dbas.issue/slug preferences dbas.issue/positions]}]
   {:query [:dbas.issue/slug
            {:preferences (prim/get-query PreferredItem)}
-           {[:dbas.issue/positions '_] (prim/get-query models/Position)}
-           [:dbas/connection '_]]
-   :ident [:preference-list/by-slug :dbas.issue/slug]}
+           {[:dbas.issue/positions '_] (prim/get-query models/Position)}]
+   :ident [:preference-list/by-slug :dbas.issue/slug]
+   :initial-state (fn [{:keys [slug preferences]}]
+
+                    {:dbas.issue/slug slug
+                     :preferences     preferences})}
   (when-not preferences
-    (df/load this [:preference-list/by-slug slug] PreferenceList {:params  {:dbas.client/token (:dbas.client/token connection)}
-                                                                  :without #{[:dbas.issue/positions '_] [:dbas/connection '_]}}))
+    (df/load this [:preference-list/by-slug slug] PreferenceList
+      {:without #{[:dbas.issue/positions '_] [:dbas/connection '_]}}))
   (let [preferred-ids  (set (map #(get-in % [:position :id]) preferences))
         position-items (->> positions
                          (remove #(preferred-ids (:id %)))
                          (map #(hash-map :position %)))]
     (material/list-group #js {}
       (material/button
-        #js {:onClick #(df/load this [:preference-list/by-slug slug] PreferenceList {:params  {:dbas.client/token (:dbas.client/token connection)}
-                                                                                     :without #{[:dbas.issue/positions '_] [:dbas/connection '_]}})}
+        #js {:onClick #(df/load this [:preference-list/by-slug slug] PreferenceList {:without #{[:dbas.issue/positions '_]}})}
         "Refresh!")
       (material/list-group #js {}
         (when (not-empty preferences)
@@ -223,6 +225,6 @@
    :ident         (fn [] [page id])
    :initial-state (fn [_] {:db/id       1
                            :router/page :PAGE/preferences
-                           :pref-list   {:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"}})}
+                           :pref-list   (prim/get-initial-state PreferenceList {:slug "was-sollen-wir-mit-20-000eur-anfangen"})})}
   (dom/div
     (ui-pref-list pref-list)))

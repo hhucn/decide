@@ -20,8 +20,14 @@
   (mount))
 
 (defn wrap-api->root-middleware [handler]
-  (fn [request]
-    (handler request)))
+  (let [add-token (fn [token query] (assoc-in query [:params :dbas.client/token] token))]
+    (fn [request]
+      (handler
+        (if-let [token (-> app deref :reconciler prim/app-state deref :dbas/connection :dbas.client/token)]
+          (update request :body
+            (fn [query] (-> query prim/query->ast (update :children #(mapv (partial add-token token) %))
+                          prim/ast->query)))
+          request)))))
 
 (def secured-request-middleware
   ;; The CSRF token is embedded in the server_components/html.clj

@@ -14,7 +14,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(pc/defmutation update-preferences [_ {:keys [preference-list token]}]
+(pc/defmutation update-preferences [_ {:keys [preference-list dbas.client/token]}]
   {::pc/sym 'update-preferences
    ::pc/params [:preference-list :token]}
   (let [user-id (:id (t/unsign token))]

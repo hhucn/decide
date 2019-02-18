@@ -25,12 +25,10 @@
 
 (defn- update-preferences* [{:keys [state ast]}]
   (let [s @state
-        token (get-in s [:dbas/connection :dbas.client/token])
         issue-key (get-in s [:root/current-page :preferences :route-params :slug])
         pref-list (get-in s [:preference-list/by-slug issue-key])]
     (-> (assoc ast :key 'update-preferences)
-      (m/with-params {:preference-list pref-list
-                      :token token}))))
+      (m/with-params {:preference-list pref-list}))))
 
 (defn prefer* [pref-list id]
   (update pref-list :preferences conj {:position [:position/by-id id]}))
