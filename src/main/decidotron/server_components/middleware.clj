@@ -58,7 +58,8 @@
       [:link {:rel       "stylesheet" :href "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
               :integrity "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" :crossorigin "anonymous"}]
       [:link {:rel "stylesheet" :href "/css/main.css"}]
-      [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]]
+      [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
+      [:script (str "var dbas_host ='" (get-in config [:dbas :base]) "';")]]
      [:body
       [:div#app]
       [:script {:src       "https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -95,13 +96,16 @@
         (if (= "tmp" (:sub payload))
             (token/refresh query-token)
             query-token))
-      (catch Exception e))))
+      (catch Exception e
+        (println "Token could not be verified" e)))))
 
 (defn wrap-html-routes [ring-handler]
   (fn [{:keys [uri anti-forgery-token] :as req}]
     (cond
+      ;; fetch the correct token from the user and redirect to the site without the token parameter.
       (get-in req [:params :token])
       (let [response (resp/redirect uri)]
+        (println "Get user token and redirect")
         (if-let [t (ensure-token req)]
           (resp/set-cookie response "decidotron-token" t {:path "/"})
           response))

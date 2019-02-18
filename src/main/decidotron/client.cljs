@@ -30,18 +30,24 @@
     (net/wrap-fulcro-request)
     (wrap-api->root-middleware)))
 
-(defn- parse-json [json]
+(defn- parse-json
+  "Parse a JSON string to edn. Use only for small amounts of data"
+  [json]
   (js->clj (.parse js/JSON json) :keywordize-keys true))
 
-(defn- ->initial-dbas-data [token]
+(defn- ->initial-dbas-data
+  "Receives a D-BAS JWT and returns in the map containing all login data needed for decidotron"
+  [token]
   (let [{:keys [id nickname]} (-> token (clojure.string/split #"\.") second b64/decodeString parse-json)]
-    {:dbas.client/base "http://0.0.0.0/api"
-     :dbas.client/id id
-     :dbas.client/nickname nickname
+    {:dbas.client/base         (str js/dbas_host "/api")
+     :dbas.client/id           id
+     :dbas.client/nickname     nickname
      :dbas.client/login-status :dbas.client/logged-in
-     :dbas.client/token token}))
+     :dbas.client/token        token}))
 
-(defn get-user-state-from-cookie [app-root]
+(defn get-user-state-from-cookie!
+  "Fetches the token from the cookies, if it is available. Transact the connection data into the state"
+  [app-root]
   (when-let [token (.get (Cookies. js/document) "decidotron-token" nil)]
     (prim/transact! app-root `[(ms/set-dbas-connection {:dbas-state ~(->initial-dbas-data token)})])))
 
@@ -54,7 +60,7 @@
                                         :request-middleware secured-request-middleware})
                              :dbas   dbas-remote}
                 :started-callback (fn [{:keys [reconciler] :as app}]
-                                    (get-user-state-from-cookie (prim/app-root reconciler))
+                                    (get-user-state-from-cookie! (prim/app-root reconciler))
                                     (routing/start-routing (prim/app-root reconciler))
                                     (df/load reconciler :dbas.issue/positions models/Position {:params {:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"}}))))
   (start))
