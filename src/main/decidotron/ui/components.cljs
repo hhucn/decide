@@ -11,6 +11,8 @@
     [decidotron.ui.routing :as routing]
     [fulcro.client.data-fetch :as df]
     [decidotron.ui.models :as models]
+    [goog.string :as gstring]
+    [dbas.client :as dbas]
     [goog.string :as gstring]))
 
 (defsc InputField
@@ -72,7 +74,7 @@
    :initial-state (fn [{:keys [id]}]
                     {:db/id        id
                      :drawer/open? false})}
-  (let [logged-in? (dbas.client/logged-in? connection)
+  (let [logged-in? (dbas/logged-in? connection)
         close      #(m/set-value! this :drawer/open? false)]
     (material/drawer #js {:modal   true
                           :open    open?
@@ -116,17 +118,20 @@
 
 (def ui-temp-root (prim/factory TempRoot))
 
+(defn format-cost [cost]
+  (gstring/format "€ %.2f" (/ cost 100)))
+
 (defsc PreferenceListItem [this {:keys [position]} {:keys [prefer-fn]}]
   {:query [{:position (prim/get-query models/Position)}]}
   (material/list-item #js {}
     (material/list-item-graphic
       #js {:graphic (material/icon-button
                       #js {:onClick #(prefer-fn (:id position))}
-                      (material/icon #js {:icon "thumb_up" :className "material-icon prefer-icon"}))})
+                      (material/icon #js {:icon "check_box_outline_blank" :className "material-icon prefer-icon"}))})
     (material/list-item-text #js {:className   "content"
                                   :primaryText (str "Ich bin dafür, dass " (:text position) ".")}) ; TODO translate
     (material/list-item-meta #js {:className "price"
-                                  :meta      (str "€ " (:cost position))})))
+                                  :meta      (format-cost (:cost position))})))
 
 (def ui-pref-list-item (prim/factory PreferenceListItem {:keyfn :position}))
 
@@ -147,7 +152,7 @@
 
 (defsc PreferredItem [this {:keys [ui/preferred-level position ui/last?] :or {last? false}} {:keys [un-prefer-fn] :as computed}]
   {:query [:ui/preferred-level {:position (prim/get-query models/Position)} :ui/last?]}
-  (dom/li
+  (dom/li {:data-position-id (:id position)}
     (material/card #js {:outlined true}
       (material/card-primary-content #js {:className "preferred-item"}
         (ui-updown-button (prim/computed {:level preferred-level
@@ -155,15 +160,15 @@
         (dom/p {:className "content"}
           (str "Ich bin dafür, dass " (or (:text position) "") "."))
         (material/list-item-meta #js {:className "price"
-                                      :meta      (str "€ " (:cost position))})
+                                      :meta      (format-cost (:cost position))})
         (material/card-actions #js {:fullBleed false}
           (material/card-action-buttons #js {}
             (material/button #js {:href (gstring/format "http://0.0.0.0:4284/discuss/%s/justify/%d/agree"
                                           "was-sollen-wir-mit-20-000eur-anfangen" (:id position))}
-              "Unterstütze dies!"))
+              "Füg ein Argument hinzu!"))
           (material/card-action-icons #js {}
             (dom/i {:onClick #(un-prefer-fn (:id position))}
-              (material/icon #js {:icon "close"}))))))))
+              (material/icon #js {:icon "not_interested"}))))))))
 
 
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn (comp :id :position)}))

@@ -82,5 +82,5 @@
                {:icon    "menu"
                 :onClick #(prim/transact! this `[(ms/toggle-drawer {:drawer/id :main-drawer})])})}))
 
-      (material/grid #js {}
+      (dom/div {:className "container"}
         (ui-router router)))))
