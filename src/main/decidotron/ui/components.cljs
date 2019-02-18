@@ -121,7 +121,7 @@
 (defn format-cost [cost]
   (gstring/format "€ %.2f" (/ cost 100)))
 
-(defsc PreferenceListItem [this {:keys [position]} {:keys [prefer-fn]}]
+(defsc PreferenceListItem [_this {:keys [position]} {:keys [prefer-fn]}]
   {:query [{:position (prim/get-query models/Position)}]}
   (material/list-item #js {}
     (material/list-item-graphic
@@ -135,7 +135,7 @@
 
 (def ui-pref-list-item (prim/factory PreferenceListItem {:keyfn :position}))
 
-(defsc UpDownButton [this {:keys [level last?] :or {last? false}} {:keys [up-fn down-fn]}]
+(defsc UpDownButton [_this {:keys [level last?] :or {last? false}} {:keys [up-fn down-fn]}]
   (dom/div {:className "up-down"}
     (material/icon-button #js {:className "up-down-button up-down-button__up"
                                :dense     "true"
@@ -150,7 +150,7 @@
 
 (def ui-updown-button (prim/factory UpDownButton))
 
-(defsc PreferredItem [this {:keys [ui/preferred-level position ui/last?] :or {last? false}} {:keys [un-prefer-fn] :as computed}]
+(defsc PreferredItem [_this {:keys [ui/preferred-level position ui/last?] :or {last? false}} {:keys [un-prefer-fn] :as computed}]
   {:query [:ui/preferred-level {:position (prim/get-query models/Position)} :ui/last?]}
   (dom/li {:data-position-id (:id position)}
     (material/card #js {:outlined true}
@@ -215,11 +215,7 @@
 
 (def ui-pref-list (prim/factory PreferenceList))
 
-(defsc Position [this {:keys [id text cost]}]
-  {:query [:id :text :cost]
-   :ident [:position/by-id :id]})
-
-(defsc PreferenceScreen [this {:keys [db/id router/page pref-list]}]
+(defsc PreferenceScreen [_this {:keys [db/id router/page pref-list]}]
   {:query         [:db/id :router/page
                    {:pref-list (prim/get-query PreferenceList)}]
    :ident         (fn [] [page id])
