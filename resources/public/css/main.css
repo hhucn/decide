@@ -54,20 +54,12 @@
 
 .preferred-item {
     display: grid;
-    grid-template-columns: 42px auto 75px;
-    grid-template-areas:
-        "up-down content price"
-        "up-down buttons buttons";
-
-
+    padding-left: 0;
+    grid-template-columns: 42px auto;
+    grid-template-areas: "up-down content" "up-down buttons" "pro-con pro-con";
 }
 
-.preferred-item > .mdc-list-item__text {
-    width: 100%;
-    display: grid;
-}
-
-.preferred-item > .mdc-card__actions {
+.preferred-item > .links {
     grid-area: buttons;
 }
 
@@ -79,6 +71,7 @@
 
 .price {
     white-space: nowrap;
+    justify-content: right;
 }
 
 .preferred-item > .content {
@@ -91,3 +84,10 @@
     white-space: normal;
 }
 
+.pro-con-addon {
+    grid-area: pro-con;
+}
+
+.links {
+    padding-top: 12px;
+}

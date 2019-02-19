@@ -40,7 +40,7 @@
     (update-preferences* env)))
 
 (defn un-prefer* [pref-list id]
-  (update pref-list :preferences (fn [pref-list] (vec (remove #{{:position [:position/by-id id]}} pref-list)))))
+  (update pref-list :preferences (fn [pref-list] (vec (remove #(= id (-> % :position second)) pref-list)))))
 
 (defmutation un-prefer [{:keys [position/id]}]
   (action [{:keys [state component]}]

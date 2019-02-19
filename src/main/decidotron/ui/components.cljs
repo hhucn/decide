@@ -123,52 +123,79 @@
 
 (defsc PreferenceListItem [_this {:keys [position]} {:keys [prefer-fn]}]
   {:query [{:position (prim/get-query models/Position)}]}
-  (material/list-item #js {}
-    (material/list-item-graphic
-      #js {:graphic (material/icon-button
-                      #js {:onClick #(prefer-fn (:id position))}
-                      (material/icon #js {:icon "check_box_outline_blank" :className "material-icon prefer-icon"}))})
-    (material/list-item-text #js {:className   "content"
-                                  :primaryText (str "Ich bin dafür, dass " (:text position) ".")}) ; TODO translate
-    (material/list-item-meta #js {:className "price"
-                                  :meta      (format-cost (:cost position))})))
+  (dom/li :.list-group-item.d-flex.container
+    (dom/div :.row
+      (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn (:id position))}
+        (dom/i :.far.fa-thumbs-up))
+      (dom/p :.col (str "Ich bin dafür, dass " (:text position) ".")) ; TODO translate
+      (dom/span :.price.text-muted.float-right (format-cost (:cost position))))))
 
 (def ui-pref-list-item (prim/factory PreferenceListItem {:keyfn :position}))
 
 (defsc UpDownButton [_this {:keys [level last?] :or {last? false}} {:keys [up-fn down-fn]}]
-  (dom/div {:className "up-down"}
-    (material/icon-button #js {:className "up-down-button up-down-button__up"
-                               :dense     "true"
-                               :onClick   #(up-fn level)
-                               :disabled  (zero? level)}
-      (material/icon #js {:icon "keyboard_arrow_up"}))
-    (material/icon-button #js {:className "up-down-button up-down-button__down"
-                               :dense     "true"
-                               :onClick   #(down-fn level)
-                               :disabled  last?}
-      (material/icon #js {:icon "keyboard_arrow_down"}))))
+  (let [chevron-button
+        (fn [up_or_down props]
+          (dom/button (merge props {:className "btn btn-lg" :type "button"})
+            (dom/i {:className (str "fas " (case up_or_down :up "fa-chevron-up"
+                                                            :down "fa-chevron-down"))})))]
+    (dom/div {:className "up-down"}
+      (chevron-button :up {:disabled (zero? level)
+                           :onClick  #(up-fn level)})
+      (chevron-button :down {:disabled last?
+                             :onClick  #(down-fn level)}))))
 
 (def ui-updown-button (prim/factory UpDownButton))
 
-(defsc PreferredItem [_this {:keys [ui/preferred-level position ui/last?] :or {last? false}} {:keys [un-prefer-fn] :as computed}]
-  {:query [:ui/preferred-level {:position (prim/get-query models/Position)} :ui/last?]}
-  (dom/li {:data-position-id (:id position)}
-    (material/card #js {:outlined true}
-      (material/card-primary-content #js {:className "preferred-item"}
-        (ui-updown-button (prim/computed {:level preferred-level
-                                          :last? last?} computed))
-        (dom/p {:className "content"}
-          (str "Ich bin dafür, dass " (or (:text position) "") "."))
-        (material/list-item-meta #js {:className "price"
-                                      :meta      (format-cost (:cost position))})
-        (material/card-actions #js {:fullBleed false}
-          (material/card-action-buttons #js {}
-            (material/button #js {:href (gstring/format "http://0.0.0.0:4284/discuss/%s/justify/%d/agree"
-                                          "was-sollen-wir-mit-20-000eur-anfangen" (:id position))}
-              "Füg ein Argument hinzu!"))
-          (material/card-action-icons #js {}
-            (dom/i {:onClick #(un-prefer-fn (:id position))}
-              (material/icon #js {:icon "not_interested"}))))))))
+(defsc ProConAddon [this {:keys [position/pro position/con]}]
+  {:query [:position/pro :position/con]}
+  (dom/div {:className "pro-con-addon"}
+    (dom/p (dom/span :.text-success "Pro:") " " pro)
+    (dom/p (dom/span :.text-danger "Con:") " " con)))
+
+(def ui-pro-con-addon (prim/factory ProConAddon))
+
+(defsc PreferredItem [this {:keys [ui/preferred-level
+                                   position
+                                   ui/last?
+                                   pro-con]
+                            :or   {last? false}}
+                      {:keys [un-prefer-fn
+                              dbas-argument-link] :as computed}]
+  {:query [:ui/preferred-level
+           {:position (prim/get-query models/Position)}
+           :ui/last?
+           :pro-con]}
+  (dom/li {:data-position-id (:id position)
+           :className        "list-group-item"}
+    (dom/div #js {:className "preferred-item card-body"}
+      (ui-updown-button (prim/computed {:level preferred-level
+                                        :last? last?} computed))
+      (dom/div :.container
+        (dom/p :.row
+          (dom/div {:className "content card-text col"} (str "Ich bin dafür, dass " (or (:text position) "") "."))
+          (dom/div {:className "price text-muted float-right"} (format-cost (:cost position))))
+        (dom/div :.row
+          (dom/div :.col
+            (dom/div :.btn-toolbar
+              (dom/div :.btn-group.mr-2
+                (dom/a :.btn.btn-outline-secondary
+                  {:href (gstring/format "%s/discuss/%s/justify/%d/agree" js/dbas-host
+                         "was-sollen-wir-mit-20-000eur-anfangen" (:id position))}
+                  (dom/i :.fas.fa-plus) " Argument hinzufügen!")
+
+                (dom/button {:className   "btn btn-outline-secondary"
+                             :data-toggle "collapse"
+                             :data-target (str "#prefered-item-collapse-" preferred-level)}
+                  (dom/i :.fas.fa-eye) " Zeige mir Argumente"))
+
+              (dom/div :.btn-group
+                (dom/button {:className "icon-btn btn btn-outline-danger"
+                             :onClick   #(un-prefer-fn (:id position))}
+                  (dom/i :.far.fa-thumbs-down))))))))
+
+    (dom/div :.collapse {:id (str "prefered-item-collapse-" preferred-level)}
+      (ui-pro-con-addon {:position/pro "Wasser ist gesund für die Menschen!"
+                         :position/con "Ein Wasserspende ist aufwändig zu warten"}))))
 
 
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn (comp :id :position)}))
@@ -193,21 +220,27 @@
       (material/button
         #js {:onClick #(df/load this [:preference-list/by-slug slug] PreferenceList {:without #{[:dbas.issue/positions '_]}})}
         "Refresh!")
-      (material/list-group #js {}
+      (dom/div
         (when (not-empty preferences)
-          (material/list-group-subheader #js {} "Diesen Positionen stimmst du zu."))
-        (material/mdc-list #js {:tag "ol"}
+          (dom/div (dom/h2 "Deine Prioritätsliste")
+            (dom/h6 :.text-muted "Sortiere sie deinen Wünschen entsprechend.")))
+        (dom/ol {:className "list-group list-group-flush"}
           (->> preferences
-            (map-indexed (fn [i v] (assoc v :ui/preferred-level i :ui/last? (= i (dec (count preferences))))))
-            (map #(prim/computed % {:up-fn   (fn [level] (prim/transact! this `[(ms/preference-up {:level ~level})]))
+            (map-indexed (fn [i v] (assoc v
+                                     :ui/preferred-level i
+                                     :ui/last? (= i (dec (count preferences))))))
+            (map #(prim/computed % {:dbas-argument-link (gstring/format "%s/discuss/%s/justify" js/dbas-host slug)
+                                    :up-fn              (fn [level] (prim/transact! this `[(ms/preference-up {:level ~level})]))
                                     :down-fn (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
                                     :un-prefer-fn (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
             (map ui-preferred-item))))
-      (material/list-divider #js {})
-      (material/list-group #js {}
+      (dom/hr)
+      (dom/div
         (when (not-empty position-items)
-          (material/list-group-subheader #js {} "Diesen Positionen kannst du zustimmen."))
-        (material/mdc-list #js {}
+          (dom/div
+            (dom/h3 "Weitere Positionen")
+            (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen.")))
+        (dom/ol :.list-group.list-group-flush
           (map #(ui-pref-list-item
                   (prim/computed %
                     {:prefer-fn (fn [position-id] (prim/transact! this `[(ms/prefer {:position/id ~position-id})]))}))
