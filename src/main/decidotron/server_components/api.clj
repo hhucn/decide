@@ -13,11 +13,15 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn- ident->map [[a b]] {a b})
+
 (pc/defmutation update-preferences [_ {:keys [preference-list dbas.client/token]}]
   {::pc/sym    'update-preferences
    ::pc/params [:preference-list :token]}
-  (let [user-id (:id (t/unsign token))]
-    (get (swap! state assoc-in [user-id (:preference-list/slug preference-list)] preference-list) user-id)))
+  (let [user-id         (:id (t/unsign token))
+        slug            (:preference-list/slug preference-list)
+        with-map-idents (update preference-list :preferences (partial map ident->map))] ; idents to maps
+    (get (swap! state assoc-in [user-id slug] with-map-idents) user-id)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
