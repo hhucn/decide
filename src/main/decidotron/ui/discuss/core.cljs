@@ -40,8 +40,8 @@
    :initial-state (fn [_]
                     {:db/id       1
                      :router/page :PAGE.discuss/issues})}
-  (when (not (some? issues))
-    (loads/load-issues this connection [page id :issues]))
+  #_(when (not (some? issues))
+      (loads/load-issues this connection [page id :issues]))
   (if (some? issues)
     (material/mdc-list #js {:twoLine true}
       (map ui-issue-entry (filter (comp not empty?) issues)))
