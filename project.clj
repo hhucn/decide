@@ -4,8 +4,8 @@
   :min-lein-version "2.7.0"
 
   :dependencies [[org.clojure/clojure "1.10.0"]
-                 [thheller/shadow-cljs "2.7.32"]
-                 [fulcrologic/fulcro "2.8.0"]
+                 [thheller/shadow-cljs "2.8.8"]
+                 [fulcrologic/fulcro "2.8.1"]
                  [com.wsscode/pathom "2.2.9"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
@@ -26,7 +26,7 @@
 
                  ;; the following 3 are not used directly, but are pinned to ensure consistency.
                  ;; delete then if you upgrade anything and reanalyze deps
-                 [commons-codec "1.11"]
+                 [commons-codec "1.12"]
                  [args4j "2.33"]
                  [com.google.errorprone/error_prone_annotations "2.3.2"]
                  [com.google.code.findbugs/jsr305 "3.0.2"]
@@ -59,7 +59,7 @@
              :production {}
              :cljs       {:source-paths ["src/main" "src/test" "src/workspaces"]
                           :dependencies [[binaryage/devtools "0.9.10"]
-                                         [org.clojure/clojurescript "1.10.516"]
+                                         [org.clojure/clojurescript "1.10.520"]
                                          [fulcrologic/fulcro-inspect "2.2.5"]]}
              :dev        {:source-paths ["src/dev" "src/main" "src/workspaces"]
                           :jvm-opts     ["-XX:-OmitStackTraceInFastThrow" "-Xmx1g"]
@@ -68,6 +68,6 @@
 
                           :dependencies [[org.clojure/tools.namespace "0.3.0-alpha4"]
                                          [org.clojure/tools.nrepl "0.2.13"]
-                                         [cider/piggieback "0.3.10"]]
+                                         [cider/piggieback "0.4.0"]]
                           :repl-options {:init-ns          user
                                          :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}})
