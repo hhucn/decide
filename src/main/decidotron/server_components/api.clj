@@ -2,15 +2,14 @@
   (:require [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc]
             [decidotron.server-components.token :as t]
-            [decidotron.database.models :refer [positions-for-issue index-by]]))
+            [decidotron.database.models :as db :refer [positions-for-issue index-by]]))
 
 
 
 (defonce state (atom {}))
 (reset! state {4
                {"was-sollen-wir-mit-20-000eur-anfangen"
-                {:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"
-                 :preferences [{:position [:position/by-id 87]}]}}})
+                {:preferences [{:dbas.position/id 83}]}}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -18,33 +17,51 @@
   {::pc/sym 'update-preferences
    ::pc/params [:preference-list :token]}
   (let [user-id (:id (t/unsign token))]
-    (get (swap! state assoc-in [user-id (:dbas.issue/slug preference-list)] preference-list) user-id)))
+    (get (swap! state assoc-in [user-id (:preference-list/slug preference-list)] preference-list) user-id)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(pc/defresolver position [{{{:keys [slug id]} :params} :ast} _]
-  {::pc/output [:id :text :cost]}
-  (get (index-by (positions-for-issue slug) :id) id))
+(pc/defresolver position [_ input]
+  {::pc/input  #{:dbas.position/id}
+   ::pc/output [:dbas.position/id :dbas.position/text :dbas.position/cost]
+   ::pc/batch? true}
+  (if (sequential? input)
+    (pc/batch-restore-sort {::pc/inputs input
+                            ::pc/key    :dbas.position/id}
+      (db/positions-by-ids (map :dbas.position/id input)))
+    (db/position-by-id (:dbas.position/id input))))
 
+(pc/defresolver issue [_ {slug :dbas.issue/slug}]
+  {::pc/input  #{:dbas.issue/slug}
+   ::pc/output [:dbas.issue/slug
+                {:dbas.issue/positions [:dbas.position/id :dbas.position/text :dbas.position/cost]}]}
+  #:dbas.issue{:slug      slug
+               :positions (db/positions-for-issue slug)})
 
-(pc/defresolver positions [{{{:keys [dbas.issue/slug]} :params} :ast} _]
-  {::pc/output [{:dbas.issue/positions [:id :text :cost]}]}
-  {:dbas.issue/positions (positions-for-issue slug)})
+(pc/defresolver statements [_ {id :dbas.position/id}]
+  {::pc/input  #{:dbas.position/id}
+   ::pc/output [{:dbas/statements [:dbas.statement/id
+                                   :dbas.statement/text
+                                   :dbas.statement/is-supportive]}]}
+  {:dbas/statements
+   (for [{:keys [uid text is_supportive]} (db/pro-con-for-position id)]
+     #:dbas.statement{:id            uid
+                      :text          text
+                      :is-supportive is_supportive})})
 
-
-(pc/defresolver preferences [{user-id :dbas.client/id} {slug :preference-list/by-slug}]
-  {::pc/input #{:preference-list/by-slug}
-   ::pc/output [:dbas.issue/slug {:preferences [{:position [:id :text :cost]}]}]}
-  (let [positions (index-by (positions-for-issue slug) :id)
-        preference-ids (map (comp second :position) (get-in @state [user-id slug :preferences] []))]
-    {:dbas.issue/slug slug
-     :preferences (map (comp (partial hash-map :position) positions) preference-ids)}))
+(pc/defresolver preferences [{user-id :dbas.client/id} {slug :preference-list/slug}]
+  {::pc/input  #{:preference-list/slug}
+   ::pc/output [:preference-list/slug
+                {:dbas/issue [:dbas.issue/slug]}
+                {:preferences [:dbas.position/id]}]}
+  (merge {:dbas/issue {:dbas.issue/slug slug}}
+    (get-in @state [user-id slug])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(def app-registry [position positions preferences update-preferences]) ; DON'T FORGET TO ADD EVERYTHING HERE!
+(def app-registry [position issue preferences statements update-preferences]) ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def index (atom {}))
 
 (def token-param-plugin

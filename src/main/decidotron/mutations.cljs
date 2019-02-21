@@ -24,27 +24,21 @@
 ;;;;
 
 (defn- update-preferences* [{:keys [state ast]}]
-  (let [s @state
+  (let [s         @state
         issue-key (get-in s [:root/current-page :preferences :route-params :slug])
-        pref-list (get-in s [:preference-list/by-slug issue-key])]
+        pref-list (get-in s [:preference-list/slug issue-key])]
     (-> (assoc ast :key 'update-preferences)
-      (m/with-params {:preference-list pref-list}))))
-
-(defn prefer* [pref-list id]
-  (update pref-list :preferences conj {:position [:position/by-id id]}))
+      (m/with-params {:preference-list (select-keys pref-list [:preferences :preference-list/slug])}))))
 
 (defmutation prefer [{:keys [position/id]}]
   (action [{:keys [state component]}]
-    (swap! state update-in (prim/get-ident component) prefer* id))
+    (swap! state m/integrate-ident* [:dbas.position/id id] :append (concat (prim/get-ident component) [:preferences])))
   (remote [env]
     (update-preferences* env)))
 
-(defn un-prefer* [pref-list id]
-  (update pref-list :preferences (fn [pref-list] (vec (remove #(= id (-> % :position second)) pref-list)))))
-
 (defmutation un-prefer [{:keys [position/id]}]
   (action [{:keys [state component]}]
-    (swap! state update-in (prim/get-ident component) un-prefer* id))
+    (swap! state m/remove-ident* [:dbas.position/id id] (concat (prim/get-ident component) [:preferences])))
   (remote [env]
     (update-preferences* env)))
 

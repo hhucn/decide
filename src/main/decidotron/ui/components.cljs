@@ -121,16 +121,16 @@
 (defn format-cost [cost]
   (gstring/format "€ %.2f" (/ cost 100)))
 
-(defsc PreferenceListItem [_this {:keys [position]} {:keys [prefer-fn]}]
-  {:query [{:position (prim/get-query models/Position)}]}
+(defsc PreferenceListItem [_this {:dbas.position/keys [text id cost]} {:keys [prefer-fn]}]
+  {:query [{:dbas/position (prim/get-query models/Position)}]}
   (dom/li :.list-group-item.d-flex.container
     (dom/div :.row
-      (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn (:id position))}
+      (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)}
         (dom/i :.far.fa-thumbs-up))
-      (dom/p :.col (str "Ich bin dafür, dass " (:text position) ".")) ; TODO translate
-      (dom/span :.price.text-muted.float-right (format-cost (:cost position))))))
+      (dom/p :.col (str "Ich bin dafür, dass " text "."))   ; TODO translate
+      (dom/span :.price.text-muted.float-right (format-cost cost)))))
 
-(def ui-pref-list-item (prim/factory PreferenceListItem {:keyfn :position}))
+(def ui-pref-list-item (prim/factory PreferenceListItem {:keyfn :dbas.position/id}))
 
 (defsc UpDownButton [_this {:keys [level last?] :or {last? false}} {:keys [up-fn down-fn]}]
   (let [chevron-button
@@ -146,8 +146,13 @@
 
 (def ui-updown-button (prim/factory UpDownButton))
 
+(defsc Statement [this {:keys [uid position_uid text is_supportive]}]
+  {:query [:uid :position_uid :text :is_supportive]
+   :ident [:statement/by-id :uid]})
+
 (defsc ProConAddon [this {:keys [position/pro position/con]}]
-  {:query [:position/pro :position/con]}
+  {:query [{:position/pro (prim/get-query Statement)}
+           {:position/con (prim/get-query Statement)}]}
   (dom/div {:className "pro-con-addon"}
     (dom/p (dom/span :.text-success "Pro:") " " pro)
     (dom/p (dom/span :.text-danger "Con:") " " con)))
@@ -155,32 +160,34 @@
 (def ui-pro-con-addon (prim/factory ProConAddon))
 
 (defsc PreferredItem [this {:keys [ui/preferred-level
-                                   position
-                                   ui/last?
-                                   pro-con]
+                                   dbas.position/text
+                                   dbas.position/id
+                                   dbas.position/cost
+                                   ui/last?]
                             :or   {last? false}}
                       {:keys [un-prefer-fn
                               dbas-argument-link] :as computed}]
   {:query [:ui/preferred-level
-           {:position (prim/get-query models/Position)}
-           :ui/last?
-           :pro-con]}
-  (dom/li {:data-position-id (:id position)
+           :dbas.position/text
+           :dbas.position/id
+           :dbas.position/cost
+           :ui/last?]}
+  (dom/li {:data-position-id id
            :className        "list-group-item"}
     (dom/div #js {:className "preferred-item card-body"}
       (ui-updown-button (prim/computed {:level preferred-level
                                         :last? last?} computed))
       (dom/div :.container
         (dom/p :.row
-          (dom/div {:className "content card-text col"} (str "Ich bin dafür, dass " (or (:text position) "") "."))
-          (dom/div {:className "price text-muted float-right"} (format-cost (:cost position))))
+          (dom/div {:className "content card-text col"} (str "Ich bin dafür, dass " (or text "") "."))
+          (dom/div {:className "price text-muted float-right"} (format-cost cost)))
         (dom/div :.row
           (dom/div :.col
             (dom/div :.btn-toolbar
               (dom/div :.btn-group.mr-2
                 (dom/a :.btn.btn-outline-secondary
                   {:href (gstring/format "%s/discuss/%s/justify/%d/agree" js/dbas-host
-                         "was-sollen-wir-mit-20-000eur-anfangen" (:id position))}
+                           "was-sollen-wir-mit-20-000eur-anfangen" id)}
                   (dom/i :.fas.fa-plus) " Argument hinzufügen!")
 
                 (dom/button {:className   "btn btn-outline-secondary"
@@ -190,35 +197,33 @@
 
               (dom/div :.btn-group
                 (dom/button {:className "icon-btn btn btn-outline-danger"
-                             :onClick   #(un-prefer-fn (:id position))}
+                             :onClick   #(un-prefer-fn id)}
                   (dom/i :.far.fa-thumbs-down))))))))
 
     (dom/div :.collapse {:id (str "prefered-item-collapse-" preferred-level)}
       (ui-pro-con-addon {:position/pro "Wasser ist gesund für die Menschen!"
-                         :position/con "Ein Wasserspende ist aufwändig zu warten"}))))
+                         :position/con "Ein Wasserspender ist aufwändig zu warten"}))))
 
 
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn (comp :id :position)}))
 
-(defsc PreferenceList [this {:keys [dbas.issue/slug preferences dbas.issue/positions]}]
-  {:query [:dbas.issue/slug
-           {:preferences (prim/get-query PreferredItem)}
-           {[:dbas.issue/positions '_] (prim/get-query models/Position)}]
-   :ident [:preference-list/by-slug :dbas.issue/slug]
+(defsc PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
+  {:query         [:preference-list/slug
+                   {:preferences (prim/get-query models/Position)}
+                   {:dbas/issue (prim/get-query models/Issue)}]
+   :ident         [:preference-list/slug :preference-list/slug]
    :initial-state (fn [{:keys [slug preferences]}]
-
-                    {:dbas.issue/slug slug
-                     :preferences     preferences})}
+                    {:preference-list/slug slug
+                     :preferences          preferences})}
   (when-not preferences
-    (df/load this [:preference-list/by-slug slug] PreferenceList
-      {:without #{[:dbas.issue/positions '_] [:dbas/connection '_]}}))
-  (let [preferred-ids  (set (map #(get-in % [:position :id]) preferences))
+    (df/load this [:preference-list/slug slug] PreferenceList))
+  (let [positions      (:dbas.issue/positions issue)
+        preferred-ids  (set (map :dbas.position/id preferences))
         position-items (->> positions
-                         (remove #(preferred-ids (:id %)))
-                         (map #(hash-map :position %)))]
+                         (remove #(preferred-ids (:dbas.position/id %))))]
     (material/list-group #js {}
       (material/button
-        #js {:onClick #(df/load this [:preference-list/by-slug slug] PreferenceList {:without #{[:dbas.issue/positions '_]}})}
+        #js {:onClick #(df/load this [:preference-list/slug slug] PreferenceList)}
         "Refresh!")
       (dom/div
         (when (not-empty preferences)

@@ -68,5 +68,5 @@
                 :started-callback (fn [{:keys [reconciler] :as app}]
                                     (get-user-state-from-cookie! (prim/app-root reconciler))
                                     (routing/start-routing (prim/app-root reconciler))
-                                    (df/load reconciler :dbas.issue/positions models/Position {:params {:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"}}))))
+                                    (df/load reconciler [:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"] models/Issue))))
   (start))
