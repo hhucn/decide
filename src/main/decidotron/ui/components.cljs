@@ -146,22 +146,40 @@
 
 (def ui-updown-button (prim/factory UpDownButton))
 
-(defsc Statement [this {:keys [uid position_uid text is_supportive]}]
-  {:query [:uid :position_uid :text :is_supportive]
-   :ident [:statement/by-id :uid]})
+(defn- format-pro-con [text]
+  (gstring/format "... %s" text))
 
-(defsc ProConAddon [this {:dbas.position/keys [pros cons]}]
+(defsc ProConAddon [_this
+                    {:dbas.position/keys [pros cons]}
+                    {:keys [dbas-argument-link]}]
   {:query [{:dbas.position/pros (prim/get-query models/Statement)}
            {:dbas.position/cons (prim/get-query models/Statement)}]}
-  (dom/div {:className "pro-con-addon"}
-    (when (not-empty pros)
-      (dom/ul
-        (for [pro pros]
-          (dom/p (dom/span :.text-success "Pro:") " " (:dbas.statement/text pro)))))
-    (when (not-empty cons)
-      (dom/ul
-        (for [con cons]
-          (dom/p (dom/span :.text-danger "Con:") " " (:dbas.statement/text con)))))))
+  (let [pros (take 3 (shuffle pros))
+        cons (take 3 (shuffle cons))]
+    (dom/div {:className "pro-con-addon"}
+      (when (not-empty pros)
+        (dom/div :.pro-con-addon__pros
+          (dom/p
+            (dom/span :.text-success "Dafür") " spricht, dass ...")
+          (dom/ul :.list-group.list-group-flush
+            (for [pro pros]
+              (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
+                (format-pro-con (:dbas.statement/text pro))))
+            (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
+              (dom/a :.btn.btn-block.btn-sm.btn-outline-success
+                {:href (str dbas-argument-link "/justify/83/agree")}
+                (dom/i :.fas.fa-plus) " Argument hinzufügen")))))
+      (when (not-empty cons)
+        (dom/div :.pro-con-addon__cons
+          (dom/p
+            (dom/span :.text-danger "Dagegen") " spricht, dass ...")
+          (dom/ul :.list-group.list-group-flush
+            (for [con cons]
+              (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
+                (format-pro-con (:dbas.statement/text con))
+                (dom/a :.btn.btn-sm.btn-outline-primary
+                  {:href "#"}
+                  (dom/i :.fas.fa-shield-alt) " Verteidigen")))))))))
 
 (def ui-pro-con-addon (prim/factory ProConAddon))
 
@@ -184,39 +202,32 @@
            :ui/last?]
    :ident [:dbas.position/id :dbas.position/id]}
   (dom/li {:data-position-id id
-           :className        "list-group-item"}
+           :className        "list-group-item border"}
     (dom/div #js {:className "preferred-item card-body"}
       (ui-updown-button (prim/computed {:level preferred-level
                                         :last? last?} computed))
       (dom/div :.container
-        (dom/p :.row
+        (dom/div :.row.mb-3
           (dom/div {:className "content card-text col"} (str "Ich bin dafür, dass " (or text "") "."))
           (dom/div {:className "price text-muted float-right"} (format-cost cost)))
         (dom/div :.row
           (dom/div :.col
             (dom/div :.btn-toolbar
-              (dom/div :.btn-group.mr-2
-                (dom/a :.btn.btn-outline-secondary
-                  {:href (gstring/format "%s/discuss/%s/justify/%d/agree" js/dbas-host
-                           "was-sollen-wir-mit-20-000eur-anfangen" id)}
-                  (dom/i :.fas.fa-plus) " Argument hinzufügen!")
-
-                (dom/button {:className   "btn btn-outline-secondary"
-                             :data-toggle "collapse"
-                             :data-target (str "#prefered-item-collapse-" preferred-level)}
-                  (dom/i :.fas.fa-eye) " Zeige mir Argumente"))
-
+              (dom/button {:className   "btn btn-outline-secondary"
+                           :data-toggle "collapse"
+                           :data-target (str "#prefered-item-collapse-" preferred-level)}
+                (dom/i :.fas.fa-eye) " Zeige mir Argumente")
               (dom/div :.btn-group
                 (dom/button {:className "icon-btn btn btn-outline-danger"
                              :onClick   #(un-prefer-fn id)}
                   (dom/i :.far.fa-thumbs-down))))))))
 
     (dom/div :.collapse {:id (str "prefered-item-collapse-" preferred-level)}
-      (ui-pro-con-addon {:dbas.position/pros pros
-                         :dbas.position/cons cons}))))
+      (ui-pro-con-addon (prim/computed {:dbas.position/pros pros
+                                        :dbas.position/cons cons} computed)))))
 
 
-(def ui-preferred-item (prim/factory PreferredItem {:keyfn (comp :id :position)}))
+(def ui-preferred-item (prim/factory PreferredItem {:keyfn :dbas.position/id}))
 
 (defsc PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
   {:query         [:preference-list/slug
@@ -240,15 +251,15 @@
         (when (not-empty preferences)
           (dom/div (dom/h2 "Deine Prioritätsliste")
             (dom/h6 :.text-muted "Sortiere sie deinen Wünschen entsprechend.")))
-        (dom/ol {:className "list-group list-group-flush"}
+        (dom/ol :.list-group
           (->> preferences
             (map-indexed (fn [i v] (assoc v
                                      :ui/preferred-level i
                                      :ui/last? (= i (dec (count preferences))))))
-            (map #(prim/computed % {:dbas-argument-link (gstring/format "%s/discuss/%s/justify" js/dbas-host slug)
+            (map #(prim/computed % {:dbas-argument-link (gstring/format "%s/discuss/%s" js/dbas-host slug)
                                     :up-fn              (fn [level] (prim/transact! this `[(ms/preference-up {:level ~level})]))
-                                    :down-fn (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
-                                    :un-prefer-fn (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
+                                    :down-fn            (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
+                                    :un-prefer-fn       (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
             (map ui-preferred-item))))
       (dom/hr)
       (dom/div
