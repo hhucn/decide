@@ -150,12 +150,18 @@
   {:query [:uid :position_uid :text :is_supportive]
    :ident [:statement/by-id :uid]})
 
-(defsc ProConAddon [this {:keys [position/pro position/con]}]
-  {:query [{:position/pro (prim/get-query Statement)}
-           {:position/con (prim/get-query Statement)}]}
+(defsc ProConAddon [this {:dbas.position/keys [pros cons]}]
+  {:query [{:dbas.position/pros (prim/get-query models/Statement)}
+           {:dbas.position/cons (prim/get-query models/Statement)}]}
   (dom/div {:className "pro-con-addon"}
-    (dom/p (dom/span :.text-success "Pro:") " " pro)
-    (dom/p (dom/span :.text-danger "Con:") " " con)))
+    (when (not-empty pros)
+      (dom/ul
+        (for [pro pros]
+          (dom/p (dom/span :.text-success "Pro:") " " (:dbas.statement/text pro)))))
+    (when (not-empty cons)
+      (dom/ul
+        (for [con cons]
+          (dom/p (dom/span :.text-danger "Con:") " " (:dbas.statement/text con)))))))
 
 (def ui-pro-con-addon (prim/factory ProConAddon))
 
@@ -163,6 +169,8 @@
                                    dbas.position/text
                                    dbas.position/id
                                    dbas.position/cost
+                                   dbas.position/pros
+                                   dbas.position/cons
                                    ui/last?]
                             :or   {last? false}}
                       {:keys [un-prefer-fn
@@ -171,7 +179,10 @@
            :dbas.position/text
            :dbas.position/id
            :dbas.position/cost
-           :ui/last?]}
+           {:dbas.position/pros (prim/get-query models/Statement)}
+           {:dbas.position/cons (prim/get-query models/Statement)}
+           :ui/last?]
+   :ident [:dbas.position/id :dbas.position/id]}
   (dom/li {:data-position-id id
            :className        "list-group-item"}
     (dom/div #js {:className "preferred-item card-body"}
@@ -201,22 +212,22 @@
                   (dom/i :.far.fa-thumbs-down))))))))
 
     (dom/div :.collapse {:id (str "prefered-item-collapse-" preferred-level)}
-      (ui-pro-con-addon {:position/pro "Wasser ist gesund für die Menschen!"
-                         :position/con "Ein Wasserspender ist aufwändig zu warten"}))))
+      (ui-pro-con-addon {:dbas.position/pros pros
+                         :dbas.position/cons cons}))))
 
 
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn (comp :id :position)}))
 
 (defsc PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
   {:query         [:preference-list/slug
-                   {:preferences (prim/get-query models/Position)}
+                   {:preferences (prim/get-query PreferredItem)}
                    {:dbas/issue (prim/get-query models/Issue)}]
    :ident         [:preference-list/slug :preference-list/slug]
    :initial-state (fn [{:keys [slug preferences]}]
                     {:preference-list/slug slug
                      :preferences          preferences})}
-  (when-not preferences
-    (df/load this [:preference-list/slug slug] PreferenceList))
+  #_(when-not preferences
+      (df/load this [:preference-list/slug slug] PreferenceList))
   (let [positions      (:dbas.issue/positions issue)
         preferred-ids  (set (map :dbas.position/id preferences))
         position-items (->> positions
