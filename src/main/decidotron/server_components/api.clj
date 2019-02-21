@@ -14,7 +14,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (pc/defmutation update-preferences [_ {:keys [preference-list dbas.client/token]}]
-  {::pc/sym 'update-preferences
+  {::pc/sym    'update-preferences
    ::pc/params [:preference-list :token]}
   (let [user-id (:id (t/unsign token))]
     (get (swap! state assoc-in [user-id (:preference-list/slug preference-list)] preference-list) user-id)))
@@ -39,16 +39,32 @@
   #:dbas.issue{:slug      slug
                :positions (db/positions-for-issue slug)})
 
-(pc/defresolver statements [_ {id :dbas.position/id}]
+(pc/defresolver statement [_ {id :dbas.statement/id}]
+  {::pc/input  #{:dbas.statement/id}
+   ::pc/output [:dbas.statement/id :dbas.statement/text :dbas.statement/is-supportive]}
+  (for [{:keys [uid text is_supportive]} (db/pro-con-for-position id)]
+    #:dbas.statement{:id            uid
+                     :text          text
+                     :is-supportive is_supportive}))
+
+(pc/defresolver position-pros-cons [_ {id :dbas.position/id}]
   {::pc/input  #{:dbas.position/id}
-   ::pc/output [{:dbas/statements [:dbas.statement/id
-                                   :dbas.statement/text
-                                   :dbas.statement/is-supportive]}]}
-  {:dbas/statements
-   (for [{:keys [uid text is_supportive]} (db/pro-con-for-position id)]
-     #:dbas.statement{:id            uid
-                      :text          text
-                      :is-supportive is_supportive})})
+   ::pc/output [{:dbas.position/pros [:dbas.statement/id
+                                      :dbas.statement/text
+                                      :dbas.statement/is-supportive]}
+                {:dbas.position/cons [:dbas.statement/id
+                                      :dbas.statement/text
+                                      :dbas.statement/is-supportive]}]}
+  (let [{pros true
+         cons false
+         :or  {pros [] cons []}}
+        (group-by :dbas.statement/is-supportive
+          (for [{:keys [uid text is_supportive]} (db/pro-con-for-position id)]
+            #:dbas.statement{:id            uid
+                             :text          text
+                             :is-supportive is_supportive}))]
+    {:dbas.position/pros pros
+     :dbas.position/cons cons}))
 
 (pc/defresolver preferences [{user-id :dbas.client/id} {slug :preference-list/slug}]
   {::pc/input  #{:preference-list/slug}
@@ -61,7 +77,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(def app-registry [position issue preferences statements update-preferences]) ; DON'T FORGET TO ADD EVERYTHING HERE!
+(def app-registry [position issue preferences position-pros-cons update-preferences]) ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def index (atom {}))
 
 (def token-param-plugin

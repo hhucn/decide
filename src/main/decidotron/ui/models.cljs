@@ -9,7 +9,8 @@
   {:query [:dbas.position/text
            :dbas.position/id
            :dbas.position/cost
-           {:dbas/statements (prim/get-query Statement)}]
+           {:dbas.position/pros (prim/get-query Statement)}
+           {:dbas.position/cons (prim/get-query Statement)}]
    :ident [:dbas.position/id :dbas.position/id]})
 
 (defsc Issue [_ _]
