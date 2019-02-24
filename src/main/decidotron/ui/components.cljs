@@ -220,7 +220,7 @@
           (dom/div :.row
             (ui-updown-button (prim/computed {:level preferred-level
                                               :last? last?} computed))
-            (dom/div {:className "align-center content card-text col mt-3"} (str "Ich bin dafür, dass " (or text "") ".")))
+            (dom/div {:className "align-center content card-text col"} (str "Ich bin dafür, dass " (or text "") ".")))
           (dom/div :.row.d-flex.flex-row-reverse
             (dom/div :.price.text-muted.float-right
               (format-cost cost)))))
