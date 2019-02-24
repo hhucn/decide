@@ -2,7 +2,7 @@
   (:require [fulcro.client.primitives :as prim :refer [defsc]]))
 
 (defsc Statement [_ _]
-  {:query [:dbas.statement/id :dbas.statement/text :dbas.statement/is-supportive]
+  {:query [:dbas.statement/id :dbas.statement/text :dbas.statement/is-supportive :dbas.statement/argument-id]
    :ident [:dbas.statement/id :dbas.statement/id]})
 
 (defsc Position [_ _]

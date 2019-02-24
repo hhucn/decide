@@ -65,13 +65,16 @@
 
 (defn pro-con-for-positions [position-ids]
   (k/select ["textversions" :tv]
-    (k/fields [:statements.stmt_uid :position_uid] :statements.uid [:tv.content :text] :statements.is_supportive)
+    (k/fields [:statements.stmt_uid :position_uid]
+      :statements.uid [:tv.content :text] :statements.is_supportive
+      :arg_uid)
     (k/join :inner
       [(k/subselect "premises"
-         (k/fields [:statement_uid :uid] :arguments.is_supportive :arguments.stmt_uid)
+         (k/fields [:statement_uid :uid] :arguments.is_supportive :arguments.stmt_uid :arguments.arg_uid)
          (k/join :inner
            [(k/subselect "arguments"
-              (k/fields :premisegroup_uid :is_supportive [:conclusion_uid :stmt_uid])
+              (k/fields :premisegroup_uid :is_supportive
+                [:conclusion_uid :stmt_uid] [:uid :arg_uid])
               (k/where (and
                          (in :conclusion_uid (vec position-ids))
                          (= :is_disabled false))))

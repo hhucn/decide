@@ -47,28 +47,33 @@
 
 (pc/defresolver statement [_ {id :dbas.statement/id}]
   {::pc/input  #{:dbas.statement/id}
-   ::pc/output [:dbas.statement/id :dbas.statement/text :dbas.statement/is-supportive]}
-  (for [{:keys [uid text is_supportive]} (db/pro-con-for-position id)]
+   ::pc/output [:dbas.statement/id :dbas.statement/text :dbas.statement/is-supportive
+                :dbas.statement/argument-id]}
+  (for [{:keys [uid text is_supportive arg_uid]} (db/pro-con-for-position id)]
     #:dbas.statement{:id            uid
                      :text          text
-                     :is-supportive is_supportive}))
+                     :is-supportive is_supportive
+                     :argument-id   arg_uid}))
 
 (pc/defresolver position-pros-cons [_ {id :dbas.position/id}]
   {::pc/input  #{:dbas.position/id}
    ::pc/output [{:dbas.position/pros [:dbas.statement/id
                                       :dbas.statement/text
-                                      :dbas.statement/is-supportive]}
+                                      :dbas.statement/is-supportive
+                                      :dbas.statement/argument-id]}
                 {:dbas.position/cons [:dbas.statement/id
                                       :dbas.statement/text
-                                      :dbas.statement/is-supportive]}]}
+                                      :dbas.statement/is-supportive
+                                      :dbas.statement/argument-id]}]}
   (let [{pros true
          cons false
          :or  {pros [] cons []}}
         (group-by :dbas.statement/is-supportive
-          (for [{:keys [uid text is_supportive]} (db/pro-con-for-position id)]
+          (for [{:keys [uid text is_supportive arg_uid]} (db/pro-con-for-position id)]
             #:dbas.statement{:id            uid
                              :text          text
-                             :is-supportive is_supportive}))]
+                             :is-supportive is_supportive
+                             :argument-id   arg_uid}))]
     {:dbas.position/pros pros
      :dbas.position/cons cons}))
 

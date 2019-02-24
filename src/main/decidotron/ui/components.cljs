@@ -13,7 +13,8 @@
     [decidotron.ui.models :as models]
     [goog.string :as gstring]
     [dbas.client :as dbas]
-    [goog.string :as gstring]))
+    [goog.string :as gstring]
+    [goog.string :refer [format]]))
 
 (defsc InputField
   [this {:keys [db/id input/value] :as props} {:keys [ui/label ui/type] :as computed}]
@@ -175,11 +176,11 @@
           (dom/p
             (dom/span :.text-danger "Dagegen") " spricht, dass ...")
           (dom/ul :.list-group.list-group-flush
-            (for [con cons]
+            (for [{:dbas.statement/keys [text argument-id]} cons]
               (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
-                (format-pro-con (:dbas.statement/text con))
+                (format-pro-con text)
                 (dom/a :.btn.btn-sm.btn-outline-primary
-                  {:href "#"}
+                  {:href (format "%s/jump/%d" dbas-argument-link argument-id)}
                   (dom/i :.fas.fa-shield-alt) " Verteidigen")))))))))
 
 (def ui-pro-con-addon (prim/factory ProConAddon))
