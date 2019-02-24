@@ -5,14 +5,13 @@
 
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [thheller/shadow-cljs "2.8.8"]
-                 [fulcrologic/fulcro "2.8.1"]
+                 [fulcrologic/fulcro "2.8.0"]
                  [com.wsscode/pathom "2.2.9"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
                  [garden "1.3.6"]
                  [mount "0.1.16"]
                  [hiccup "1.0.5"]
-                 [toucan "1.11.0"]
                  [org.postgresql/postgresql "42.2.5"]
                  [clj-http "3.9.1"]
                  [cheshire "5.8.1"]
@@ -26,10 +25,10 @@
 
                  ;; the following 3 are not used directly, but are pinned to ensure consistency.
                  ;; delete then if you upgrade anything and reanalyze deps
-                 [commons-codec "1.12"]
-                 [args4j "2.33"]
-                 [com.google.errorprone/error_prone_annotations "2.3.2"]
-                 [com.google.code.findbugs/jsr305 "3.0.2"]
+                 ;[commons-codec "1.12"]
+                 ;[args4j "2.33"]
+                 ;[com.google.errorprone/error_prone_annotations "2.3.2"]
+                 ;[com.google.code.findbugs/jsr305 "3.0.2"]
 
                  [nubank/workspaces "1.0.4" :scope "test" :exclusions [com.cognitect/transit-java]]
 

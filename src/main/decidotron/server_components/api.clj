@@ -10,7 +10,7 @@
 (reset! state {4
                {"was-sollen-wir-mit-20-000eur-anfangen"
                 {:preferences [{:dbas.position/id 83}]}}})
-
+@state
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- ident->map [[a b]] {a b})
@@ -31,9 +31,11 @@
    ::pc/output [:dbas.position/id :dbas.position/text :dbas.position/cost]
    ::pc/batch? true}
   (if (sequential? input)
-    (pc/batch-restore-sort {::pc/inputs input
-                            ::pc/key    :dbas.position/id}
-      (db/positions-by-ids (map :dbas.position/id input)))
+    (do
+      (clojure.pprint/pprint input)
+      (pc/batch-restore-sort {::pc/inputs input
+                              ::pc/key    :dbas.position/id}
+        (db/positions-by-ids (map :dbas.position/id input))))
     (db/position-by-id (:dbas.position/id input))))
 
 (pc/defresolver issue [_ {slug :dbas.issue/slug}]

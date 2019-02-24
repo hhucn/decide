@@ -42,21 +42,16 @@
 }
 
 .up-down {
-    padding: 10px;
-
     display: grid;
     grid-template-columns: 24px;
     grid-template-rows: 24px 24px;
     justify-items: center;
     align-items: center;
-    grid-area: up-down;
 }
 
 .preferred-item {
-    display: grid;
     padding-left: 0;
-    grid-template-columns: 42px auto;
-    grid-template-areas: "up-down content" "up-down buttons" "pro-con pro-con";
+    padding-right: 0;
 }
 
 .preferred-item > .links {
@@ -90,4 +85,10 @@
 
 .links {
     padding-top: 12px;
+}
+
+.unprefer-position {
+    position: absolute;
+    top: 10px;
+    right: 10px;
 }

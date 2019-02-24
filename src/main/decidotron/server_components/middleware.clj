@@ -50,11 +50,9 @@
       [:title "Decidotron"]
       [:meta {:charset "utf-8"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}]
-      [:link {:href "https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
-              :rel  "stylesheet"}]
       [:link {:rel "shortcut icon" :href "data:image/x-icon;," :type "image/x-icon"}]
-      [:link {:rel "stylesheet" :href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"}]
-      [:link {:rel "stylesheet" :href "https://fonts.googleapis.com/icon?family=Material+Icons"}]
+      [:link {:rel "stylesheet" :href "/css/material-components-web.min.css"}]
+      #_[:link {:rel "stylesheet" :href "https://fonts.googleapis.com/icon?family=Material+Icons"}]
       [:link {:rel       "stylesheet" :href "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
               :integrity "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" :crossorigin "anonymous"}]
       [:link {:rel         "stylesheet" :href "https://use.fontawesome.com/releases/v5.7.2/css/all.css"
