@@ -210,13 +210,13 @@
    :ident [:dbas.position/id :dbas.position/id]}
   (let [collapse-id (random-uuid)
         unprefer    (partial un-prefer-fn id)]
-    (dom/div :.list-group-item.list-group-item-action.border.card
-      {:data-position-id id
-       :role             "button"
-       :data-toggle      "collapse"
-       :data-target      (str "#collapse-" collapse-id)}
+    (dom/div :.list-group-item.border.card
+      {:data-position-id id}
       (dom/span :.unprefer-position (close-button unprefer))
-      (dom/div :.preferred-item
+      (dom/div :.preferred-item.list-group-item-action
+        {:role        "button"
+         :data-toggle "collapse"
+         :data-target (str "#collapse-" collapse-id)}
         (dom/div :.container
           (dom/div :.row
             (ui-updown-button (prim/computed {:level preferred-level
