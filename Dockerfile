@@ -1,6 +1,9 @@
 FROM clojure:openjdk-11-lein AS clj-build
 # Install node
-RUN apt-get update && apt-get install curl && curl -sL https://deb.nodesource.com/setup_11.x | bash && apt-get install -y nodejs
+RUN apt-get update &&\
+    apt-get install -y curl &&\
+    curl -sL https://deb.nodesource.com/setup_11.x | bash &&\
+    apt-get install -y nodejs
 
 # Install JS deps
 COPY package.json package.json
