@@ -97,3 +97,25 @@ li {
     top: 10px;
     right: 10px;
 }
+
+.expand-btn {
+    position: absolute;
+    bottom: 0px;
+    right: 50%;
+    -webkit-transition: .25s linear;
+    -moz-transition: .25s linear;
+    -o-transition: .25s linear;
+    transition: .25s linear;
+}
+
+.expand-btn[data-toggle="collapse"] {
+    -webkit-transform: rotate(.5turn);
+    -moz-transform: rotate(.5turn);
+    transform: rotate(.5turn);
+}
+
+.expand-btn[data-toggle="collapse"].collapsed {
+    -webkit-transform: rotate(0turn);
+    -moz-transform: rotate(0turn);
+    transform: rotate(0turn);
+}

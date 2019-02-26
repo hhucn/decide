@@ -163,8 +163,9 @@
           (dom/p
             (dom/span :.text-danger "Dagegen") " spricht, dass ...")
           (dom/ul :.list-group.list-group-flush
-            (for [{:dbas.statement/keys [text argument-id]} cons]
+            (for [{:dbas.statement/keys [text argument-id] :as con} cons]
               (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
+                {:key (str id "-" (:dbas.statement/id con))}
                 (format-pro-con text)
                 (dom/a :.btn.btn-sm.btn-outline-primary
                   {:href (format "%s/jump/%d" dbas-argument-link argument-id)}
@@ -172,17 +173,24 @@
 
 (def ui-pro-con-addon (prim/factory ProConAddon))
 
+(defn expand-button [collapse-id]
+  (dom/button :.expand-btn.btn.btn-sm.collapsed
+    {:role        "button"
+     :data-toggle "collapse"
+     :aria-label  "collapse"
+     :data-target (str "#collapse-" collapse-id)}
+    (dom/i :.fas.fa-chevron-down)))
+
+
 (defsc PreferenceListItem [_this {:dbas.position/keys [text id cost pros cons]}
                            {:keys [prefer-fn
                                    dbas-argument-link]
                             :as   computed}]
   {:query [{:dbas/position (prim/get-query models/Position)}]}
   (let [collapse-id (random-uuid)]
-    (dom/li
-      (dom/div :.list-group-item-action.list-group-item.container
-        {:role        "button"
-         :data-toggle "collapse"
-         :data-target (str "#collapse-" collapse-id)}
+    (dom/li :.mb-1
+      (dom/div :.list-group-item.container
+        (expand-button collapse-id)
         (dom/div :.row
           (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)}
             (dom/i :.far.fa-thumbs-up))
@@ -221,20 +229,18 @@
    :ident [:dbas.position/id :dbas.position/id]}
   (let [collapse-id (random-uuid)
         unprefer    (partial un-prefer-fn id)]
-    (dom/li
-      (dom/div :.list-group-item.list-group-item-action
-        {:role        "button"
-         :data-toggle "collapse"
-         :data-target (str "#collapse-" collapse-id)
-         :style       {:cursor :pointer}}
+    (dom/li :.mb-1
+      (dom/div :.list-group-item
         (dom/div {:data-position-id id}
           (dom/span :.unprefer-position (close-button unprefer))
+          (expand-button collapse-id)
           (dom/div :.container
             (dom/div :.row
               (ui-updown-button (prim/computed {:level preferred-level
                                                 :last? last?} computed))
               (dom/div {:className "align-center content card-text col"} (str "Ich bin dafür, dass " (or text "") ".")))
-            (dom/div :.row.d-flex.flex-row-reverse
+            (dom/div :.row.d-flex.justify-content-between
+              (dom/div)
               (dom/div :.price.text-muted.float-right
                 (format-cost cost))))))
 
