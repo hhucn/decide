@@ -27,6 +27,10 @@
     margin: auto auto;
 }
 
+li {
+    list-style-type: none;
+}
+
 .mdc-list-divider {
     list-style-type: none;
     margin: 10px;

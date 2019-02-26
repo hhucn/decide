@@ -11,9 +11,7 @@
     [decidotron.ui.routing :as routing]
     [fulcro.client.data-fetch :as df]
     [decidotron.ui.models :as models]
-    [goog.string :as gstring]
     [dbas.client :as dbas]
-    [goog.string :as gstring]
     [goog.string :refer [format]]))
 
 (defsc InputField
@@ -120,18 +118,7 @@
 (def ui-temp-root (prim/factory TempRoot))
 
 (defn format-cost [cost]
-  (gstring/format "%.2f €" (/ cost 100)))
-
-(defsc PreferenceListItem [_this {:dbas.position/keys [text id cost]} {:keys [prefer-fn]}]
-  {:query [{:dbas/position (prim/get-query models/Position)}]}
-  (dom/li :.list-group-item.d-flex.container
-    (dom/div :.row
-      (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)}
-        (dom/i :.far.fa-thumbs-up))
-      (dom/p :.col (str "Ich bin dafür, dass " text "."))   ; TODO translate
-      (dom/span :.price.text-muted.float-right (format-cost cost)))))
-
-(def ui-pref-list-item (prim/factory PreferenceListItem {:keyfn :dbas.position/id}))
+  (format "%.2f €" (/ cost 100)))
 
 (defsc UpDownButton [_this {:keys [level last?] :or {last? false}} {:keys [up-fn down-fn]}]
   (let [chevron-button
@@ -148,7 +135,7 @@
 (def ui-updown-button (prim/factory UpDownButton))
 
 (defn- format-pro-con [text]
-  (gstring/format "... %s." text))
+  (format "... %s." text))
 
 (defsc ProConAddon [_this
                     {:dbas.position/keys [pros cons]}
@@ -157,7 +144,7 @@
            {:dbas.position/cons (prim/get-query models/Statement)}]}
   (let [pros (take 3 (shuffle pros))
         cons (take 3 (shuffle cons))]
-    (dom/div :.collapse.pro-con-addon {:id id}
+    (dom/div :.list-group-item.collapse.pro-con-addon {:id id}
       (when (not-empty pros)
         (dom/div :.pro-con-addon__pros
           (dom/p
@@ -185,6 +172,30 @@
 
 (def ui-pro-con-addon (prim/factory ProConAddon))
 
+(defsc PreferenceListItem [_this {:dbas.position/keys [text id cost pros cons]}
+                           {:keys [prefer-fn
+                                   dbas-argument-link]
+                            :as   computed}]
+  {:query [{:dbas/position (prim/get-query models/Position)}]}
+  (let [collapse-id (random-uuid)]
+    (dom/li
+      (dom/div :.list-group-item-action.list-group-item.container
+        {:role        "button"
+         :data-toggle "collapse"
+         :data-target (str "#collapse-" collapse-id)}
+        (dom/div :.row
+          (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)}
+            (dom/i :.far.fa-thumbs-up))
+          (dom/div :.col.d-flex.justify-content-between
+            (dom/p (str "Ich bin dafür, dass " text "."))   ; TODO translate
+            (dom/span :.price.text-muted (format-cost cost)))))
+      (ui-pro-con-addon (->> computed
+                          (merge {:id (str "collapse-" collapse-id)})
+                          (prim/computed {:dbas.position/pros pros
+                                          :dbas.position/cons cons}))))))
+
+(def ui-pref-list-item (prim/factory PreferenceListItem {:keyfn :dbas.position/id}))
+
 (defn close-button [on-click-fn]
   (dom/button :.close {:type       "button"
                        :aria-label "Close"
@@ -210,21 +221,22 @@
    :ident [:dbas.position/id :dbas.position/id]}
   (let [collapse-id (random-uuid)
         unprefer    (partial un-prefer-fn id)]
-    (dom/div :.list-group-item.border.card
-      {:data-position-id id}
-      (dom/span :.unprefer-position (close-button unprefer))
-      (dom/div :.preferred-item.list-group-item-action
+    (dom/li
+      (dom/div :.list-group-item.list-group-item-action
         {:role        "button"
          :data-toggle "collapse"
-         :data-target (str "#collapse-" collapse-id)}
-        (dom/div :.container
-          (dom/div :.row
-            (ui-updown-button (prim/computed {:level preferred-level
-                                              :last? last?} computed))
-            (dom/div {:className "align-center content card-text col"} (str "Ich bin dafür, dass " (or text "") ".")))
-          (dom/div :.row.d-flex.flex-row-reverse
-            (dom/div :.price.text-muted.float-right
-              (format-cost cost)))))
+         :data-target (str "#collapse-" collapse-id)
+         :style       {:cursor :pointer}}
+        (dom/div {:data-position-id id}
+          (dom/span :.unprefer-position (close-button unprefer))
+          (dom/div :.container
+            (dom/div :.row
+              (ui-updown-button (prim/computed {:level preferred-level
+                                                :last? last?} computed))
+              (dom/div {:className "align-center content card-text col"} (str "Ich bin dafür, dass " (or text "") ".")))
+            (dom/div :.row.d-flex.flex-row-reverse
+              (dom/div :.price.text-muted.float-right
+                (format-cost cost))))))
 
 
       (ui-pro-con-addon (->> computed
@@ -243,13 +255,13 @@
    :initial-state (fn [{:keys [slug preferences]}]
                     {:preference-list/slug slug
                      :preferences          preferences})}
-  #_(when-not preferences
-      (df/load this [:preference-list/slug slug] PreferenceList))
+  (when-not preferences
+    (df/load this [:preference-list/slug slug] PreferenceList))
   (let [positions      (:dbas.issue/positions issue)
         preferred-ids  (set (map :dbas.position/id preferences))
         position-items (->> positions
                          (remove #(preferred-ids (:dbas.position/id %))))]
-    (material/list-group #js {}
+    (dom/div
       (material/button
         #js {:onClick #(df/load this [:preference-list/slug slug] PreferenceList)}
         "Refresh!")
@@ -262,7 +274,7 @@
             (map-indexed (fn [i v] (assoc v
                                      :ui/preferred-level i
                                      :ui/last? (= i (dec (count preferences))))))
-            (map #(prim/computed % {:dbas-argument-link (gstring/format "%s/discuss/%s" js/dbas-host slug)
+            (map #(prim/computed % {:dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)
                                     :up-fn              (fn [level] (prim/transact! this `[(ms/preference-up {:level ~level})]))
                                     :down-fn            (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
                                     :un-prefer-fn       (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
@@ -273,10 +285,11 @@
           (dom/div
             (dom/h3 "Weitere Positionen")
             (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen.")))
-        (dom/ol :.list-group.list-group-flush
+        (dom/ul :.list-group
           (map #(ui-pref-list-item
                   (prim/computed %
-                    {:prefer-fn (fn [position-id] (prim/transact! this `[(ms/prefer {:position/id ~position-id})]))}))
+                    {:prefer-fn          (fn [position-id] (prim/transact! this `[(ms/prefer {:position/id ~position-id})]))
+                     :dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)}))
             position-items))))))
 
 (def ui-pref-list (prim/factory PreferenceList))

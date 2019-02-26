@@ -16,6 +16,7 @@
     "@material/react-radio": "^0.9.0",
     "@material/react-text-field": "^0.9.0",
     "@material/react-top-app-bar": "^0.9.0",
+    "highlight.js": "^9.15.5",
     "react-grid-layout": "^0.16.6",
     "react-icons": "^2.2.7",
     "reakit": "^0.11.1"
