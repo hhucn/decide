@@ -21,10 +21,15 @@
    :initial-state (fn [{:keys [value] :or {value ""}}]
                     {:db/id       (prim/tempid)
                      :input/value value})}
-  (material/text-field #js {:label label}
-    (material/input #js {:type     type
-                         :value    value
-                         :onChange (fn [e] (m/set-string! this :input/value :event e))})))
+  (dom/div :.form-group
+    (dom/label {:for id} label)
+    (dom/input :.form-control
+      {:id          id
+       :type        type
+       :value       value
+       :placeholder label
+       :aria-label  label
+       :onChange    (fn [e] (m/set-string! this :input/value :event e))})))
 
 (def ui-input-field (prim/factory InputField))
 
@@ -36,23 +41,20 @@
                         :or   {nickname "" password ""}}]
                     {:login-form/nickname-field (prim/get-initial-state InputField {:value nickname})
                      :login-form/password-field (prim/get-initial-state InputField {:value password})})}
-  (dom/form
-    (material/grid #js {:align "right"}
-      (material/row #js {}
-        (material/cell #js {:columns 12}
-          (ui-input-field (prim/computed nickname-field
-                            {:ui/label "Nickname"
-                             :ui/type  "text"})))
-        (material/cell #js {:columns 12}
-          (ui-input-field (prim/computed password-field
-                            {:ui/label "Password"
-                             :ui/type  "password"})))
-        (material/cell #js {:columns 6 :align "bottom"}
-          (material/button #js {:href    "#"
-                                :raised  true
-                                :onClick #(prim/transact! this `[(ms/login {:nickname ~(:input/value nickname-field)
-                                                                            :password ~(:input/value password-field)})])}
-            "Login"))))))
+  (dom/div :.mt-3
+    (dom/p "Log dich bitte mit deiner Uni Kennung ein.")
+    (dom/form
+      (ui-input-field (prim/computed nickname-field
+                        {:ui/label "Nickname"
+                         :ui/type  "text"}))
+      (ui-input-field (prim/computed password-field
+                        {:ui/label "Passwort"
+                         :ui/type  "password"}))
+      (dom/button :.btn.btn-primary
+        {:href    "#"
+         :onClick #(prim/transact! this `[(ms/login {:nickname ~(:input/value nickname-field)
+                                                     :password ~(:input/value password-field)})])}
+        "Login"))))
 
 (def ui-login-form (prim/factory LoginForm))
 
