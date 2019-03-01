@@ -190,13 +190,13 @@
   (let [collapse-id (random-uuid)]
     (dom/li :.mb-1
       (dom/div :.list-group-item.container
-        (expand-button collapse-id)
         (dom/div :.row
           (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)}
             (dom/i :.far.fa-thumbs-up))
           (dom/div :.col.d-flex.justify-content-between
             (dom/p (str "Ich bin dafür, dass " text "."))   ; TODO translate
-            (dom/span :.price.text-muted (format-cost cost)))))
+            (dom/span :.price.text-muted (format-cost cost))))
+        (expand-button collapse-id))
       (ui-pro-con-addon (->> computed
                           (merge {:id (str "collapse-" collapse-id)})
                           (prim/computed {:dbas.position/pros pros

@@ -68,5 +68,4 @@
                           :dependencies [[org.clojure/tools.namespace "0.3.0-alpha4"]
                                          [org.clojure/tools.nrepl "0.2.13"]
                                          [cider/piggieback "0.4.0"]]
-                          :repl-options {:init-ns          user
-                                         :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}})
+                          :repl-options {:init-ns user}}})
