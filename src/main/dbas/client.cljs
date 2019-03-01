@@ -5,9 +5,8 @@
     [cljs.spec.alpha :as s]
     [goog.string :as gstring]))
 
-(defn new-connection [] {::base         "https://dbas.cs.uni-duesseldorf.de/api"
-                         ::login-status ::logged-out})
-(def connection (new-connection))
+(defn new-connection [base] {::base         base
+                             ::login-status ::logged-out})
 
 ; from https://stackoverflow.com/a/43722784/3616102
 (defn- map->nsmap
@@ -40,7 +39,7 @@
                             (cond-> (some? body)
                                     (assoc :json-params body))
                             (cond-> (logged-in? conn)
-                                    (assoc-in [:headers "X-Authentication"] (select-keys conn [::nickname ::token])))
+                              (assoc-in [:headers "Authorization"] (::token conn)))
                             (->> (method-fn (str (::base conn) path)))))]
        (if (:success response)
          (get response :body {})

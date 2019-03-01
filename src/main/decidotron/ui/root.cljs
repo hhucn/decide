@@ -4,83 +4,54 @@
     [fulcro.client.primitives :as prim :refer [defsc]]
     [fulcro.client.routing :as r :refer [defsc-router]]
     [dbas.client :as dbas]
-    [decidotron.ui.mdc-components :as material]
     [decidotron.ui.components :as comp]
     [decidotron.ui.discuss.core :as discuss]
     [decidotron.ui.routing :as routing]
     [decidotron.mutations :as ms]))
 
-(def drawer-id 1)
-
-(defn ui-login-button [this connection]
-  (if (dbas.client/logged-in? connection)
-    (material/icon-button #js {}
-      (material/icon #js {:icon "account_circle"}))
-    (material/button #js {:onClick #(prim/transact! this
-                                      `[(r/set-route {:router :root/router
-                                                      :target [:PAGE/login 1]})])}
-      "Login")))
-
-(defsc TopBar [this {:keys [dbas/connection]} {:keys [topbar/nav-icon]}]
-  {:query [[:dbas/connection '_]]}
-  (let [login-button (ui-login-button this connection)]
-    (dom/div :#toolbar
-      (material/top-app-bar #js {:title          "Decidotron 3000"
-                                 :navigationIcon nav-icon})
-      (material/top-app-bar-fixed-adjust #js {} []))))      ; spacing between top bar and content ; [] because it requires a child
-
-(def ui-top-bar (prim/factory TopBar))
-
 (defsc Login [this {:keys [db/id router/page login/login-form]}]
   {:query         [:db/id :router/page
                    {:login/login-form (prim/get-query comp/LoginForm)}]
    :ident         (fn [] [page id])
-   :initial-state (fn [params]
+   :initial-state (fn [_]
                     {:db/id            1
                      :router/page      :PAGE/login
                      :login/login-form (prim/get-initial-state comp/LoginForm {})})}
   (comp/ui-login-form login-form))
 
-(defsc Welcome [this {:keys [db/id router/page]}]
-  {:query         [:db/id :router/page]
-   :ident         (fn [] [page id])
-   :initial-state (fn [_]
-                    {:db/id       1
-                     :router/page :PAGE/main})}
-  (dom/p "Welcome!"))
-
-(defsc-router RootRouter [this {:keys [db/id router/page]}]
+(defsc-router RootRouter [_this {:keys [db/id router/page]}]
   {:router-id      :root/router
    :default-route  discuss/Discuss
    :ident          (fn [] [page id])
-   :router-targets {:PAGE/discuss     discuss/Discuss
-                    :PAGE/login       Login
-                    :PAGE/main        Welcome
+   :router-targets {:PAGE/login       Login
                     :PAGE/preferences comp/PreferenceScreen}}
   (dom/p "Unknown Route!"))
 
 (def ui-router (prim/factory RootRouter))
 
-(defsc Root [this {:keys [dbas/connection root/top-bar root/router root/drawer]}]
+(defn ui-login-button [this connection]
+  (if (dbas.client/logged-in? connection)
+    (dom/button :.btn.btn-primary
+      {:onClick #(prim/transact! this `[(ms/logout {})])}
+      (dom/i :.fas.fa-sign-out-alt) " Logout")
+    (dom/button :.btn.btn-light
+      {:onClick #(prim/transact! this
+                   `[(r/set-route {:router :root/router
+                                   :target [:PAGE/login 1]})])}
+      (dom/i :.fas.fa-sign-in-alt) " Login")))
+
+(defsc Root [this {:keys [dbas/connection root/router]}]
   {:query         [:dbas/connection
-                   {:root/top-bar (prim/get-query TopBar)}
-                   {:root/router (prim/get-query RootRouter)}
-                   {:root/drawer (prim/get-query comp/NavDrawer)}]
-   :initial-state (fn [params]
+                   {:root/router (prim/get-query RootRouter)}]
+   :initial-state (fn [_]
                     (merge
                       {:root/router     (prim/get-initial-state RootRouter {})
-                       :dbas/connection dbas/connection
-                       :root/drawer     (prim/get-initial-state comp/NavDrawer {:id :main-drawer})}
+                       :dbas/connection (dbas/new-connection (str js/dbas_host "/api"))}
                       routing/app-routing-tree))}
-  (let [logged-in? (dbas/logged-in? connection)]
-    (dom/div
-      (comp/ui-nav-drawer drawer)
-      (ui-top-bar
-        (prim/computed top-bar
-          {:topbar/nav-icon
-           (material/icon #js
-               {:icon    "menu"
-                :onClick #(prim/transact! this `[(ms/toggle-drawer {:drawer/id :main-drawer})])})}))
+  (dom/div :.root
+    (dom/nav :.navbar.navbar-light.bg-light
+      (dom/a :.navbar-brand {:href "#"} "Decidotron 3000")
+      (ui-login-button this connection))
 
-      (dom/div {:className "container"}
-        (ui-router router)))))
+    (dom/div {:className "container"}
+      (ui-router router))))

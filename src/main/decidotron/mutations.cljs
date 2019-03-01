@@ -13,6 +13,16 @@
       (assoc-in [:params :connection] (:dbas/connection @state))
       (m/with-target [:dbas/connection]))))
 
+
+(defn logout* [state]
+  (-> state
+    (assoc :dbas/connection {::dbas/login-status ::dbas/logged-out
+                             ::dbas/base         (str js/dbas_host "/api")})))
+
+(defmutation logout [_]
+  (action [{:keys [state]}]
+    (swap! state logout*)))
+
 (defmutation set-dbas-connection [{:keys [dbas-state]}]
   (action [{:keys [state]}]
     (swap! state assoc :dbas/connection dbas-state)))
