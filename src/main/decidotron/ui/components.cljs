@@ -135,41 +135,42 @@
 (def ui-updown-button (prim/factory UpDownButton))
 
 (defn- format-pro-con [text]
-  (format "... %s." text))
+  (format "… %s." text))
+
+(defn discuss-button [prefix id]
+  (dom/a :.btn.btn-sm.btn-outline-primary
+    {:href (format "%s/jump/%d" prefix id)}
+    (dom/i :.far.fa-comments) " Diskutieren"))
 
 (defsc ProConAddon [_this
                     {:dbas.position/keys [pros cons]}
-                    {:keys [id dbas-argument-link]}]
+                    {:keys [collapse-id dbas-argument-link]}]
   {:query [{:dbas.position/pros (prim/get-query models/Statement)}
            {:dbas.position/cons (prim/get-query models/Statement)}]}
   (let [pros (take 3 (shuffle pros))
         cons (take 3 (shuffle cons))]
-    (dom/div :.list-group-item.collapse.pro-con-addon {:id id}
+    (dom/div :.list-group-item.collapse.pro-con-addon {:id collapse-id}
       (when (not-empty pros)
         (dom/div :.pro-con-addon__pros
           (dom/p
-            (dom/span :.text-success "Dafür") " spricht, dass ...")
+            (dom/span :.text-success "Dafür") " spricht, dass …")
           (dom/ul :.list-group.list-group-flush
-            (for [pro pros]
+            (for [{:dbas.statement/keys [text id argument-id]} pros]
               (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
-                {:key (str id "-" (:dbas.statement/id pro))}
-                (format-pro-con (:dbas.statement/text pro))))
-            (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
-              (dom/a :.btn.btn-block.btn-sm.btn-outline-success
-                {:href (str dbas-argument-link "/justify/83/agree")}
-                (dom/i :.fas.fa-plus) " Argument hinzufügen")))))
-      (when (not-empty cons)
-        (dom/div :.pro-con-addon__cons
-          (dom/p
-            (dom/span :.text-danger "Dagegen") " spricht, dass ...")
-          (dom/ul :.list-group.list-group-flush
-            (for [{:dbas.statement/keys [text argument-id] :as con} cons]
-              (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
-                {:key (str id "-" (:dbas.statement/id con))}
+                {:key (str collapse-id "-" id)}
                 (format-pro-con text)
-                (dom/a :.btn.btn-sm.btn-outline-primary
-                  {:href (format "%s/jump/%d" dbas-argument-link argument-id)}
-                  (dom/i :.fas.fa-shield-alt) " Verteidigen")))))))))
+                (discuss-button dbas-argument-link argument-id))))))
+
+      (when (not-empty cons)
+        (dom/div :.pro-con-addon__cons.mt-3
+          (dom/p
+            (dom/span :.text-danger "Dagegen") " spricht, dass …")
+          (dom/ul :.list-group.list-group-flush
+            (for [{:dbas.statement/keys [id text argument-id]} cons]
+              (dom/li :.list-group-item.d-flex.justify-content-between.align-items-center
+                {:key (str collapse-id "-" id)}
+                (format-pro-con text)
+                (discuss-button dbas-argument-link argument-id)))))))))
 
 (def ui-pro-con-addon (prim/factory ProConAddon))
 
@@ -183,9 +184,7 @@
 
 
 (defsc PreferenceListItem [_this {:dbas.position/keys [text id cost pros cons]}
-                           {:keys [prefer-fn
-                                   dbas-argument-link]
-                            :as   computed}]
+                           {:keys [prefer-fn] :as computed}]
   {:query [{:dbas/position (prim/get-query models/Position)}]}
   (let [collapse-id (random-uuid)]
     (dom/li :.mb-1
@@ -198,7 +197,7 @@
             (dom/span :.price.text-muted (format-cost cost))))
         (expand-button collapse-id))
       (ui-pro-con-addon (->> computed
-                          (merge {:id (str "collapse-" collapse-id)})
+                          (merge {:collapse-id (str "collapse-" collapse-id)})
                           (prim/computed {:dbas.position/pros pros
                                           :dbas.position/cons cons}))))))
 
@@ -246,7 +245,7 @@
 
 
       (ui-pro-con-addon (->> computed
-                          (merge {:id (str "collapse-" collapse-id)})
+                          (merge {:collapse-id (str "collapse-" collapse-id)})
                           (prim/computed {:dbas.position/pros pros
                                           :dbas.position/cons cons}))))))
 
