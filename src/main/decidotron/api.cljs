@@ -2,6 +2,7 @@
   (:require
     [fulcro.client.mutations :as m :refer [defmutation]]
     [dbas.client :as dbas]
+    [decidotron.cookies :as cookie]
     [fulcro.client.primitives :as prim]))
 
 (defmutation login [{:keys [nickname password]}]
@@ -22,6 +23,7 @@
 
 (defmutation logout [_]
   (action [{:keys [state]}]
+    (cookie/remove cookie/decidotron-token)
     (swap! state logout*)))
 
 (defmutation set-dbas-connection [{:keys [dbas-state]}]

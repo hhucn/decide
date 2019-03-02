@@ -6,10 +6,10 @@
             [decidotron.ui.routing :as routing]
             [decidotron.ui.models :as models]
             [decidotron.api :as ms]
+            [decidotron.cookies :as cookie]
             [fulcro.client.primitives :as prim]
             [fulcro.client.data-fetch :as df]
-            [goog.crypt.base64 :as b64])
-  (:import goog.net.Cookies))
+            [goog.crypt.base64 :as b64]))
 
 (defonce app (atom nil))
 
@@ -54,7 +54,7 @@
 (defn get-user-state-from-cookie!
   "Fetches the token from the cookies, if it is available. Transact the connection data into the state"
   [app-root]
-  (when-let [token (.get (Cookies. js/document) "decidotron-token" nil)]
+  (when-let [token (cookie/get cookie/decidotron-token)]
     (prim/transact! app-root `[(ms/set-dbas-connection {:dbas-state ~(->initial-dbas-data token)})])))
 
 (defn ^:export init []
