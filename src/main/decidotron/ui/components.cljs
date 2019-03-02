@@ -3,7 +3,7 @@
     [fulcro.client.primitives :as prim :refer [defsc]]
     [fulcro.client.dom :as dom]
     [fulcro.client.mutations :as m :refer [defmutation]]
-    [decidotron.mutations :as ms]
+    [decidotron.api :as ms]
     [decidotron.ui.mdc-components :as material]
     [fulcro.client.routing :as r]
     [decidotron.loads :as loads]

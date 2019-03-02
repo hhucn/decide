@@ -2,7 +2,7 @@
   (:require
     [clojure.core.async :as async]
     [decidotron.server-components.config :refer [config]]
-    [decidotron.server-components.api :refer [server-parser]]
+    [decidotron.api :refer [server-parser]]
     [decidotron.server-components.token :as token]
     [mount.core :refer [defstate]]
     [fulcro.server :as server]

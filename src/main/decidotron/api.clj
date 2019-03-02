@@ -1,4 +1,4 @@
-(ns decidotron.server-components.api
+(ns decidotron.api
   (:require [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc]
             [decidotron.server-components.token :as t]
@@ -16,8 +16,7 @@
 (defn- ident->map [[a b]] {a b})
 
 (pc/defmutation update-preferences [_ {:keys [preference-list dbas.client/token]}]
-  {::pc/sym    'update-preferences
-   ::pc/params [:preference-list :token]}
+  {::pc/params [:preference-list :token]}
   (let [user-id         (:id (t/unsign token))
         slug            (:preference-list/slug preference-list)
         with-map-idents (update preference-list :preferences (partial map ident->map))] ; idents to maps

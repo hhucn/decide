@@ -7,7 +7,7 @@
     [decidotron.ui.components :as comp]
     [decidotron.ui.discuss.core :as discuss]
     [decidotron.ui.routing :as routing]
-    [decidotron.mutations :as ms]))
+    [decidotron.api :as ms]))
 
 (defsc Login [this {:keys [db/id router/page login/login-form]}]
   {:query         [:db/id :router/page

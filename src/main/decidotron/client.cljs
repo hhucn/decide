@@ -5,7 +5,7 @@
             [decidotron.remotes.dbas :refer [dbas-remote]]
             [decidotron.ui.routing :as routing]
             [decidotron.ui.models :as models]
-            [decidotron.mutations :as ms]
+            [decidotron.api :as ms]
             [fulcro.client.primitives :as prim]
             [fulcro.client.data-fetch :as df]
             [goog.crypt.base64 :as b64])

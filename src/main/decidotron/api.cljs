@@ -1,4 +1,4 @@
-(ns decidotron.mutations
+(ns decidotron.api
   (:require
     [fulcro.client.mutations :as m :refer [defmutation]]
     [dbas.client :as dbas]
@@ -15,9 +15,10 @@
 
 
 (defn logout* [state]
-  (-> state
-    (assoc :dbas/connection {::dbas/login-status ::dbas/logged-out
-                             ::dbas/base         (str js/dbas_host "/api")})))
+  (assoc state
+    :dbas/connection
+    {::dbas/login-status ::dbas/logged-out
+     ::dbas/base         (str js/dbas_host "/api")}))
 
 (defmutation logout [_]
   (action [{:keys [state]}]
@@ -37,7 +38,7 @@
   (let [s         @state
         issue-key (get-in s [:root/current-page :preferences :route-params :slug])
         pref-list (get-in s [:preference-list/slug issue-key])]
-    (-> (assoc ast :key 'update-preferences)
+    (-> (assoc ast :key `update-preferences)
       (m/with-params {:preference-list (select-keys pref-list [:preferences :preference-list/slug])}))))
 
 (defmutation prefer [{:keys [position/id]}]
