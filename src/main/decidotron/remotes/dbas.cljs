@@ -23,11 +23,9 @@
   {::pc/output [{:dbas.issue.position/attitudes [:bubbles :attitudes]}]}
   {:dbas.issue.position/attitudes (dbas/attitude connection slug position)})
 
-(pc/defmutation login [_ {:keys [connection nickname password]}]
-  {::pc/sym    'dbas/login
-   ::pc/params [:connection :nickname :password]
-   ::pc/output [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token ::dbas/login-status]}
-  (dbas/login connection nickname password))
+(pc/defresolver login [{{{:keys [connection nickname password]} :params} :ast :as ast} _]
+  {::pc/output [{:dbas/connection [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token ::dbas/login-status]}]}
+  {:dbas/connection (dbas/login connection nickname password)})
 
 (def app-registry [login issues positions attitudes]) ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def index (atom {}))

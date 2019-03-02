@@ -1,5 +1,6 @@
 (ns decidotron.ui.models
-  (:require [fulcro.client.primitives :as prim :refer [defsc]]))
+  (:require [fulcro.client.primitives :as prim :refer [defsc]]
+            [dbas.client :as client]))
 
 (defsc Statement [_ _]
   {:query [:dbas.statement/id :dbas.statement/text :dbas.statement/is-supportive :dbas.statement/argument-id]
@@ -17,3 +18,6 @@
   {:query [:dbas.issue/slug
            {:dbas.issue/positions (prim/get-query Position)}]
    :ident [:dbas.issue/slug :dbas.issue/slug]})
+
+(defsc Connection [_ _]
+  {:query [::client/base ::client/nickname ::client/id ::client/token ::client/login-status]})

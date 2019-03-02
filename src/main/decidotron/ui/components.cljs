@@ -34,15 +34,20 @@
 (def ui-input-field (prim/factory InputField))
 
 (defsc LoginForm
-  [this {:keys [login-form/nickname-field login-form/password-field]}]
+  [this {:keys [login-form/nickname-field login-form/password-field dbas/connection]}]
   {:query         [{:login-form/nickname-field (prim/get-query InputField)}
-                   {:login-form/password-field (prim/get-query InputField)}]
+                   {:login-form/password-field (prim/get-query InputField)}
+                   {[:dbas/connection '_] (prim/get-query models/Connection)}]
    :initial-state (fn [{:keys [nickname password]
                         :or   {nickname "" password ""}}]
                     {:login-form/nickname-field (prim/get-initial-state InputField {:value nickname})
                      :login-form/password-field (prim/get-initial-state InputField {:value password})})}
   (dom/div :.mt-3
     (dom/p "Log dich bitte mit deiner Uni Kennung ein.")
+    (case (::dbas/login-status connection)
+      ::dbas/failed (dom/div :.alert.alert-danger {:role :alert} "Login fehlgeschlagen")
+      ::dbas/logged-in (dom/div :.alert.alert-success {:role :alert} "Login erfolgreich")
+      nil)
     (dom/form
       (ui-input-field (prim/computed nickname-field
                         {:ui/label "Nickname"
@@ -51,9 +56,16 @@
                         {:ui/label "Passwort"
                          :ui/type  "password"}))
       (dom/button :.btn.btn-primary
-        {:href    "#"
-         :onClick #(prim/transact! this `[(ms/login {:nickname ~(:input/value nickname-field)
-                                                     :password ~(:input/value password-field)})])}
+        {:type    "button"
+         :onClick (fn login []
+                    (let [{{login-status ::dbas/login-status} :dbas/connection}
+                          (df/load this :dbas/connection models/Connection
+                            {:remote :dbas
+                             :params {:nickname   (:input/value nickname-field)
+                                      :password   (:input/value password-field)
+                                      :connection connection}})]
+                      (when (= ::dbas/logged-in login-status)
+                        (routing/nav-to! this :preferences {:slug "was-sollen-wir-mit-20-000eur-anfangen"}))))}
         "Login"))))
 
 (def ui-login-form (prim/factory LoginForm))

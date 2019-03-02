@@ -58,15 +58,15 @@
     (prim/transact! app-root `[(ms/set-dbas-connection {:dbas-state ~(->initial-dbas-data token)})])))
 
 (defn ^:export init []
-  (reset! app (fc/new-fulcro-client
+  (reset! app (fc/make-fulcro-client
                 ;; This ensures your client can talk to a CSRF-protected server.
                 ;; See middleware.clj to see how the token is embedded into the HTML
-                :networking {:remote (net/fulcro-http-remote
-                                       {:url                "/api"
-                                        :request-middleware secured-request-middleware})
-                             :dbas   dbas-remote}
-                :started-callback (fn [{:keys [reconciler] :as app}]
-                                    (get-user-state-from-cookie! (prim/app-root reconciler))
-                                    (routing/start-routing (prim/app-root reconciler))
-                                    (df/load reconciler [:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"] models/Issue))))
+                {:networking       {:remote (net/fulcro-http-remote
+                                              {:url                "/api"
+                                               :request-middleware secured-request-middleware})
+                                    :dbas   dbas-remote}
+                 :started-callback (fn [{:keys [reconciler] :as app}]
+                                     (get-user-state-from-cookie! (prim/app-root reconciler))
+                                     (routing/start-routing (prim/app-root reconciler))
+                                     (df/load reconciler [:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"] models/Issue))}))
   (start))

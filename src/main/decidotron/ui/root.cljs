@@ -21,7 +21,7 @@
 
 (defsc-router RootRouter [_this {:keys [db/id router/page]}]
   {:router-id      :root/router
-   :default-route  discuss/Discuss
+   :default-route  Login
    :ident          (fn [] [page id])
    :router-targets {:PAGE/login       Login
                     :PAGE/preferences comp/PreferenceScreen}}
@@ -35,9 +35,7 @@
       {:onClick #(prim/transact! this `[(ms/logout {})])}
       (dom/i :.fas.fa-sign-out-alt) " Logout")
     (dom/button :.btn.btn-light
-      {:onClick #(prim/transact! this
-                   `[(r/set-route {:router :root/router
-                                   :target [:PAGE/login 1]})])}
+      {:onClick #(routing/nav-to! this :login)}
       (dom/i :.fas.fa-sign-in-alt) " Login")))
 
 (defsc Root [this {:keys [dbas/connection root/router]}]

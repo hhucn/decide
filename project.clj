@@ -4,8 +4,8 @@
   :min-lein-version "2.7.0"
 
   :dependencies [[org.clojure/clojure "1.10.0"]
-                 [thheller/shadow-cljs "2.8.12"]
-                 [fulcrologic/fulcro "2.8.3" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [thheller/shadow-cljs "2.8.13"]
+                 [fulcrologic/fulcro "2.8.4" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [com.wsscode/pathom "2.2.11"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
