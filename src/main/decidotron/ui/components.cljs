@@ -7,12 +7,13 @@
     [decidotron.ui.mdc-components :as material]
     [fulcro.client.routing :as r]
     [decidotron.loads :as loads]
-    [decidotron.ui.discuss.core :as discuss]
     [decidotron.ui.routing :as routing]
     [fulcro.client.data-fetch :as df]
     [decidotron.ui.models :as models]
     [dbas.client :as dbas]
-    [goog.string :refer [format]]))
+    [goog.string :refer [format]]
+    [fulcro.incubator.dynamic-routing :as dr])
+  (:require-macros [fulcro.incubator.dynamic-routing :refer [defsc-route-target defrouter]]))
 
 (defsc InputField
   [this {:keys [db/id input/value] :as props} {:keys [ui/label ui/type] :as computed}]
@@ -22,9 +23,9 @@
                     {:db/id       (prim/tempid)
                      :input/value value})}
   (dom/div :.form-group
-    (dom/label {:for id} label)
+    (dom/label {:htmlFor (str "id" label)} label)
     (dom/input :.form-control
-      {:id          id
+      {:id          (str "id" label)
        :type        type
        :value       value
        :placeholder label
@@ -32,6 +33,12 @@
        :onChange    (fn [e] (m/set-string! this :input/value :event e))})))
 
 (def ui-input-field (prim/factory InputField))
+
+(defmutation redirect-from-login [{:keys [where]}]
+  (action [{:keys [state component]}]
+    (let [login-status (get-in @state [:dbas/connection ::dbas/login-status])]
+      (when (= ::dbas/logged-in login-status)
+        (routing/change-route! component where)))))
 
 (defsc LoginForm
   [this {:keys [login-form/nickname-field login-form/password-field dbas/connection]}]
@@ -43,7 +50,7 @@
                     {:login-form/nickname-field (prim/get-initial-state InputField {:value nickname})
                      :login-form/password-field (prim/get-initial-state InputField {:value password})})}
   (dom/div :.mt-3
-    (dom/p "Log dich bitte mit deiner Uni Kennung ein.")
+    (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
     (case (::dbas/login-status connection)
       ::dbas/failed (dom/div :.alert.alert-danger {:role :alert} "Login fehlgeschlagen")
       ::dbas/logged-in (dom/div :.alert.alert-success {:role :alert} "Login erfolgreich")
@@ -58,78 +65,16 @@
       (dom/button :.btn.btn-primary
         {:type    "button"
          :onClick (fn login []
-                    (let [{{login-status ::dbas/login-status} :dbas/connection}
-                          (df/load this :dbas/connection models/Connection
-                            {:remote :dbas
-                             :params {:nickname   (:input/value nickname-field)
-                                      :password   (:input/value password-field)
-                                      :connection connection}})]
-                      (when (= ::dbas/logged-in login-status)
-                        (routing/nav-to! this :preferences {:slug "was-sollen-wir-mit-20-000eur-anfangen"}))))}
+                    (df/load this :dbas/connection models/Connection
+                      {:remote               :dbas
+                       :params               {:nickname   (:input/value nickname-field)
+                                              :password   (:input/value password-field)
+                                              :connection connection}
+                       :post-mutation        `redirect-from-login
+                       :post-mutation-params {:where ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"]}}))}
         "Login"))))
 
 (def ui-login-form (prim/factory LoginForm))
-
-(defsc NavDrawerItem [this {:keys [drawer-item/text drawer-item/icon drawer-item/index]} {:keys [ui/onClick]}]
-  {:query [:drawer-item/text :drawer-item/icon :drawer-item/index]}
-  (material/list-item #js {:onClick          onClick
-                           :tag              "a"
-                           :tabIndex         index
-                           :childrenTabIndex index}
-    (material/list-item-graphic #js {:graphic (material/icon #js {:icon icon})})
-    (material/list-item-text #js {:primaryText text})))
-
-(def ui-nav-drawer-item (prim/factory NavDrawerItem {:keyfn :drawer-item/index}))
-
-(defsc NavDrawer [this {:keys [db/id drawer/open? dbas/connection]}]
-  {:query         [:db/id :drawer/open? [:dbas/connection '_]]
-   :ident         [:drawer/by-id :db/id]
-   :initial-state (fn [{:keys [id]}]
-                    {:db/id        id
-                     :drawer/open? false})}
-  (let [logged-in? (dbas/logged-in? connection)
-        close      #(m/set-value! this :drawer/open? false)]
-    (material/drawer #js {:modal   true
-                          :open    open?
-                          :onClose #(m/set-value! this :drawer/open? false)}
-      (material/drawer-header #js {}
-        (material/drawer-title #js {}
-          (if logged-in?
-            (:dbas.client/nickname connection)
-            (material/button #js
-                {:onClick #(do (close)
-                               (routing/nav-to! this :login))}
-              "Login"))))
-      (material/drawer-content #js {}
-        (material/mdc-list #js {:tag "nav"}
-          (map-indexed (fn [i p] (ui-nav-drawer-item (assoc p :drawer-item/index (inc i))))
-            (cond-> [(prim/computed {:drawer-item/text "Discuss"
-                                     :drawer-item/icon "forum"}
-                       {:ui/onClick #(do (close)
-                                         (routing/nav-to! this :issues))})])))))))
-
-(def ui-nav-drawer (prim/factory NavDrawer))
-
-(defsc IssueList [this {:keys [dbas/issues dbas/connection]}]
-  {:query [[:dbas/connection '_]
-           {[:dbas/issues '_] (prim/get-query discuss/IssueEntry)}]}
-  (dom/div
-    (material/button #js {:onClick #(loads/load-issues this connection [:ui/root])} "LOAD!")
-    (js/console.log issues)
-    (map discuss/ui-issue-entry issues)))
-
-(def ui-issue-list (prim/factory IssueList))
-
-(defsc TempRoot [this {:keys [db/id dbas/connection issue-list]}]
-  {:query [:db/id
-           [:dbas/connection '_]
-           {:issue-list (prim/get-query IssueList)}]}
-  (dom/div
-    (material/button #js {:outlined true
-                          :onClick  #(loads/load-issues this connection [:ui/root])} "Load")
-    (ui-issue-list issue-list)))
-
-(def ui-temp-root (prim/factory TempRoot))
 
 (defn format-cost [cost]
   (format "%.2f €" (/ cost 100)))
@@ -266,23 +211,30 @@
 
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn :dbas.position/id}))
 
-(defsc PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
-  {:query         [:preference-list/slug
-                   {:preferences (prim/get-query PreferredItem)}
-                   {:dbas/issue (prim/get-query models/Issue)}]
-   :ident         [:preference-list/slug :preference-list/slug]
-   :initial-state (fn [{:keys [slug preferences]}]
-                    {:preference-list/slug slug
-                     :preferences          preferences})}
-  (when-not preferences
-    (df/load this [:preference-list/slug slug] PreferenceList))
+(declare PreferenceList)
+(defsc-route-target PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
+  {:query           [:preference-list/slug
+                     {:preferences (prim/get-query PreferredItem)}
+                     {:dbas/issue (prim/get-query models/Issue)}]
+   :ident           [:preference-list/slug :preference-list/slug]
+   :route-segment   (fn [] ["preferences" :preference-list/slug])
+   :route-cancelled (fn [_])
+   :will-enter      (fn [reconciler {:keys [preference-list/slug]}]
+                      (js/console.log "Enter Preference Screen")
+                      (dr/route-deferred [:preference-list/slug slug]
+                        #(df/load reconciler [:preference-list/slug slug] PreferenceList
+                           {:post-mutation        `dr/target-ready
+                            :post-mutation-params {:target [:preference-list/slug slug]}})))
+   :will-leave      (fn [_]
+                      (js/console.log "Leaving Preference Screen")
+                      true)}
   (let [positions      (:dbas.issue/positions issue)
         preferred-ids  (set (map :dbas.position/id preferences))
         position-items (->> positions
                          (remove #(preferred-ids (:dbas.position/id %))))]
     (dom/div
-      (material/button
-        #js {:onClick #(df/load this [:preference-list/slug slug] PreferenceList)}
+      (dom/button :.btn.btn-dark
+        {:onClick #(df/load this [:preference-list/slug slug] PreferenceList)}
         "Refresh!")
       (dom/div
         (when (not-empty preferences)

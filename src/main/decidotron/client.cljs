@@ -65,8 +65,7 @@
                                               {:url                "/api"
                                                :request-middleware secured-request-middleware})
                                     :dbas   dbas-remote}
-                 :started-callback (fn [{:keys [reconciler] :as app}]
+                 :started-callback (fn [{:keys [reconciler]}]
                                      (get-user-state-from-cookie! (prim/app-root reconciler))
-                                     (routing/start-routing (prim/app-root reconciler))
-                                     (df/load reconciler [:dbas.issue/slug "was-sollen-wir-mit-20-000eur-anfangen"] models/Issue))}))
+                                     (routing/start-routing reconciler))}))
   (start))
