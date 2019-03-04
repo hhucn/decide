@@ -2,7 +2,7 @@
   (:require [korma.core :as k]))
 
 
-(declare cost textversion issue statement position)
+(declare cost textversion issue statement position decision-process)
 
 (k/defentity cost
   (k/pk :position_id)
@@ -17,6 +17,7 @@
 (k/defentity issue
   (k/pk :uid)
   (k/table :issues)
+  (k/has-one decision-process {:fk :issue_id})
   (k/many-to-many statement :statement_to_issue {:lfk :statement_to_issue.issue_uid :rfk :statement_to_issue.statement_uid}))
 
 (k/defentity statement
@@ -34,6 +35,14 @@
   (k/has-one textversion {:fk :statement_uid})
   (k/many-to-many issue :statement_to_issue {:rfk :statement_to_issue.issue_uid
                                              :lfk :statement_to_issue.statement_uid}))
+
+(k/defentity decision-process
+  (k/pk :issue_id)
+  (k/table :decidotron_decision_process)
+  (k/belongs-to issue {:fk :issue_id}))
+
+(k/select decision-process
+  (k/with issue))
 
 (defn positions-by-ids [ids]
   (for [{:keys [uid content cost]}
