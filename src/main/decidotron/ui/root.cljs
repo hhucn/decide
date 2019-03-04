@@ -24,7 +24,7 @@
   (comp/ui-login-form login-form))
 
 (defrouter RootRouter [_ _]
-  {:router-targets [LoginScreen comp/PreferenceList]})
+  {:router-targets [LoginScreen comp/PreferenceScreen]})
 
 (def ui-router (prim/factory RootRouter))
 

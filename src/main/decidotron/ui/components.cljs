@@ -217,22 +217,11 @@
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn :dbas.position/id}))
 
 (declare PreferenceList)
-(defsc-route-target PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
-  {:query           [:preference-list/slug
-                     {:preferences (prim/get-query PreferredItem)}
-                     {:dbas/issue (prim/get-query models/Issue)}]
-   :ident           [:preference-list/slug :preference-list/slug]
-   :route-segment   (fn [] ["preferences" :preference-list/slug])
-   :route-cancelled (fn [_])
-   :will-enter      (fn [reconciler {:keys [preference-list/slug]}]
-                      (js/console.log "Enter Preference Screen")
-                      (dr/route-deferred [:preference-list/slug slug]
-                        #(df/load reconciler [:preference-list/slug slug] PreferenceList
-                           {:post-mutation        `dr/target-ready
-                            :post-mutation-params {:target [:preference-list/slug slug]}})))
-   :will-leave      (fn [_]
-                      (js/console.log "Leaving Preference Screen")
-                      true)}
+(defsc PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
+  {:query [:preference-list/slug
+           {:preferences (prim/get-query PreferredItem)}
+           {:dbas/issue (prim/get-query models/Issue)}]
+   :ident [:preference-list/slug :preference-list/slug]}
   (if (logged-in? this)
     (let [positions      (:dbas.issue/positions issue)
           preferred-ids  (set (map :dbas.position/id preferences))
@@ -272,12 +261,23 @@
 
 (def ui-pref-list (prim/factory PreferenceList))
 
-(defsc PreferenceScreen [_this {:keys [db/id router/page pref-list]}]
-  {:query         [:db/id :router/page
-                   {:pref-list (prim/get-query PreferenceList)}]
-   :ident         (fn [] [page id])
-   :initial-state (fn [_] {:db/id       1
-                           :router/page :PAGE/preferences
-                           :pref-list   (prim/get-initial-state PreferenceList {:slug "was-sollen-wir-mit-20-000eur-anfangen"})})}
-  (dom/div
-    (ui-pref-list pref-list)))
+(defsc-route-target PreferenceScreen [_this {:keys [preferences/slug preferences/list]}]
+  {:query           [:preferences/slug
+                     {:preferences/list (prim/get-query PreferenceList)}]
+   :ident           [:preferences/slug :preferences/slug]
+   :route-segment   (fn [] ["preferences" :preferences/slug])
+   :route-cancelled (fn [_])
+   :will-enter      (fn [reconciler {:keys [preferences/slug]}]
+                      (js/console.log "Enter Preference Screen")
+                      (js/console.log slug)
+                      (dr/route-deferred [:preferences/slug slug]
+                        #(df/load reconciler [:preferences/slug slug] PreferenceScreen
+                           {:post-mutation        `dr/target-ready
+                            :post-mutation-params {:target [:preferences/slug slug]}})))
+   :will-leave      (fn [_]
+                      (js/console.log "Leaving Preference Screen")
+                      true)}
+  (dom/div :.preference-screen
+    (dom/p "Hier ist etwas Text")
+    (ui-pref-list list)
+    (dom/p "Hier ist etwas Text")))

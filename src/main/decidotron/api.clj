@@ -76,7 +76,7 @@
     {:dbas.position/pros pros
      :dbas.position/cons cons}))
 
-(pc/defresolver preferences [{user-id :dbas.client/id} {slug :preference-list/slug}]
+(pc/defresolver preference-list [{user-id :dbas.client/id} {slug :preference-list/slug}]
   {::pc/input  #{:preference-list/slug}
    ::pc/output [:preference-list/slug
                 {:dbas/issue [:dbas.issue/slug]}
@@ -84,10 +84,16 @@
   (merge {:dbas/issue {:dbas.issue/slug slug}}
     (get-in @state [user-id slug])))
 
+(pc/defresolver preferences [_ {slug :preferences/slug}]
+  {::pc/input  #{:preferences/slug}
+   ::pc/output [{:preferences/list
+                 [:preference-list/slug]}]}
+  {:preferences/list {:preference-list/slug slug}})
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-(def app-registry [position issue preferences position-pros-cons update-preferences]) ; DON'T FORGET TO ADD EVERYTHING HERE!
+(def app-registry [position issue preferences preference-list position-pros-cons update-preferences]) ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def index (atom {}))
 
 (def token-param-plugin
