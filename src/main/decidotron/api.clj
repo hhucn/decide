@@ -92,9 +92,12 @@
 
 (pc/defresolver preferences [_ {slug :preferences/slug}]
   {::pc/input  #{:preferences/slug}
-   ::pc/output [{:preferences/list [:preference-list/slug :dbas.issue/slug]}]}
-  {:preferences/list {:preference-list/slug slug
-                      :dbas.issue/slug      slug}})
+   ::pc/output [:preferences/slug
+                {:preferences/list [:preference-list/slug]}
+                {:dbas/issue [:dbas.issue/slug]}]}
+  {:preferences/slug slug
+   :preferences/list {:preference-list/slug slug}
+   :dbas/issue       {:dbas.issue/slug slug}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -15,7 +15,14 @@
    :ident [:dbas.position/id :dbas.position/id]})
 
 (defsc Issue [_ _]
-  {:query [:dbas.issue/slug
+  {:query [:dbas.issue/id
+           :dbas.issue/slug
+           :dbas.issue/budget
+           :dbas.issue/title
+           :dbas.issue/info
+           :dbas.issue/long-info
+           :dbas.issue/votes-end
+           :dbas.issue/currency-symbol
            {:dbas.issue/positions (prim/get-query Position)}]
    :ident [:dbas.issue/slug :dbas.issue/slug]})
 
