@@ -29,11 +29,9 @@
    ::pc/output [:dbas.position/id :dbas.position/text :dbas.position/cost]
    ::pc/batch? true}
   (if (sequential? input)
-    (do
-      (clojure.pprint/pprint input)
-      (pc/batch-restore-sort {::pc/inputs input
-                              ::pc/key    :dbas.position/id}
-        (db/positions-by-ids (map :dbas.position/id input))))
+    (pc/batch-restore-sort {::pc/inputs input
+                            ::pc/key    :dbas.position/id}
+      (db/positions-by-ids (map :dbas.position/id input)))
     (db/position-by-id (:dbas.position/id input))))
 
 (pc/defresolver issue [_ {slug :dbas.issue/slug}]
@@ -91,23 +89,25 @@
 
 (pc/defresolver preferences [_ {slug :preferences/slug}]
   {::pc/input  #{:preferences/slug}
-   ::pc/output [:preferences/slug
-                {:preferences/list [:preference-list/slug]}
-                {:dbas/issue [:dbas.issue/slug]}]}
-  {:preferences/slug slug
-   :preferences/list {:preference-list/slug slug}
-   :dbas/issue       {:dbas.issue/slug slug}})
+   ::pc/output [{:preferences/list [:preference-list/slug]}
+                {:dbas/issue [:dbas.issue/slug]}
+                {:preferences/result-list [:result/slug]}]}
+  {:preferences/list        {:preference-list/slug slug}
+   :dbas/issue              {:dbas.issue/slug slug}
+   :preferences/result-list {:result/slug slug}})
 
 (pc/defresolver result [_ {slug :result/slug}]
   {::pc/input  #{:result/slug}
-   ::pc/output [{:result/positions [:dbas.position/id]}]}
+   ::pc/output [{:result/positions [{:winners [:dbas.position/id :score]} ; make score publicly available?
+                                    {:losers [:dbas.position/id :score]}]}]}
   (let [issue       (db/get-issue slug)
         budget      (:dbas.issue/budget issue)
         costs       (db/get-costs issue)
-        preferences (->> @state vals (map #(map :dbas.position/id (get-in % [slug :preferences]))))]
+        preferences (->> @state vals (map #(map :dbas.position/id (get-in % [slug :preferences]))))
+        {:keys [winners losers]} (b/borda-budget preferences budget costs)]
     {:result/positions
-     (map #(hash-map :dbas.position/id %)
-       (b/borda-budget preferences budget costs))}))
+     {:winners winners
+      :losers  losers}}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

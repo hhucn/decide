@@ -231,9 +231,6 @@
           position-items (->> positions
                            (remove #(preferred-ids (:dbas.position/id %))))]
       (dom/div
-        (dom/button :.btn.btn-dark
-          {:onClick #(df/load this [:preference-list/slug slug] PreferenceList)}
-          "Refresh!")
         (dom/div
           (when (not-empty preferences)
             (dom/div (dom/h2 "Deine Prioritätsliste")
@@ -275,16 +272,29 @@
     (when votes-end
       (dom/p :.text-muted (format "Die Stimmabgabe ist möglich bis zum %s Uhr." (format-votes-end votes-end))))))
 
-(defsc-route-target PreferenceScreen [_this {:keys [preferences/slug preferences/list dbas/issue]}]
+(defsc ResultList [_this {:keys [result/positions]}]
+  {:query [{:result/positions [{:winners (prim/get-query models/Position)}
+                               {:losers (prim/get-query models/Position)}]}]}
+  (dom/div
+    (dom/h5 "Dies sind die Ergebnisse")
+    (dom/ol :.list-group
+      (for [{:dbas.position/keys [text cost]} (:winners positions)]
+        (dom/li :.list-group-item (dom/p (format "Es wurde dafür gestimmt, dass %s. %s" text (format-cost cost)))))
+      (for [{:dbas.position/keys [text cost]} (:losers positions)]
+        (dom/li :.list-group-item (dom/p :.text-muted (format "Es wurde nicht dafür gestimmt, dass %s. %s" text (format-cost cost))))))))
+
+(def ui-result-list (prim/factory ResultList))
+
+(defsc-route-target PreferenceScreen [this {:keys [preferences/slug preferences/list dbas/issue preferences/result-list]}]
   {:query           [:preferences/slug
                      {:preferences/list (prim/get-query PreferenceList)}
-                     {:dbas/issue (prim/get-query models/Issue)}]
+                     {:dbas/issue (prim/get-query models/Issue)}
+                     {:preferences/result-list (prim/get-query ResultList)}]
    :ident           [:preferences/slug :preferences/slug]
    :route-segment   (fn [] ["preferences" :preferences/slug])
    :route-cancelled (fn [_])
    :will-enter      (fn [reconciler {:keys [preferences/slug]}]
-                      (js/console.log "Enter Preference Screen")
-                      (js/console.log slug)
+                      (js/console.log "Enter Preference Screen" slug)
                       (dr/route-deferred [:preferences/slug slug]
                         #(df/load reconciler [:preferences/slug slug] PreferenceScreen
                            {:post-mutation        `dr/target-ready
@@ -294,4 +304,10 @@
                       true)}
   (dom/div :.preference-screen
     (vote-header issue)
-    (ui-pref-list list)))
+    (ui-pref-list list)
+    (dom/hr :.mt-5)
+    (when-not (empty? (:result/positions result-list))
+      (ui-result-list result-list))
+    (dom/button :.btn.btn-sm.btn-link
+      {:onClick #(df/load this [:preferences/slug slug] PreferenceScreen)}
+      "Refresh!")))

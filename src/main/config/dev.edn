@@ -1,3 +1,4 @@
-{:dbas {:base      "http://0.0.0.0:4284"
-        :api-token "e05a7:a00544e349411fc5bf51e3089ac825a1cf10ae9145d47e6965439fa473cd7b3a"
-        :pubkey    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm\n8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"}}
+{:dbas                            {:base      "http://0.0.0.0:4284"
+                                   :api-token "e05a7:a00544e349411fc5bf51e3089ac825a1cf10ae9145d47e6965439fa473cd7b3a"
+                                   :pubkey    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm\n8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"}
+ :ring.middleware/defaults-config {:security {:anti-forgery false}}}
