@@ -1,6 +1,6 @@
 (ns decidotron.cookies
   (:import goog.net.Cookies)
-  (:refer-clojure :exclude [get remove]))
+  (:refer-clojure :exclude [get remove set]))
 
 (def ^const decidotron-token "decidotron-token")
 
@@ -15,3 +15,7 @@
   Returns `true` if there was a cookie to delete, `false` otherwise"
   [name]
   (.remove (Cookies. js/document) name "/"))
+
+(defn set
+  [name value]
+  (.set (Cookies. js/document) name value (* 30 24 60 60) "/" nil true))

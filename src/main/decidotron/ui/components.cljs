@@ -4,9 +4,7 @@
     [fulcro.client.dom :as dom]
     [fulcro.client.mutations :as m :refer [defmutation]]
     [decidotron.api :as ms]
-    [decidotron.ui.mdc-components :as material]
-    [fulcro.client.routing :as r]
-    [decidotron.loads :as loads]
+    [decidotron.cookies :as cookie]
     [decidotron.ui.routing :as routing]
     [fulcro.client.data-fetch :as df]
     [decidotron.ui.models :as models]
@@ -40,10 +38,11 @@
 
 (def ui-input-field (prim/factory InputField))
 
-(defmutation redirect-from-login [{:keys [where]}]
+(defmutation post-login [{:keys [where]}]
   (action [{:keys [state component]}]
-    (let [login-status (get-in @state [:dbas/connection ::dbas/login-status])]
+    (let [{::dbas/keys [login-status token]} (:dbas/connection @state)]
       (when (= ::dbas/logged-in login-status)
+        (cookie/set cookie/decidotron-token token)
         (routing/change-route! component where)))))
 
 (defsc LoginForm
@@ -76,7 +75,7 @@
                          :params               {:nickname   (:input/value nickname-field)
                                                 :password   (:input/value password-field)
                                                 :connection connection}
-                         :post-mutation        `redirect-from-login
+                         :post-mutation        `post-login
                          :post-mutation-params {:where ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"]}}))}
           "Login")))))
 
