@@ -42,7 +42,7 @@
   (action [{:keys [state component]}]
     (let [{::dbas/keys [login-status token]} (:dbas/connection @state)]
       (when (= ::dbas/logged-in login-status)
-        (cookie/set cookie/decidotron-token token)
+        (cookie/set! cookie/decidotron-token token)
         (routing/change-route! component where)))))
 
 (defsc LoginForm

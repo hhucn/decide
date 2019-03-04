@@ -10,12 +10,12 @@
   [name]
   (.get (Cookies. js/document) name nil))
 
-(defn remove
+(defn remove!
   "Removes a cookie by its name.
   Returns `true` if there was a cookie to delete, `false` otherwise"
   [name]
   (.remove (Cookies. js/document) name "/"))
 
-(defn set
+(defn set!
   [name value]
-  (.set (Cookies. js/document) name value (* 30 24 60 60) "/" nil true))
+  (.set (Cookies. js/document) name value (* 30 24 60 60) "/"))
