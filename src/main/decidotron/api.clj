@@ -2,9 +2,8 @@
   (:require [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc]
             [decidotron.server-components.token :as t]
-            [decidotron.database.models :as db :refer [positions-for-issue index-by]]))
-
-
+            [decidotron.database.models :as db :refer [positions-for-issue index-by]]
+            [decidotron.server-components.budgets :as b]))
 
 (defonce state (atom {}))
 (reset! state {4
@@ -99,10 +98,21 @@
    :preferences/list {:preference-list/slug slug}
    :dbas/issue       {:dbas.issue/slug slug}})
 
+(pc/defresolver result [_ {slug :result/slug}]
+  {::pc/input  #{:result/slug}
+   ::pc/output [{:result/positions [:dbas.position/id]}]}
+  (let [issue       (db/get-issue slug)
+        budget      (:dbas.issue/budget issue)
+        costs       (db/get-costs issue)
+        preferences (->> @state vals (map #(map :dbas.position/id (get-in % [slug :preferences]))))]
+    {:result/positions
+     (map #(hash-map :dbas.position/id %)
+       (b/borda-budget preferences budget costs))}))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(def app-registry [position issue preferences preference-list position-pros-cons update-preferences]) ; DON'T FORGET TO ADD EVERYTHING HERE!
+; DON'T FORGET TO ADD EVERYTHING HERE!
+(def app-registry [position issue preferences preference-list position-pros-cons update-preferences result])
 (def index (atom {}))
 
 (def token-param-plugin

@@ -121,3 +121,16 @@
                  :currency-symbol currency_symbol
                  :positions       (for [{:keys [uid cost content]} statements]
                                     #:dbas.position{:id uid :cost cost :text content})}))
+
+(defn get-costs
+  "Given an issue, returns a mapping from the position-ids to their costs.
+
+  ```clojure
+  (-> \"was-sollen-wir-mit-20-000eur-anfangen\" get-issue get-costs)
+
+  ==> {83 400000, 86 200000, 88 999900, 93 1000099}
+  ```
+  "
+  [issue]
+  (into {} (map (fn [{:dbas.position/keys [id cost]}] [id cost]))
+    (:dbas.issue/positions issue)))
