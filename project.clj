@@ -18,6 +18,8 @@
                  [cheshire "5.8.1"]
                  [buddy/buddy-sign "3.0.0"]
                  [korma "0.4.3"]
+                 [clj-time "0.15.0"]
+                 [com.andrewmcveigh/cljs-time "0.5.2"]
 
                  [http-kit "2.3.0"]
                  [ring/ring-core "1.7.1"]

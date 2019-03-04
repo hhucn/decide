@@ -10,7 +10,10 @@
     [decidotron.ui.models :as models]
     [dbas.client :as dbas]
     [goog.string :refer [format]]
-    [fulcro.incubator.dynamic-routing :as dr])
+    [fulcro.incubator.dynamic-routing :as dr]
+    [cljs-time.core :as time]
+    [cljs-time.format :as tf]
+    [cljs-time.coerce :refer [from-date]])
   (:require-macros [fulcro.incubator.dynamic-routing :refer [defsc-route-target defrouter]]))
 
 (defn logged-in?
@@ -234,7 +237,7 @@
         (dom/div
           (when (not-empty preferences)
             (dom/div (dom/h2 "Deine Prioritätsliste")
-              (dom/h6 :.text-muted "Sortiere sie deinen Wünschen entsprechend.")))
+              (dom/h6 :.text-muted "Sortiere sie deinen Wünschen entsprechend. Je höher desto besser. Du darfst dabei gerne über das Budget hinausgehen.")))
           (dom/ol :.list-group
             (->> preferences
               (map-indexed (fn [i v] (assoc v
@@ -250,7 +253,7 @@
           (when (not-empty position-items)
             (dom/div
               (dom/h3 "Weitere Positionen")
-              (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen.")))
+              (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen und lasse die unwichtigen hier.")))
           (dom/ul :.list-group
             (map #(ui-pref-list-item
                     (prim/computed %
@@ -261,9 +264,21 @@
 
 (def ui-pref-list (prim/factory PreferenceList))
 
-(defsc-route-target PreferenceScreen [_this {:keys [preferences/slug preferences/list]}]
+(defn format-votes-end [votes-end]
+  (tf/unparse-local (tf/formatter "dd.MM.yyyy HH:mm") (from-date votes-end)))
+
+(defn vote-header [{:dbas.issue/keys [title info votes-end]}]
+  (dom/div
+    (dom/h1 title)
+    (dom/h6 :.text-muted info)
+    (dom/p "Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit.")
+    (when votes-end
+      (dom/p :.text-muted (format "Die Stimmabgabe ist möglich bis zum %s Uhr." (format-votes-end votes-end))))))
+
+(defsc-route-target PreferenceScreen [_this {:keys [preferences/slug preferences/list dbas/issue]}]
   {:query           [:preferences/slug
-                     {:preferences/list (prim/get-query PreferenceList)}]
+                     {:preferences/list (prim/get-query PreferenceList)}
+                     {:dbas/issue (prim/get-query models/Issue)}]
    :ident           [:preferences/slug :preferences/slug]
    :route-segment   (fn [] ["preferences" :preferences/slug])
    :route-cancelled (fn [_])
@@ -278,6 +293,5 @@
                       (js/console.log "Leaving Preference Screen")
                       true)}
   (dom/div :.preference-screen
-    (dom/p "Hier ist etwas Text")
-    (ui-pref-list list)
-    (dom/p "Hier ist etwas Text")))
+    (vote-header issue)
+    (ui-pref-list list)))

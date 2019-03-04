@@ -41,9 +41,6 @@
   (k/table :decidotron_decision_process)
   (k/belongs-to issue {:fk :issue_id}))
 
-(k/select decision-process
-  (k/with issue))
-
 (defn positions-by-ids [ids]
   (for [{:keys [uid content cost]}
         (k/select statement
@@ -124,6 +121,3 @@
                  :currency-symbol currency_symbol
                  :positions       (for [{:keys [uid cost content]} statements]
                                     #:dbas.position{:id uid :cost cost :text content})}))
-
-
-(get-issue "was-sollen-wir-mit-20-000eur-anfangen")
