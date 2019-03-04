@@ -39,10 +39,16 @@
 
 (pc/defresolver issue [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
-   ::pc/output [:dbas.issue/slug
+   ::pc/output [:dbas.issue/id
+                :dbas.issue/slug
+                :dbas.issue/budget
+                :dbas.issue/title
+                :dbas.issue/info
+                :dbas.issue/long-info
+                :dbas.issue/votes-end
+                :dbas.issue/currency-symbol
                 {:dbas.issue/positions [:dbas.position/id :dbas.position/text :dbas.position/cost]}]}
-  #:dbas.issue{:slug      slug
-               :positions (db/positions-for-issue slug)})
+  (db/get-issue slug))
 
 (pc/defresolver statement [_ {id :dbas.statement/id}]
   {::pc/input  #{:dbas.statement/id}
@@ -86,9 +92,9 @@
 
 (pc/defresolver preferences [_ {slug :preferences/slug}]
   {::pc/input  #{:preferences/slug}
-   ::pc/output [{:preferences/list
-                 [:preference-list/slug]}]}
-  {:preferences/list {:preference-list/slug slug}})
+   ::pc/output [{:preferences/list [:preference-list/slug :dbas.issue/slug]}]}
+  {:preferences/list {:preference-list/slug slug
+                      :dbas.issue/slug      slug}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

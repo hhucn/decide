@@ -98,3 +98,32 @@
 (comment
   (pro-con-for-position 85)
   (pro-con-for-positions [83, 85]))
+
+(defn get-issue [slug]
+  (let [{:keys [votes_end slug uid title long_info currency_symbol positions_end info budget statements]}
+        (first
+          (k/select issue
+            (k/fields :uid :title :slug :info :long_info)
+            (k/with statement
+              (k/fields :uid)
+              (k/with textversion)
+              (k/with cost)
+              (k/where (and
+                         (= :is_position true)
+                         (= :is_disabled false))))
+            (k/where (and (= :slug slug)))
+            (k/with decision-process)))]
+    #:dbas.issue{:id              uid
+                 :title           title
+                 :slug            slug
+                 :info            info
+                 :long-info       long_info
+                 :positions-end   positions_end
+                 :votes-end       votes_end
+                 :budget          budget
+                 :currency-symbol currency_symbol
+                 :positions       (for [{:keys [uid cost content]} statements]
+                                    #:dbas.position{:id uid :cost cost :text content})}))
+
+
+(get-issue "was-sollen-wir-mit-20-000eur-anfangen")
