@@ -36,24 +36,25 @@
 
 ;;;;
 
-(defn- update-preferences* [{:keys [state ast]}]
-  (let [s         @state
-        issue-key (get-in s [:root/current-page :preferences :route-params :slug])
-        pref-list (get-in s [:preference-list/slug issue-key])]
+(defn- update-preferences* [{:keys [state ast ref]}]
+  (let [pref-list (get-in @state ref)]
     (-> (assoc ast :key `update-preferences)
       (m/with-params {:preference-list (select-keys pref-list [:preferences :preference-list/slug])}))))
 
 (defmutation prefer [{:keys [position/id]}]
-  (action [{:keys [state component]}]
-    (swap! state m/integrate-ident* [:dbas.position/id id] :append (concat (prim/get-ident component) [:preferences])))
+  (action [{:keys [state ref]}]
+    (swap! state m/integrate-ident* [:dbas.position/id id] :append (concat ref [:preferences])))
   (remote [env]
+    (js/console.log env)
     (update-preferences* env)))
 
 (defmutation un-prefer [{:keys [position/id]}]
-  (action [{:keys [state component]}]
-    (swap! state m/remove-ident* [:dbas.position/id id] (concat (prim/get-ident component) [:preferences])))
+  (action [{:keys [state ref]}]
+    (swap! state m/remove-ident* [:dbas.position/id id] (concat ref [:preferences])))
   (remote [env]
     (update-preferences* env)))
+
+;;;;
 
 (defn- swap-levels
   "Swaps to levels l1 and l2. They have to be in preferences!"
