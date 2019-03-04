@@ -44,10 +44,9 @@
    :initial-state (fn [_]
                     {:root/router     (prim/get-initial-state RootRouter {})
                      :dbas/connection (dbas/new-connection (str js/dbas_host "/api"))})}
-  (dom/div :.root.container
+  (dom/div :.root.container.mdc-card.mdc-card__root
     (dom/nav :.navbar.navbar-light.bg-light
       (dom/a :.navbar-brand {:href "#"} "Decidotron 3000")
       (ui-login-button this (dbas.client/logged-in? connection)))
-
-    (dom/div {:className "container"}
+    (dom/div :.container
       (ui-router router))))

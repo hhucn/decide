@@ -151,9 +151,9 @@
                            {:keys [prefer-fn] :as computed}]
   {:query [{:dbas/position (prim/get-query models/Position)}]}
   (let [collapse-id (random-uuid)]
-    (dom/li :.mb-1.mdc-card
+    (dom/li :.mb-2.mdc-card
       (dom/div :.list-group-item.container
-        (dom/div :.row
+        (dom/div :.row.ml-0
           (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)}
             (dom/i :.far.fa-thumbs-up))
           (dom/div :.col.d-flex.justify-content-between
@@ -192,7 +192,7 @@
    :ident [:dbas.position/id :dbas.position/id]}
   (let [collapse-id (random-uuid)
         unprefer    (partial un-prefer-fn id)]
-    (dom/li :.mb-1.mdc-card
+    (dom/li :.mb-2.mdc-card
       (dom/div :.list-group-item
         (dom/div {:data-position-id id}
           (dom/span :.unprefer-position (close-button unprefer))
