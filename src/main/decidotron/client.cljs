@@ -61,11 +61,12 @@
   (reset! app (fc/make-fulcro-client
                 ;; This ensures your client can talk to a CSRF-protected server.
                 ;; See middleware.clj to see how the token is embedded into the HTML
-                {:networking       {:remote (net/fulcro-http-remote
-                                              {:url                "/api"
-                                               :request-middleware secured-request-middleware})
-                                    :dbas   dbas-remote}
-                 :started-callback (fn [{:keys [reconciler]}]
-                                     (get-user-state-from-cookie! (prim/app-root reconciler))
-                                     (routing/start-routing reconciler))}))
+                {:networking         {:remote (net/fulcro-http-remote
+                                                {:url                "/api"
+                                                 :request-middleware secured-request-middleware})
+                                      :dbas   dbas-remote}
+                 :reconciler-options {:shared-fn #(select-keys % [:dbas/connection])}
+                 :started-callback   (fn [{:keys [reconciler]}]
+                                       (get-user-state-from-cookie! (prim/app-root reconciler))
+                                       (routing/start-routing reconciler))}))
   (start))

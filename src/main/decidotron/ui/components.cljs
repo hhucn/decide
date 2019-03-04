@@ -15,6 +15,12 @@
     [fulcro.incubator.dynamic-routing :as dr])
   (:require-macros [fulcro.incubator.dynamic-routing :refer [defsc-route-target defrouter]]))
 
+(defn logged-in?
+  "Returns true if the"
+  [this]
+  (= (prim/shared this [:dbas/connection ::dbas/login-status])
+    ::dbas/logged-in))
+
 (defsc InputField
   [this {:keys [db/id input/value] :as props} {:keys [ui/label ui/type] :as computed}]
   {:query         [:db/id :input/value]
@@ -41,38 +47,38 @@
         (routing/change-route! component where)))))
 
 (defsc LoginForm
-  [this {:keys [login-form/nickname-field login-form/password-field dbas/connection]}]
+  [this {:keys [login-form/nickname-field login-form/password-field]}]
   {:query         [{:login-form/nickname-field (prim/get-query InputField)}
-                   {:login-form/password-field (prim/get-query InputField)}
-                   {[:dbas/connection '_] (prim/get-query models/Connection)}]
+                   {:login-form/password-field (prim/get-query InputField)}]
    :initial-state (fn [{:keys [nickname password]
                         :or   {nickname "" password ""}}]
                     {:login-form/nickname-field (prim/get-initial-state InputField {:value nickname})
                      :login-form/password-field (prim/get-initial-state InputField {:value password})})}
-  (dom/div :.mt-3
-    (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
-    (case (::dbas/login-status connection)
-      ::dbas/failed (dom/div :.alert.alert-danger {:role :alert} "Login fehlgeschlagen")
-      ::dbas/logged-in (dom/div :.alert.alert-success {:role :alert} "Login erfolgreich")
-      nil)
-    (dom/form
-      (ui-input-field (prim/computed nickname-field
-                        {:ui/label "Nickname"
-                         :ui/type  "text"}))
-      (ui-input-field (prim/computed password-field
-                        {:ui/label "Passwort"
-                         :ui/type  "password"}))
-      (dom/button :.btn.btn-primary
-        {:type    "button"
-         :onClick (fn login []
-                    (df/load this :dbas/connection models/Connection
-                      {:remote               :dbas
-                       :params               {:nickname   (:input/value nickname-field)
-                                              :password   (:input/value password-field)
-                                              :connection connection}
-                       :post-mutation        `redirect-from-login
-                       :post-mutation-params {:where ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"]}}))}
-        "Login"))))
+  (let [connection (prim/shared this [:dbas/connection])]
+    (dom/div :.mt-3
+      (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
+      (case (::dbas/login-status connection)
+        ::dbas/failed (dom/div :.alert.alert-danger {:role :alert} "Login fehlgeschlagen")
+        ::dbas/logged-in (dom/div :.alert.alert-success {:role :alert} "Login erfolgreich")
+        nil)
+      (dom/form
+        (ui-input-field (prim/computed nickname-field
+                          {:ui/label "Nickname"
+                           :ui/type  "text"}))
+        (ui-input-field (prim/computed password-field
+                          {:ui/label "Passwort"
+                           :ui/type  "password"}))
+        (dom/button :.btn.btn-primary
+          {:type    "button"
+           :onClick (fn login []
+                      (df/load this :dbas/connection models/Connection
+                        {:remote               :dbas
+                         :params               {:nickname   (:input/value nickname-field)
+                                                :password   (:input/value password-field)
+                                                :connection connection}
+                         :post-mutation        `redirect-from-login
+                         :post-mutation-params {:where ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"]}}))}
+          "Login")))))
 
 (def ui-login-form (prim/factory LoginForm))
 
@@ -228,40 +234,42 @@
    :will-leave      (fn [_]
                       (js/console.log "Leaving Preference Screen")
                       true)}
-  (let [positions      (:dbas.issue/positions issue)
-        preferred-ids  (set (map :dbas.position/id preferences))
-        position-items (->> positions
-                         (remove #(preferred-ids (:dbas.position/id %))))]
-    (dom/div
-      (dom/button :.btn.btn-dark
-        {:onClick #(df/load this [:preference-list/slug slug] PreferenceList)}
-        "Refresh!")
+  (if (logged-in? this)
+    (let [positions      (:dbas.issue/positions issue)
+          preferred-ids  (set (map :dbas.position/id preferences))
+          position-items (->> positions
+                           (remove #(preferred-ids (:dbas.position/id %))))]
       (dom/div
-        (when (not-empty preferences)
-          (dom/div (dom/h2 "Deine Prioritätsliste")
-            (dom/h6 :.text-muted "Sortiere sie deinen Wünschen entsprechend.")))
-        (dom/ol :.list-group
-          (->> preferences
-            (map-indexed (fn [i v] (assoc v
-                                     :ui/preferred-level i
-                                     :ui/last? (= i (dec (count preferences))))))
-            (map #(prim/computed % {:dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)
-                                    :up-fn              (fn [level] (prim/transact! this `[(ms/preference-up {:level ~level})]))
-                                    :down-fn            (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
-                                    :un-prefer-fn       (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
-            (map ui-preferred-item))))
-      (dom/hr)
-      (dom/div
-        (when (not-empty position-items)
-          (dom/div
-            (dom/h3 "Weitere Positionen")
-            (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen.")))
-        (dom/ul :.list-group
-          (map #(ui-pref-list-item
-                  (prim/computed %
-                    {:prefer-fn          (fn [position-id] (prim/transact! this `[(ms/prefer {:position/id ~position-id})]))
-                     :dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)}))
-            position-items))))))
+        (dom/button :.btn.btn-dark
+          {:onClick #(df/load this [:preference-list/slug slug] PreferenceList)}
+          "Refresh!")
+        (dom/div
+          (when (not-empty preferences)
+            (dom/div (dom/h2 "Deine Prioritätsliste")
+              (dom/h6 :.text-muted "Sortiere sie deinen Wünschen entsprechend.")))
+          (dom/ol :.list-group
+            (->> preferences
+              (map-indexed (fn [i v] (assoc v
+                                       :ui/preferred-level i
+                                       :ui/last? (= i (dec (count preferences))))))
+              (map #(prim/computed % {:dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)
+                                      :up-fn              (fn [level] (prim/transact! this `[(ms/preference-up {:level ~level})]))
+                                      :down-fn            (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
+                                      :un-prefer-fn       (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
+              (map ui-preferred-item))))
+        (dom/hr)
+        (dom/div
+          (when (not-empty position-items)
+            (dom/div
+              (dom/h3 "Weitere Positionen")
+              (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen.")))
+          (dom/ul :.list-group
+            (map #(ui-pref-list-item
+                    (prim/computed %
+                      {:prefer-fn          (fn [position-id] (prim/transact! this `[(ms/prefer {:position/id ~position-id})]))
+                       :dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)}))
+              position-items)))))
+    (dom/div :.alert.alert-danger "Du musst dich einloggen, bevor du deine Stimme abgeben kannst.")))
 
 (def ui-pref-list (prim/factory PreferenceList))
 
