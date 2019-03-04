@@ -20,7 +20,7 @@
     ::dbas/logged-in))
 
 (defsc InputField
-  [this {:keys [db/id input/value] :as props} {:keys [ui/label ui/type] :as computed}]
+  [this {:keys [db/id input/value]} {:keys [ui/label ui/type]}]
   {:query         [:db/id :input/value]
    :ident         [:input/by-id :db/id]
    :initial-state (fn [{:keys [value] :or {value ""}}]
@@ -151,7 +151,7 @@
                            {:keys [prefer-fn] :as computed}]
   {:query [{:dbas/position (prim/get-query models/Position)}]}
   (let [collapse-id (random-uuid)]
-    (dom/li :.mb-1
+    (dom/li :.mb-1.mdc-card
       (dom/div :.list-group-item.container
         (dom/div :.row
           (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)}
@@ -192,7 +192,7 @@
    :ident [:dbas.position/id :dbas.position/id]}
   (let [collapse-id (random-uuid)
         unprefer    (partial un-prefer-fn id)]
-    (dom/li :.mb-1
+    (dom/li :.mb-1.mdc-card
       (dom/div :.list-group-item
         (dom/div {:data-position-id id}
           (dom/span :.unprefer-position (close-button unprefer))
