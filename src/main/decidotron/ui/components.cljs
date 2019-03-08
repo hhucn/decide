@@ -52,7 +52,7 @@
            {:dbas.position/cons (prim/get-query models/Statement)}]}
   (let [pros (take 3 (shuffle pros))
         cons (take 3 (shuffle cons))]
-    (dom/div :.list-group-item.collapse.pro-con-addon {:id collapse-id}
+    (dom/div :.list-group-item.collapse.pro-con-addon.pr-0 {:id collapse-id}
       (when (not-empty pros)
         (dom/div :.pro-con-addon__pros
           (dom/p
