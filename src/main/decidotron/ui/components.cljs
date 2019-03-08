@@ -2,16 +2,13 @@
   (:require
     [fulcro.client.primitives :as prim :refer [defsc]]
     [fulcro.client.dom :as dom]
-    [fulcro.client.mutations :as m :refer [defmutation]]
+    [fulcro.client.mutations :refer [defmutation]]
     [decidotron.api :as ms]
-    [decidotron.cookies :as cookie]
-    [decidotron.ui.routing :as routing]
     [fulcro.client.data-fetch :as df]
     [decidotron.ui.models :as models]
     [dbas.client :as dbas]
     [goog.string :refer [format]]
     [fulcro.incubator.dynamic-routing :as dr]
-    [cljs-time.core :as time]
     [cljs-time.format :as tf]
     [cljs-time.coerce :refer [from-date]])
   (:require-macros [fulcro.incubator.dynamic-routing :refer [defsc-route-target defrouter]]))
@@ -22,67 +19,6 @@
   (= (prim/shared this [:dbas/connection ::dbas/login-status])
     ::dbas/logged-in))
 
-(defsc InputField
-  [this {:keys [db/id input/value]} {:keys [ui/label ui/type]}]
-  {:query         [:db/id :input/value]
-   :ident         [:input/by-id :db/id]
-   :initial-state (fn [{:keys [value] :or {value ""}}]
-                    {:db/id       (prim/tempid)
-                     :input/value value})}
-  (dom/div :.form-group
-    (dom/label {:htmlFor (str "id" label)} label)
-    (dom/input :.form-control
-      {:id          (str "id" label)
-       :type        type
-       :value       value
-       :placeholder label
-       :aria-label  label
-       :onChange    (fn [e] (m/set-string! this :input/value :event e))})))
-
-(def ui-input-field (prim/factory InputField))
-
-(defmutation post-login [{:keys [where]}]
-  (action [{:keys [state component]}]
-    (let [{::dbas/keys [login-status token]} (:dbas/connection @state)]
-      (when (= ::dbas/logged-in login-status)
-        (cookie/set! cookie/decidotron-token token)
-        (routing/change-route! component where)))))
-
-(defsc LoginForm
-  [this {:keys [login-form/nickname-field login-form/password-field]}]
-  {:query         [{:login-form/nickname-field (prim/get-query InputField)}
-                   {:login-form/password-field (prim/get-query InputField)}]
-   :initial-state (fn [{:keys [nickname password]
-                        :or   {nickname "" password ""}}]
-                    {:login-form/nickname-field (prim/get-initial-state InputField {:value nickname})
-                     :login-form/password-field (prim/get-initial-state InputField {:value password})})}
-  (let [connection (prim/shared this [:dbas/connection])]
-    (dom/div :.mt-3
-      (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
-      (case (::dbas/login-status connection)
-        ::dbas/failed (dom/div :.alert.alert-danger {:role :alert} "Login fehlgeschlagen")
-        ::dbas/logged-in (dom/div :.alert.alert-success {:role :alert} "Login erfolgreich")
-        nil)
-      (dom/form
-        (ui-input-field (prim/computed nickname-field
-                          {:ui/label "Nickname"
-                           :ui/type  "text"}))
-        (ui-input-field (prim/computed password-field
-                          {:ui/label "Passwort"
-                           :ui/type  "password"}))
-        (dom/button :.btn.btn-primary
-          {:type    "button"
-           :onClick (fn login []
-                      (df/load this :dbas/connection models/Connection
-                        {:remote               :dbas
-                         :params               {:nickname   (:input/value nickname-field)
-                                                :password   (:input/value password-field)
-                                                :connection connection}
-                         :post-mutation        `post-login
-                         :post-mutation-params {:where ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"]}}))}
-          "Login")))))
-
-(def ui-login-form (prim/factory LoginForm))
 
 (defn format-cost [cost]
   (format "%.2f €" (/ cost 100)))
@@ -234,7 +170,7 @@
         (dom/div
           (when (not-empty preferences)
             (dom/div (dom/h2 "Deine Prioritätsliste")
-              (dom/h6 :.text-muted "Sortiere sie deinen Wünschen entsprechend. Je höher desto besser. Du darfst dabei gerne über das Budget hinausgehen.")))
+              (dom/h6 :.text-muted "Sortiere sie absteigend deinen Wünschen entsprechend. Du darfst dabei gerne über das Budget hinausgehen.")))
           (dom/ol :.list-group
             (->> preferences
               (map-indexed (fn [i v] (assoc v

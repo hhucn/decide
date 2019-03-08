@@ -5,23 +5,24 @@
     [fulcro.client.primitives :as prim :refer [defsc]]
     [dbas.client :as dbas]
     [decidotron.ui.components :as comp]
+    [decidotron.ui.components.login :as login]
     [decidotron.api :as ms]
     [fulcro.incubator.dynamic-routing :as dr]
     [decidotron.ui.routing :as routing]))
 
-(dr/defsc-route-target LoginScreen [this {:keys [login/login-form]}]
-  {:query           [{:login/login-form (prim/get-query comp/LoginForm)}]
+(declare LoginScreen)
+(defsc-route-target LoginScreen [_this {:keys [login/login-form]}]
+  {:query           [{:login/login-form (prim/get-query login/LoginForm)}]
    :ident           (fn [] [:screens/id :login-screen])
-   :initial-state   (fn [_] {:login/login-form (prim/get-initial-state comp/LoginForm {})})
+   :initial-state   (fn [_] {:login/login-form (prim/get-initial-state login/LoginForm {})})
    :route-segment   (fn [] ["login"])
    :route-cancelled (fn [_])
-   :will-enter      (fn [_reconciler _]
-                      (js/console.log "Enter Login Screen")
+   :will-enter      (fn [_ _]
                       (dr/route-immediate [:screens/id :login-screen]))
-   :will-leave      (fn [_]
-                      (js/console.log "Leaving Login Screen")
-                      true)}
-  (comp/ui-login-form login-form))
+   :will-leave      (fn [_] true)}
+  (dom/div :.login-screen
+    (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
+    (login/ui-login-form login-form)))
 
 (defrouter RootRouter [_ _]
   {:router-targets [LoginScreen comp/PreferenceScreen]})

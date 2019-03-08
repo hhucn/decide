@@ -16,10 +16,13 @@
 
 
 (defn logout* [state]
-  (assoc state
-    :dbas/connection
-    {::dbas/login-status ::dbas/logged-out
-     ::dbas/base         (str js/dbas_host "/api")}))
+  (js/console.log state)
+  (-> state
+    (assoc :dbas/connection
+           {::dbas/login-status ::dbas/logged-out
+            ::dbas/base         (str js/dbas_host "/api")})
+    (dissoc :preference-list/slug)
+    (dissoc :preferences/slug)))
 
 (defmutation logout [_]
   (action [{:keys [state]}]
