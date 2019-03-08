@@ -26,7 +26,7 @@
 
 (pc/defresolver position [_ input]
   {::pc/input  #{:dbas.position/id}
-   ::pc/output [:dbas.position/id :dbas.position/text :dbas.position/cost]
+   ::pc/output [:dbas.position/id :dbas.position/text :dbas.position/cost :dbas.position/disabled?]
    ::pc/batch? true}
   (if (sequential? input)
     (pc/batch-restore-sort {::pc/inputs input
@@ -84,8 +84,9 @@
    ::pc/output [:preference-list/slug
                 {:dbas/issue [:dbas.issue/slug]}
                 {:preferences [:dbas.position/id]}]}
-  (merge {:dbas/issue {:dbas.issue/slug slug}}
-    (get-in @state [user-id slug])))
+  (let [preferences (get-in @state [user-id slug])]
+    (merge {:dbas/issue {:dbas.issue/slug slug}}
+      (update preferences :preferences db/filter-disabled-positions))))
 
 (pc/defresolver preferences [_ {slug :preferences/slug}]
   {::pc/input  #{:preferences/slug}
@@ -103,7 +104,10 @@
   (let [issue       (db/get-issue slug)
         budget      (:dbas.issue/budget issue)
         costs       (db/get-costs issue)
-        preferences (->> @state vals (map #(map :dbas.position/id (get-in % [slug :preferences]))))
+        preferences (->> @state vals (map #(->> %
+                                             (map db/filter-disabled-positions)
+                                             (get-in [slug :preferences])
+                                             :dbas.position/id)))
         {:keys [winners losers]} (b/borda-budget preferences budget costs)]
     {:result/positions
      {:winners winners

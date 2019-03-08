@@ -1,5 +1,5 @@
 (ns decidotron.database.models
-  (:require [korma.core :as k]))
+  (:require [korma.core :as k :refer [select where with fields subselect]]))
 
 
 (declare cost textversion issue statement position decision-process)
@@ -42,14 +42,15 @@
   (k/belongs-to issue {:fk :issue_id}))
 
 (defn positions-by-ids [ids]
-  (for [{:keys [uid content cost]}
+  (for [{:keys [uid content cost is_disabled]}
         (k/select statement
           (k/where (and (in :uid ids) (= :is_position true)))
           (k/with cost)
           (k/with textversion))]
-    #:dbas.position{:id uid
-                    :text content
-                    :cost cost}))
+    #:dbas.position{:id        uid
+                    :text      content
+                    :cost      cost
+                    :disabled? is_disabled}))
 
 (defn position-by-id [id]
   (first (positions-by-ids [id])))
@@ -134,3 +135,15 @@
   [issue]
   (into {} (map (fn [{:dbas.position/keys [id cost]}] [id cost]))
     (:dbas.issue/positions issue)))
+
+(defn filter-disabled-positions
+  "Filters out all positions which are disabled"
+  [positions]
+  (let [position-ids (map :dbas.position/id positions)]
+    (filter
+      (comp (set (map :uid (select statement
+                             (fields :uid)
+                             (where (and (in :uid position-ids)
+                                      (= :is_disabled false))))))
+        :dbas.position/id)
+      positions)))
