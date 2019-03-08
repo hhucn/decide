@@ -30,7 +30,7 @@
 
 (defn ui-login-button [this logged-in?]
   (if logged-in?
-    (dom/button :.btn.btn-primary
+    (dom/button :.btn.btn-light
       {:onClick #(do (prim/transact! this `[(ms/logout {})])
                      (routing/change-route! this ["login"]))}
       (dom/i :.fas.fa-sign-out-alt) " Logout")
