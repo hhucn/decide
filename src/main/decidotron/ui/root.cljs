@@ -48,10 +48,7 @@
   (dom/div :.root.container.mdc-card.mdc-card__root
     (dom/nav :.navbar.navbar-light.bg-light
       (dom/a :.navbar-brand.d-flex.align-items-center {:href "#"}
-        (dom/object {:data  "/dbas_logo_round.svg"
-                     :type  "image/svg+xml"
-                     :style {:height       "2rem"
-                             :margin-right "1rem"}})
+        (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "Decidotron 3000")
       (ui-login-button this (dbas.client/logged-in? connection)))
     (dom/div :.container

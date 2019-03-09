@@ -4,14 +4,14 @@
         <mask id="holes">
             <rect x="-100" y="-100" width="200" height="200" fill="white"/>
             <g>
-                <title>seperated</title>
+                <title>separated</title>
                 <ellipse cx="-61" rx="15" ry="15" cy="-42" fill="black" origin="0 0" transform-origin="0 0"/>
             </g>
             <ellipse cx="0" cy="0" rx="24.5" ry="24.5" fill="black" origin="0 0" transform-origin="0 0">
                 <title>center</title>
             </ellipse>
             <g>
-                <title>top_rigth</title>
+                <title>top_right</title>
                 <ellipse cx="65" cy="-50" rx="24.5" ry="24.5" fill="black" origin="0 0" transform-origin="0 0"/>
                 <line style="paint-order: stroke; stroke: black; stroke-width: 13;" x1="0" y1="0" x2="65" y2="-50"/>
             </g>
@@ -36,5 +36,5 @@
 
         </mask>
     </defs>
-    <ellipse class="dbas-logo-animated" cx="0" cy="0" rx="100" ry="100" mask="url(#holes)"/>
+    <ellipse class="dbas-logo" cx="0" cy="0" rx="100" ry="100" mask="url(#holes)"/>
 </svg>
