@@ -93,7 +93,9 @@
     (dom/li :.mb-2.mdc-card
       (dom/div :.list-group-item.container
         (dom/div :.row.ml-0
-          (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)}
+          (dom/button :.btn.btn-outline-success {:onClick #(prefer-fn id)
+                                                 :style   {:width  "2.5em"
+                                                           :height "2.5em"}}
             (dom/i :.far.fa-thumbs-up))
           (dom/div :.col.d-flex.justify-content-between
             (dom/p (str "Ich bin dafür, dass " text "."))   ; TODO translate
