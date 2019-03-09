@@ -43,6 +43,7 @@
                 :dbas.issue/info
                 :dbas.issue/long-info
                 :dbas.issue/votes-end
+                :dbas.issue/votes-start
                 :dbas.issue/currency-symbol
                 {:dbas.issue/positions [:dbas.position/id :dbas.position/text :dbas.position/cost]}]}
   (db/get-issue slug))

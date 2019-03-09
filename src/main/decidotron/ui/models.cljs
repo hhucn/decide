@@ -23,6 +23,7 @@
            :dbas.issue/long-info
            :dbas.issue/votes-end
            :dbas.issue/currency-symbol
+           :dbas.issue/votes-start
            {:dbas.issue/positions (prim/get-query Position)}]
    :ident [:dbas.issue/slug :dbas.issue/slug]})
 

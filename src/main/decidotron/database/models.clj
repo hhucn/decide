@@ -98,7 +98,7 @@
   (pro-con-for-positions [83, 85]))
 
 (defn get-issue [slug]
-  (let [{:keys [votes_end slug uid title long_info currency_symbol positions_end info budget statements]}
+  (let [{:keys [votes_end votes_start slug uid title long_info currency_symbol positions_end info budget statements]}
         (first
           (k/select issue
             (k/fields :uid :title :slug :info :long_info)
@@ -118,6 +118,7 @@
                  :long-info       long_info
                  :positions-end   positions_end
                  :votes-end       votes_end
+                 :votes-start     votes_start
                  :budget          budget
                  :currency-symbol currency_symbol
                  :positions       (for [{:keys [uid cost content]} statements]
