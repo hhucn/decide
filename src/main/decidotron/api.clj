@@ -19,7 +19,8 @@
   (let [user-id         (:id (t/unsign token))
         slug            (:preference-list/slug preference-list)
         with-map-idents (update preference-list :preferences (partial map ident->map))] ; idents to maps
-    (get (swap! state assoc-in [user-id slug] with-map-idents) user-id)))
+    (when (db/allow-voting? slug)
+      (get (swap! state assoc-in [user-id slug] with-map-idents) user-id))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -100,19 +101,25 @@
 
 (pc/defresolver result [_ {slug :result/slug}]
   {::pc/input  #{:result/slug}
-   ::pc/output [{:result/positions [{:winners [:dbas.position/id :score]} ; make score publicly available?
+   ::pc/output [:result/show?
+                {:result/positions [{:winners [:dbas.position/id :score]} ; make score publicly available?
                                     {:losers [:dbas.position/id :score]}]}]}
-  (let [issue       (db/get-issue slug)
-        budget      (:dbas.issue/budget issue)
-        costs       (db/get-costs issue)
-        preferences (->> @state vals (map #(->> %
-                                             (map db/filter-disabled-positions)
-                                             (get-in [slug :preferences])
-                                             :dbas.position/id)))
-        {:keys [winners losers]} (b/borda-budget preferences budget costs)]
-    {:result/positions
-     {:winners winners
-      :losers  losers}}))
+  (if (db/show-results? slug)
+    (let [issue       (db/get-issue slug)
+          budget      (:dbas.issue/budget issue)
+          costs       (db/get-costs issue)
+          preferences (->> @state vals (map #(->> %
+                                               (map db/filter-disabled-positions)
+                                               (get-in [slug :preferences])
+                                               :dbas.position/id)))
+          {:keys [winners losers]} (b/borda-budget preferences budget costs)]
+      {:result/show? true
+       :result/positions
+                     {:winners winners
+                      :losers  losers}})
+    {:result/show?     false
+     :result/positions {:winners []
+                        :losers  []}}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

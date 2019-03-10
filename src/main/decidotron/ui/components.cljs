@@ -9,6 +9,7 @@
     [dbas.client :as dbas]
     [goog.string :refer [format]]
     [fulcro.incubator.dynamic-routing :as dr]
+    [cljs-time.core :as t]
     [cljs-time.format :as tf]
     [cljs-time.coerce :refer [from-date]])
   (:require-macros [fulcro.incubator.dynamic-routing :refer [defsc-route-target defrouter]]))
@@ -199,27 +200,36 @@
 
 (def ui-pref-list (prim/factory PreferenceList))
 
-(defn format-votes-end [votes-end]
-  (tf/unparse-local (tf/formatter "dd.MM.yyyy HH:mm") (from-date votes-end)))
+(defn format-votes-date [votes-date]
+  (tf/unparse (tf/formatter "dd.MM.yyyy' um 'HH:mm' Uhr'") (t/to-default-time-zone (from-date votes-date))))
 
-(defn vote-header [{:dbas.issue/keys [title info votes-end]}]
+(defn vote-header [{:dbas.issue/keys [title info votes-end] :as x}]
+  (js/console.log x)
   (dom/div
     (dom/h1 title)
-    (dom/h6 :.text-muted info)
-    (dom/p "Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit Lorem ipsum dolor sit.")
+    #_(dom/h6 :.text-muted info)
+    (dom/p
+      "Es werden für 20.000€ Vorschläge gewählt.
+      Dafür kannst du die Vorschläge auswählen, von welchen du möchtest, dass diese umgesetzt werden.")
+    (dom/p
+      "Die Vorschläge lassen sich sortieren, wobei dein Favorit das meiste Gewicht bei der Abstimmung hat, dein zweit liebster Vorschlag etwas weniger u.s.w.
+      Vorschläge die du nicht magst, wählst du einfach nicht aus und lässt sie wo sie sind.")
     (when votes-end
-      (dom/p :.text-muted (format "Die Stimmabgabe ist möglich bis zum %s Uhr." (format-votes-end votes-end))))))
+      (dom/p (format "Die Stimmabgabe ist möglich bis zum %s. Danach werden die Ergebnise hier angezeigt." (format-votes-date votes-end))))))
 
-(defsc ResultList [_this {:keys [result/positions]}]
-  {:query [{:result/positions [{:winners (prim/get-query models/Position)}
+(defsc ResultList [_this {:keys [result/show? result/positions]}]
+  {:query [:result/show?
+           {:result/positions [{:winners (prim/get-query models/Position)}
                                {:losers (prim/get-query models/Position)}]}]}
-  (dom/div
-    (dom/h5 "Dies sind die Ergebnisse")
-    (dom/ol :.list-group
-      (for [{:dbas.position/keys [text cost]} (:winners positions)]
-        (dom/li :.list-group-item (dom/p (format "Es wurde dafür gestimmt, dass %s. %s" text (format-cost cost)))))
-      (for [{:dbas.position/keys [text cost]} (:losers positions)]
-        (dom/li :.list-group-item (dom/p :.text-muted (format "Es wurde nicht dafür gestimmt, dass %s. %s" text (format-cost cost))))))))
+  (if show?
+    (dom/div
+      (dom/h5 "Dies sind die Ergebnisse")
+      (dom/ol :.list-group
+        (for [{:dbas.position/keys [text cost]} (:winners positions)]
+          (dom/li :.list-group-item (dom/p (format "Es wurde dafür gestimmt, dass %s. %s" text (format-cost cost)))))
+        (for [{:dbas.position/keys [text cost]} (:losers positions)]
+          (dom/li :.list-group-item (dom/p :.text-muted (format "Es wurde nicht dafür gestimmt, dass %s. %s" text (format-cost cost)))))))
+    (dom/p "Die Ergebnisse werden nach der Wahl angezeigt.")))
 
 (def ui-result-list (prim/factory ResultList))
 
@@ -241,11 +251,17 @@
                       (js/console.log "Leaving Preference Screen")
                       true)}
   (dom/div :.preference-screen
-    (vote-header issue)
-    (ui-pref-list list)
-    (dom/hr :.mt-5)
-    (when-not (empty? (:result/positions result-list))
-      (ui-result-list result-list))
+    (js/console.log (:result/show? result-list))
+    (if (:result/show? result-list)
+      (dom/div (ui-result-list result-list))
+      (dom/div (vote-header issue)
+        (ui-pref-list list)))
+
+    ;(vote-header issue)
+    ;(ui-pref-list list)
+    ;(dom/hr :.mt-5)
+    #_(when (:result/show? result-list)
+        (ui-result-list result-list))
     (dom/button :.btn.btn-sm.btn-link
       {:onClick #(df/load this [:preferences/slug slug] PreferenceScreen)}
       "Refresh!")))

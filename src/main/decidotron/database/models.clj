@@ -1,5 +1,7 @@
 (ns decidotron.database.models
-  (:require [korma.core :as k :refer [select where with fields subselect]]))
+  (:require [korma.core :as k :refer [select where with fields subselect]]
+            [clj-time.core :as t]
+            [clj-time.coerce :as tc]))
 
 
 (declare cost textversion issue statement position decision-process)
@@ -44,6 +46,7 @@
 (defn positions-by-ids [ids]
   (for [{:keys [uid content cost is_disabled]}
         (k/select statement
+          (k/limit (count ids))
           (k/where (and (in :uid ids) (= :is_position true)))
           (k/with cost)
           (k/with textversion))]
@@ -58,6 +61,7 @@
 (defn positions-for-issue [slug]
   (for [{:keys [uid cost content]}
         (:statements (first (k/select issue
+                              (k/limit 1)
                               (k/with statement
                                 (k/with textversion)
                                 (k/with cost)
@@ -80,6 +84,7 @@
          (k/fields [:statement_uid :uid] :arguments.is_supportive :arguments.stmt_uid :arguments.arg_uid)
          (k/join :inner
            [(k/subselect "arguments"
+              (k/limit (count position-ids))
               (k/fields :premisegroup_uid :is_supportive
                 [:conclusion_uid :stmt_uid] [:uid :arg_uid])
               (k/where (and
@@ -102,13 +107,13 @@
         (first
           (k/select issue
             (k/fields :uid :title :slug :info :long_info)
+            (k/limit 1)
             (k/with statement
               (k/fields :uid)
               (k/with textversion)
               (k/with cost)
-              (k/where (and
-                         (= :is_position true)
-                         (= :is_disabled false))))
+              (k/where {:is_position true
+                        :is_disabled false}))
             (k/where (and (= :slug slug)))
             (k/with decision-process)))]
     #:dbas.issue{:id              uid
@@ -116,9 +121,9 @@
                  :slug            slug
                  :info            info
                  :long-info       long_info
-                 :positions-end   positions_end
-                 :votes-end       votes_end
-                 :votes-start     votes_start
+                 :positions-end   (tc/to-date (tc/from-sql-date positions_end))
+                 :votes-end       (tc/to-date (tc/from-sql-date votes_end))
+                 :votes-start     (tc/to-date (tc/from-sql-date votes_start))
                  :budget          budget
                  :currency-symbol currency_symbol
                  :positions       (for [{:keys [uid cost content]} statements]
@@ -148,3 +153,28 @@
                                       (= :is_disabled false))))))
         :dbas.position/id)
       positions)))
+
+(defn- votes-start-end [slug]
+  (let [[{:keys [votes_start votes_end]}]
+        (select issue (where {:slug slug})
+          (k/limit 1)
+          (with decision-process
+            (fields :votes_start :votes_end :issue_id)))]
+    {:start (tc/from-sql-date votes_start)
+     :end   (tc/from-sql-date votes_end)}))
+
+(defn allow-voting?
+  "Returns true if 'now' is in the voting phase."
+  [slug]
+  (let [{:keys [start end]} (votes-start-end slug)]
+    (t/within?
+      (or start (t/epoch))
+      (or end (-> 1 t/hours t/from-now))
+      (t/now))))
+
+(defn show-results?
+  [slug]
+  (let [{end :end} (votes-start-end slug)]
+    (if end
+      (t/after? (t/now) end)
+      true)))
