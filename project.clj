@@ -7,7 +7,7 @@
                  [thheller/shadow-cljs "2.8.15"]
                  [fulcrologic/fulcro "2.8.4" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [fulcrologic/fulcro-incubator "0.0.30" :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [com.wsscode/pathom "2.2.11"]
+                 [com.wsscode/pathom "2.2.12"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
                  [garden "1.3.6"]

@@ -10,7 +10,7 @@
     [ring.middleware.gzip :refer [wrap-gzip]]
     [ring.util.response :refer [response file-response resource-response]]
     [ring.util.response :as resp]
-    [hiccup.page :refer [html5]]
+    [hiccup.page :refer [html5 include-js include-css]]
     [fulcro.logging :as log]
     [buddy.core.keys :refer [str->public-key]]))
 
@@ -51,21 +51,18 @@
       [:meta {:charset "utf-8"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}]
       [:link {:rel "shortcut icon" :href "data:image/x-icon;," :type "image/x-icon"}]
-      [:link {:rel       "stylesheet" :href "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-              :integrity "sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" :crossorigin "anonymous"}]
-      [:link {:rel         "stylesheet" :href "https://use.fontawesome.com/releases/v5.7.2/css/all.css"
-              :integrity   "sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
-              :crossorigin "anonymous"}]
-      [:link {:rel "stylesheet" :href "/css/main.css"}]
+      (include-css
+        "/distributions/bootstrap-4.3.1-dist/css/bootstrap.css"
+        "/distributions/fontawesome-free-5.7.2-web/css/all.min.css"
+        "/css/main.css")
       [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]
       [:script (str "var dbas_host ='" (get-in config [:dbas :base]) "';")]]
      [:body
       [:div#app]
-      [:script {:src       "https://code.jquery.com/jquery-3.3.1.slim.min.js"
-                :integrity "sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" :crossorigin "anonymous"}]
-      [:script {:src       "https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-                :integrity "sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" :crossorigin "anonymous"}]
-      [:script {:src "/js/main/main.js"}]
+      (include-js
+        "/distributions/jQuery/jquery-3.3.1.slim.min.js"
+        "/distributions/bootstrap-4.3.1-dist/js/bootstrap.bundle.js"
+        "/js/main/main.js")
       [:script "decidotron.client.init();"]]]))
 
 ;; ================================================================================
