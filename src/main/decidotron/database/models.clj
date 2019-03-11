@@ -13,7 +13,13 @@
 
 (k/defentity textversion
   (k/pk :uid)
-  (k/table :textversions)
+  (k/table
+    (k/subselect
+      [(k/subselect "textversions"
+         (fields :* (k/raw "rank() over (partition by textversions.statement_uid order by textversions.timestamp DESC)"))
+         (where {:is_disabled false})) :ranked]
+      (where {:ranked.rank 1}))
+    :textversions)
   (k/entity-fields :content))
 
 (k/defentity issue
@@ -44,14 +50,15 @@
   (k/belongs-to issue {:fk :issue_id}))
 
 (defn positions-by-ids [ids]
-  (for [{:keys [uid content cost is_disabled]}
+  (for [{:keys [uid text cost is_disabled]}
         (k/select statement
+          (k/fields :* [:textversions.content :text])
           (k/limit (count ids))
           (k/where (and (in :uid ids) (= :is_position true)))
           (k/with cost)
-          (k/with textversion))]
+          (k/join textversion))]
     #:dbas.position{:id        uid
-                    :text      content
+                    :text      text
                     :cost      cost
                     :disabled? is_disabled}))
 
@@ -59,23 +66,24 @@
   (first (positions-by-ids [id])))
 
 (defn positions-for-issue [slug]
-  (for [{:keys [uid cost content]}
+  (for [{:keys [uid cost text]}
         (:statements (first (k/select issue
                               (k/limit 1)
                               (k/with statement
-                                (k/with textversion)
+                                (k/fields :uid :decidotron_position_cost.cost [:textversions.content :text])
+                                (k/join textversion)
                                 (k/with cost)
                                 (k/where (and
                                            (= :is_position true)
                                            (= :is_disabled false))))
                               (k/where (and (= :slug slug))))))]
-     #:dbas.position{:id uid :cost cost :text content}))
+    #:dbas.position{:id uid :cost cost :text text}))
 
 (defn index-by [l k]
   (apply hash-map (mapcat #(vector (k %) %) l)))
 
 (defn pro-con-for-positions [position-ids]
-  (k/select ["textversions" :tv]
+  (select [textversion :tv]
     (k/fields [:statements.stmt_uid :position_uid]
       :statements.uid [:tv.content :text] :statements.is_supportive
       :arg_uid)
@@ -109,8 +117,8 @@
             (k/fields :uid :title :slug :info :long_info)
             (k/limit 1)
             (k/with statement
-              (k/fields :uid)
-              (k/with textversion)
+              (k/fields :* [:textversions.content :text])
+              (k/join textversion)
               (k/with cost)
               (k/where {:is_position true
                         :is_disabled false}))
@@ -126,8 +134,8 @@
                  :votes-start     (tc/to-date (tc/from-sql-date votes_start))
                  :budget          budget
                  :currency-symbol currency_symbol
-                 :positions       (for [{:keys [uid cost content]} statements]
-                                    #:dbas.position{:id uid :cost cost :text content})}))
+                 :positions       (for [{:keys [uid cost text]} statements]
+                                    #:dbas.position{:id uid :cost cost :text text})}))
 
 (defn get-costs
   "Given an issue, returns a mapping from the position-ids to their costs.
