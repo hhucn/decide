@@ -22,7 +22,7 @@
 
 
 (defn format-cost [cost]
-  (format "%.2f €" (/ cost 100)))
+  (format "%.0f €" (/ cost 100)))
 
 (defsc UpDownButton [_this {:keys [level last?] :or {last? false}} {:keys [up-fn down-fn]}]
   (let [chevron-button
@@ -203,19 +203,20 @@
 (defn format-votes-date [votes-date]
   (tf/unparse (tf/formatter "dd.MM.yyyy' um 'HH:mm' Uhr'") (t/to-default-time-zone (from-date votes-date))))
 
-(defn vote-header [{:dbas.issue/keys [title info votes-end] :as x}]
-  (js/console.log x)
-  (dom/div
+(defsc VoteHeader [_ {:dbas.issue/keys [title info votes-end]}]
+  (dom/div :.vote-header.mb-5
     (dom/h1 title)
-    #_(dom/h6 :.text-muted info)
+    (dom/p :.text-muted info)
     (dom/p
       "Es werden für 20.000€ Vorschläge gewählt.
       Dafür kannst du die Vorschläge auswählen, von welchen du möchtest, dass diese umgesetzt werden.")
     (dom/p
-      "Die Vorschläge lassen sich sortieren, wobei dein Favorit das meiste Gewicht bei der Abstimmung hat, dein zweit liebster Vorschlag etwas weniger u.s.w.
-      Vorschläge die du nicht magst, wählst du einfach nicht aus und lässt sie wo sie sind.")
+      "Die Vorschläge lassen sich sortieren, wobei dein Favorit das meiste Gewicht bei der Abstimmung hat, dein zweit liebster Vorschlag etwas weniger usw.
+      Vorschläge, die du nicht magst, wählst du einfach nicht aus und lässt sie wo sie sind.")
     (when votes-end
       (dom/p (format "Die Stimmabgabe ist möglich bis zum %s. Danach werden die Ergebnise hier angezeigt." (format-votes-date votes-end))))))
+
+(def ui-vote-header (prim/factory VoteHeader))
 
 (defsc ResultList [_this {:keys [result/show? result/positions]}]
   {:query [:result/show?
@@ -250,18 +251,29 @@
    :will-leave      (fn [_]
                       (js/console.log "Leaving Preference Screen")
                       true)}
-  (dom/div :.preference-screen
-    (js/console.log (:result/show? result-list))
-    (if (:result/show? result-list)
-      (dom/div (ui-result-list result-list))
-      (dom/div (vote-header issue)
-        (ui-pref-list list)))
+  (let [{:dbas.issue/keys [budget votes-start votes-end]} issue
+        supported-issue? budget
+        voting-started?  (or (not votes-start) (t/after? (t/now) (from-date votes-start)))
+        voting-ended?    (and votes-end (t/after? (t/now) (from-date votes-end)))
+        show-results?    (:result/show? result-list)]
+    (if supported-issue?
+      (dom/div :.preference-screen
+        (when-not voting-started?
+          (dom/p :.alert.alert-info
+            (format "Die Stimmabgabe ist möglich ab dem %s. Du wirst darüber informiert!" (format-votes-date votes-start))))
 
-    ;(vote-header issue)
-    ;(ui-pref-list list)
-    ;(dom/hr :.mt-5)
-    #_(when (:result/show? result-list)
-        (ui-result-list result-list))
-    (dom/button :.btn.btn-sm.btn-link
-      {:onClick #(df/load this [:preferences/slug slug] PreferenceScreen)}
-      "Refresh!")))
+        (when (and voting-started? (not voting-ended?))
+          (dom/div
+            (ui-vote-header issue)
+            (dom/hr)
+            (ui-pref-list list)))
+
+        ; show results, if voting has begun and ended (or no end is defined) and told so by the backend.
+        (when (and voting-started? show-results? (or voting-ended? (nil? voting-ended?)))
+          (dom/div (ui-result-list result-list)))
+
+        (dom/button :.btn.btn-sm.btn-link
+          {:onClick #(df/load this [:preferences/slug slug] PreferenceScreen)}
+          "Refresh!"))
+      (dom/div
+        (dom/p :.alert.alert-danger "Für dieses Thema wird keine Entscheidung getroffen!")))))

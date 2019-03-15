@@ -1,6 +1,5 @@
 (ns decidotron.ui.routing
   (:require
-    [fulcro.client.mutations :as m :refer [defmutation]]
     [pushy.core :as pushy]
     [bidi.verbose :refer [branch leaf param]]
     [bidi.bidi :as bidi]
@@ -26,7 +25,7 @@
 (defn change-route! [this new-route]
   (if (and @history @use-html5-routing)
     (let [path (str \/ (clojure.string/join \/ new-route))]
-      (js/console.log ["Setting path to" path])
+      (js/console.log "Setting path to" path)
       (pushy/set-token! @history path))
     (dr/change-route (prim/any->reconciler this) new-route)))
 
@@ -35,7 +34,7 @@
 
 (defn start-routing [reconciler]
   (when (and @use-html5-routing (not @history))
-    (reset! history (pushy/pushy #(do (js/console.log ["URL CHANGE DETECTED" %])
+    (reset! history (pushy/pushy #(do (js/console.log "URL changed to:" %)
                                       (dr/change-route reconciler %))
                       (partial bidi/match-route app-routes)
                       :identity-fn match->path))

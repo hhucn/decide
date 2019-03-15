@@ -106,7 +106,7 @@
           (resp/set-cookie response "decidotron-token" t {:path "/"})
           response))
 
-      (#{"/" "/index.html"} uri)
+      (#{"/"} uri)
       (-> (resp/response (index anti-forgery-token))
         (resp/content-type "text/html"))
 

@@ -10,15 +10,15 @@
     [fulcro.incubator.dynamic-routing :as dr]
     [decidotron.ui.routing :as routing]))
 
-(declare LoginScreen)
+(def was-sollen-wir-mit-20-000eur-anfangen ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"])
+
 (defsc-route-target LoginScreen [_this {:keys [login/login-form]}]
   {:query           [{:login/login-form (prim/get-query login/LoginForm)}]
    :ident           (fn [] [:screens/id :login-screen])
    :initial-state   (fn [_] {:login/login-form (prim/get-initial-state login/LoginForm {})})
    :route-segment   (fn [] ["login"])
    :route-cancelled (fn [_])
-   :will-enter      (fn [_ _]
-                      (dr/route-immediate [:screens/id :login-screen]))
+   :will-enter      (fn [_ _] (dr/route-immediate [:screens/id :login-screen]))
    :will-leave      (fn [_] true)}
   (dom/div :.login-screen
     (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
