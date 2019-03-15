@@ -108,10 +108,9 @@
     (let [issue       (db/get-issue slug)
           budget      (:dbas.issue/budget issue)
           costs       (db/get-costs issue)
-          preferences (->> @state vals (map #(->> %
-                                               (map db/filter-disabled-positions)
-                                               (get-in [slug :preferences])
-                                               :dbas.position/id)))
+          preferences (->> @state vals (map #(->> (get-in % [slug :preferences])
+                                               db/filter-disabled-positions
+                                               (map :dbas.position/id))))
           {:keys [winners losers]} (b/borda-budget preferences budget costs)]
       {:result/show? true
        :result/positions
