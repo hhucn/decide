@@ -1,4 +1,7 @@
-image: clojure:lein-2.8.1
+image: clojure:openjdk-11-lein
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
 
 stages:
   - build
@@ -11,10 +14,6 @@ test:
   stage: test
   script:
     - lein test
-  cache:
-    key: "$CI_JOB_NAME"
-    paths:
-      - ~/.m2
 
 cljs-tests:
   stage: test
@@ -27,7 +26,6 @@ cljs-tests:
   cache:
     key: "$CI_JOB_NAME"
     paths:
-      - ~/.m2
       - ./node_modules
 
 build_production_images:
