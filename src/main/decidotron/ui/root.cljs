@@ -24,8 +24,28 @@
     (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
     (login/ui-login-form login-form)))
 
-(defrouter RootRouter [_ _]
-  {:router-targets [LoginScreen comp/PreferenceScreen]})
+(defsc-route-target MainPage [_ _]
+  {:ident           (fn [] [:screens/id :main-screen])
+   :route-segment   (fn [] [""])                            ; TODO this currently does not work.
+   :route-cancelled (fn [_])
+   :will-enter      (fn [_ _] (dr/route-immediate [:screens/id :main-screen]))
+   :will-leave      (fn [_] true)}
+  (dom/p "Hello"))
+
+(defn main-page [this]
+  (dom/div
+    (dom/p "Nothing to see here."
+      (dom/button :.btn.btn-sm.btn-link
+        {:onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
+        "Zur Abstimmung"))))
+
+(defrouter RootRouter [this {:keys [current-state]}]
+  {:router-targets [LoginScreen comp/PreferenceScreen]}
+  (case current-state
+    :initial (main-page this)
+    :pending (dom/div "Loading...")
+    :failed (dom/div "Oops")
+    (main-page this)))
 
 (def ui-router (prim/factory RootRouter))
 
@@ -47,7 +67,9 @@
                      :dbas/connection (dbas/new-connection (str js/dbas_host "/api"))})}
   (dom/div :.root.container.mdc-card.mdc-card__root
     (dom/nav :.navbar.navbar-light.bg-light
-      (dom/a :.navbar-brand.d-flex.align-items-center {:href "#"}
+      (dom/a :.navbar-brand.d-flex.align-items-center
+        {:href    "#"
+         :onClick #(routing/change-route! this [""])}
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "Decidotron 3000")
       (ui-login-button this (dbas.client/logged-in? connection)))

@@ -158,7 +158,6 @@
 
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn :dbas.position/id}))
 
-(declare PreferenceList)
 (defsc PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
   {:query [:preference-list/slug
            {:preferences (prim/get-query PreferredItem)}
@@ -184,7 +183,7 @@
                                       :down-fn            (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
                                       :un-prefer-fn       (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
               (map ui-preferred-item))))
-        (dom/hr)
+        (dom/div :.my-4)
         (dom/div
           (when (not-empty position-items)
             (dom/div
@@ -218,23 +217,59 @@
 
 (def ui-vote-header (prim/factory VoteHeader))
 
-(defsc ResultList [_this {:keys [result/show? result/positions]}]
+(defsc ResultEntry [_ {:dbas.position/keys [text id cost pros cons]}
+                    {:keys [winner?] :as computed}]
+  {:query [{:dbas/position (prim/get-query models/Position)}]}
+  (let [collapse-id (random-uuid)]
+    (dom/li :.mb-2.mdc-card
+      (dom/div :.list-group-item.container
+        (dom/div :.row
+          (dom/div :.col.d-flex.justify-content-between
+            (dom/p {:className (when-not winner? "text-muted")}
+              (format (if winner? "Es wurde erfolgreich darüber abgestimmt, dass %s."
+                                  "Nicht erfolgreich war der Vorschlag, dass %s.") text)) ; TODO translate
+            (dom/span :.price.text-muted (format-cost cost))))
+        (expand-button collapse-id))
+      (ui-pro-con-addon (->> computed
+                          (merge {:collapse-id (str "collapse-" collapse-id)})
+                          (prim/computed {:dbas.position/pros pros
+                                          :dbas.position/cons cons}))))))
+
+(def ui-result-entry (prim/factory ResultEntry))
+(defn ui-result-entry-winner [props] (ui-result-entry (prim/computed props {:winner? true})))
+(defn ui-result-entry-loser [props] (ui-result-entry (prim/computed props {:winner? false})))
+
+(defsc ResultList [_this {:result/keys [show? positions]}]
   {:query [:result/show?
            {:result/positions [{:winners (prim/get-query models/Position)}
                                {:losers (prim/get-query models/Position)}]}]}
-  (if show?
-    (dom/div
-      (dom/h5 "Dies sind die Ergebnisse")
-      (dom/ol :.list-group
-        (for [{:dbas.position/keys [text cost]} (:winners positions)]
-          (dom/li :.list-group-item (dom/p (format "Es wurde dafür gestimmt, dass %s. %s" text (format-cost cost)))))
-        (for [{:dbas.position/keys [text cost]} (:losers positions)]
-          (dom/li :.list-group-item (dom/p :.text-muted (format "Es wurde nicht dafür gestimmt, dass %s. %s" text (format-cost cost)))))))
-    (dom/p "Die Ergebnisse werden nach der Wahl angezeigt.")))
+  (let [overall-cost (reduce + (map :dbas.position/cost (:winners positions)))]
+    (if show?
+      (dom/div
+        (dom/p (str "Diese Vorschläge wurden von euch als die wichtigsten auserkoren. "
+                 (format "Verteilt werden dadurch %d €." (format-cost overall-cost))))
+        (dom/ol :.list-group.winners (map ui-result-entry-winner (:winners positions)))
+        (dom/div :.mb-4)
+        (when-not (empty? (:losers positions))
+          (dom/p "Diese Vorschläge waren nicht erfolgreich.")
+          (dom/ol :.list-group.losers (map ui-result-entry-loser (:losers positions)))))
+      (dom/p "Die Ergebnisse werden nach der Wahl angezeigt."))))
 
 (def ui-result-list (prim/factory ResultList))
 
-(defsc-route-target PreferenceScreen [this {:keys [preferences/slug preferences/list dbas/issue preferences/result-list]}]
+(defn refresh-button [on-click-fn]
+  (dom/button :.btn.btn-sm.btn-link
+    {:onClick on-click-fn}
+    (dom/i :.fas.fa-redo) " Refresh!"))
+
+(defn result-area [result-list]
+  (dom/div :.result-area
+    (dom/hr :.my-5)
+    (dom/h3 "Ergebnisse")
+    (ui-result-list result-list)))
+
+(defsc-route-target PreferenceScreen [this {:preferences/keys [slug list result-list]
+                                            :dbas/keys        [issue]}]
   {:query           [:preferences/slug
                      {:preferences/list (prim/get-query PreferenceList)}
                      {:dbas/issue (prim/get-query models/Issue)}
@@ -258,22 +293,19 @@
         show-results?    (:result/show? result-list)]
     (if supported-issue?
       (dom/div :.preference-screen
-        (when-not voting-started?
+        (ui-vote-header issue)
+        (if voting-started?
+          (when (not voting-ended?)
+            (dom/div :.voting-area
+              (ui-pref-list list)))
+
           (dom/p :.alert.alert-info
             (format "Die Stimmabgabe ist möglich ab dem %s. Du wirst darüber informiert!" (format-votes-date votes-start))))
 
-        (when (and voting-started? (not voting-ended?))
-          (dom/div
-            (ui-vote-header issue)
-            (dom/hr)
-            (ui-pref-list list)))
-
         ; show results, if voting has begun and ended (or no end is defined) and told so by the backend.
         (when (and voting-started? show-results? (or voting-ended? (nil? voting-ended?)))
-          (dom/div (ui-result-list result-list)))
+          (result-area result-list))
 
-        (dom/button :.btn.btn-sm.btn-link
-          {:onClick #(df/load this [:preferences/slug slug] PreferenceScreen)}
-          "Refresh!"))
+        (refresh-button #(df/load this [:preferences/slug slug] PreferenceScreen)))
       (dom/div
         (dom/p :.alert.alert-danger "Für dieses Thema wird keine Entscheidung getroffen!")))))

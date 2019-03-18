@@ -37,5 +37,9 @@
     (reset! history (pushy/pushy #(do (js/console.log "URL changed to:" %)
                                       (dr/change-route reconciler %))
                       (partial bidi/match-route app-routes)
-                      :identity-fn match->path))
+                      :identity-fn #(do
+                                      (js/console.log %)
+                                      (let [r (match->path %)]
+                                        (js/console.log r)
+                                        r))))
     (pushy/start! @history)))

@@ -8,8 +8,11 @@
 (defonce state (atom {}))
 (reset! state {4
                {"was-sollen-wir-mit-20-000eur-anfangen"
-                {:preferences [{:dbas.position/id 83}]}}})
-@state
+                {:preferences [{:dbas.position/id 83}]}}
+               6
+               {"was-sollen-wir-mit-20-000eur-anfangen"
+                {:preferences [{:dbas.position/id 85}]}}})
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- ident->map [[a b]] {a b})
