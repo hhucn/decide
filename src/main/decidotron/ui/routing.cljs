@@ -11,10 +11,17 @@
 ;; To indicate when we should turn on URI mapping. This is so you can use with devcards (by turning it off)
 (defonce use-html5-routing (atom true))
 
-(defn- url->route [url]
-  (rest (str/split url #"/")))
+(defn url->route
+  "Translate an url to a sequence of path segments"
+  [url]
+  (let [route (rest (str/split url #"/"))]
+    (if (empty? route)
+      [""]
+      route)))
 
-(defn- route->url [path]
+(defn route->url
+  "Translate a sequence of path segments to an url"
+  [path]
   (str \/ (str/join \/ path)))
 
 (defn change-route! [this new-route]

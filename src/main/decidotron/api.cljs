@@ -47,9 +47,7 @@
 (defmutation prefer [{:keys [position/id]}]
   (action [{:keys [state ref]}]
     (swap! state m/integrate-ident* [:dbas.position/id id] :append (concat ref [:preferences])))
-  (remote [env]
-    (js/console.log env)
-    (update-preferences* env)))
+  (remote [env] (update-preferences* env)))
 
 (defmutation un-prefer [{:keys [position/id]}]
   (action [{:keys [state ref]}]

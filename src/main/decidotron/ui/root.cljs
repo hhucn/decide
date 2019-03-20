@@ -24,14 +24,6 @@
     (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
     (login/ui-login-form login-form)))
 
-(defsc-route-target MainPage [_ _]
-  {:ident           (fn [] [:screens/id :main-screen])
-   :route-segment   (fn [] [""])                            ; TODO this currently does not work.
-   :route-cancelled (fn [_])
-   :will-enter      (fn [_ _] (dr/route-immediate [:screens/id :main-screen]))
-   :will-leave      (fn [_] true)}
-  (dom/p "Hello"))
-
 (defn main-page [this]
   (dom/div
     (dom/p "Nothing to see here."
@@ -39,8 +31,17 @@
         {:onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
         "Zur Abstimmung"))))
 
+(defsc-route-target MainPage [this _]
+  {:query           []
+   :ident           (fn [] [:screens/id :main-screen])
+   :route-segment   (fn [] [""])
+   :route-cancelled (fn [_])
+   :will-enter      (fn [_ _] (dr/route-immediate [:screens/id :main-screen]))
+   :will-leave      (fn [_] true)}
+  (main-page this))
+
 (defrouter RootRouter [this {:keys [current-state]}]
-  {:router-targets [LoginScreen comp/PreferenceScreen]}
+  {:router-targets [MainPage LoginScreen comp/PreferenceScreen]}
   (case current-state
     :initial (main-page this)
     :pending (dom/div "Loading...")

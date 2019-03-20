@@ -1,14 +1,27 @@
 (ns decidotron.sample-spec
   (:require
-    [fulcro-spec.core :refer [specification provided behavior assertions]]))
+    [fulcro-spec.core :refer [specification provided behavior assertions]]
+    [decidotron.ui.routing :as r]))
 
-; Tests for both client and server
-(specification "Sample Spec"
-  (behavior "addition computes addition correctly"
+(specification "URL (dis-)assembly Spec"
+  (behavior "disassembling of URLs works"
     (assertions
-      "with positive integers"
-      (+ 1 5 3) => 9
-      "with negative integers"
-      (+ -1 -3 -5) => -9
-      "with a mix of signed integers"
-      (+ +5 -3) => 2)))
+      "with the empty string"
+      (r/url->route "") => [""]
+      "just with a slash"
+      (r/url->route "/") => [""]
+      "with a single segment"
+      (r/url->route "/foo") => ["foo"]
+      "with multiple segments"
+      (r/url->route "/foo/bar") => ["foo" "bar"]))
+
+  (behavior "assembling of URLs works"
+    (assertions
+      "with an empty string"
+      (r/route->url [""]) => "/"
+      "with an empty path"
+      (r/route->url []) => "/"
+      "with a single segment"
+      (r/route->url ["foo"]) => "/foo"
+      "with multiple segments"
+      (r/route->url ["foo" "bar"]) => "/foo/bar")))
