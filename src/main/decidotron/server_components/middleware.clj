@@ -49,6 +49,26 @@
      [:head {:lang "en"}
       [:title "Decidotron"]
       [:meta {:charset "utf-8"}]
+      [:link
+       {:href  "/favicons/apple-touch-icon.png",
+        :sizes "180x180",
+        :rel   "apple-touch-icon"}]
+      [:link
+       {:href  "/favicons/favicon-32x32.png",
+        :sizes "32x32",
+        :type  "image/png",
+        :rel   "icon"}]
+      [:link
+       {:href  "/favicons/favicon-16x16.png",
+        :sizes "16x16",
+        :type  "image/png",
+        :rel   "icon"}]
+      [:link
+       {:color "#006abf",
+        :href  "/favicons/safari-pinned-tab.svg",
+        :rel   "mask-icon"}]
+      [:link {:href "/favicons/favicon.ico", :rel "shortcut icon"}]
+      [:meta {:content "#FFFFFF", :name "msapplication-TileColor"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}]
       [:link {:rel "shortcut icon" :href "data:image/x-icon;," :type "image/x-icon"}]
       (include-css

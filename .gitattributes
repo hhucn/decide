@@ -1,1 +1,2 @@
 resources/public/distributions/** filter=lfs diff=lfs merge=lfs -text
+resources/public/favicons filter=lfs diff=lfs merge=lfs -text
