@@ -7,7 +7,8 @@
                        :modules    {:main {:entries [decidotron.client]}}
 
                        :devtools   {:after-load decidotron.client/start
-                                    :preloads   [fulcro.inspect.preload decidotron.development-preload]}}
+                                    :preloads   [fulcro.inspect.preload decidotron.development-preload]
+                                    :watch-dir  "resources/public"}}
 
           :test       {:target           :browser-test
                        :test-dir         "resources/public/js/test"

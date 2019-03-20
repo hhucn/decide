@@ -5,7 +5,7 @@
 
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [thheller/shadow-cljs "2.8.15"]
-                 [fulcrologic/fulcro "2.8.4" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [fulcrologic/fulcro "2.8.4" :exclusions [com.fasterxml.jackson.core/jackson-core]] ; jackson has a clash with buddy
                  [fulcrologic/fulcro-incubator "0.0.30" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [com.wsscode/pathom "2.2.12"]
                  [ring/ring-defaults "0.3.2"]
@@ -24,7 +24,6 @@
                  [http-kit "2.3.0"]
                  [ring/ring-core "1.7.1"]
                  [bk/ring-gzip "0.3.0"]
-                 [bidi "2.1.5"]
 
                  ;; the following 3 are not used directly, but are pinned to ensure consistency.
                  ;; delete then if you upgrade anything and reanalyze deps
