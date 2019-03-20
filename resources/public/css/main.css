@@ -2,11 +2,7 @@ body {
     background: rgba(235, 235, 235, 0.45);
 }
 
-.colored-container {
-    background: #fff;
-    padding: 1em;
-}
-
+/* Borrowed from Googles Material Design Components ad the sense of material to areas */
 .mdc-card {
     border-radius: 4px;
     background-color: #fff;
@@ -21,15 +17,12 @@ body {
     box-sizing: border-box;
 }
 
-.mdc-card__root {
+/* Spacing for the root content surface */
+.mdc-card.mdc-card__root {
     background-color: rgba(255, 255, 255, 0.4);
     padding-top: 15px;
     padding-bottom: 15px;
     margin-top: 15px;
-}
-
-li {
-    list-style-type: none;
 }
 
 .up-down {
@@ -40,51 +33,19 @@ li {
     align-items: center;
 }
 
-.preferred-item {
-    padding-left: 0;
-    padding-right: 0;
-}
-
-.preferred-item > .links {
-    grid-area: buttons;
-}
-
-.preferred-item > .price {
-    grid-area: price;
-    align-self: end;
-    padding-right: 16px;
-}
-
-.price {
-    white-space: nowrap;
-    justify-content: right;
-}
-
-.preferred-item > .content {
-    grid-area: content;
-    padding: 10px;
-    margin: 0;
-}
-
+/* Align text with up/down button */
 .content {
     white-space: normal;
     margin-top: .7rem;
 }
 
-.pro-con-addon {
-    grid-area: pro-con;
-}
-
-.links {
-    padding-top: 12px;
-}
-
 .unprefer-position {
     position: absolute;
-    top: 10px;
+    top: 5px;
     right: 10px;
 }
 
+/* Set the button for the pro/con addon in the center and let it animate quite fast */
 .expand-btn {
     position: absolute;
     bottom: 0px;
@@ -95,6 +56,7 @@ li {
     transition: .25s linear;
 }
 
+/* Turn expand button upside down, when the content is shown */
 .expand-btn[data-toggle="collapse"] {
     -webkit-transform: rotate(.5turn);
     -moz-transform: rotate(.5turn);
