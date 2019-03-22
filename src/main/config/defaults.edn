@@ -22,4 +22,5 @@
                              :frame-options  :sameorigin
                              :xss-protection {:enable? true
                                               :mode    :block}}}
- :dbas {:base "https://dbas.cs.uni-duesseldorf.de"}}
+ :storage-dir   "store"
+ :dbas          {:base "https://dbas.cs.uni-duesseldorf.de"}}

@@ -20,6 +20,7 @@
                  [korma "0.4.3"]
                  [clj-time "0.15.1"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
+                 [io.replikativ/konserve "0.5.0"]
 
                  [http-kit "2.3.0"]
                  [ring/ring-core "1.7.1"]

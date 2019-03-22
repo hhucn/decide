@@ -1,29 +1,35 @@
 (ns decidotron.api
   (:require [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc]
+            [mount.core :refer [defstate]]
             [decidotron.server-components.token :as t]
             [decidotron.database.models :as db :refer [positions-for-issue index-by]]
-            [decidotron.server-components.budgets :as b]))
+            [decidotron.server-components.budgets :as b]
+            [decidotron.server-components.config :refer [config]]
+            [konserve.filestore :as kfs]
+            [konserve.core :as k]
+            [clojure.core.async :refer [go <! <!!]]))
 
-(defonce state (atom {}))
-(reset! state {4
-               {"was-sollen-wir-mit-20-000eur-anfangen"
-                {:preferences [{:dbas.position/id 83}]}}
-               6
-               {"was-sollen-wir-mit-20-000eur-anfangen"
-                {:preferences [{:dbas.position/id 85}]}}})
+(defstate storage
+  :start (<!! (kfs/new-fs-store (:storage-dir config))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- ident->map [[a b]] {a b})
 
+(defn- validate-preference-list [{:keys [preferences]}]
+  (distinct? (map :dbas.position/id preferences)))
+
 (pc/defmutation update-preferences [_ {:keys [preference-list dbas.client/token]}]
   {::pc/params [:preference-list :token]}
-  (let [user-id         (:id (t/unsign token))
-        slug            (:preference-list/slug preference-list)
-        with-map-idents (update preference-list :preferences (partial map ident->map))] ; idents to maps
-    (when (db/allow-voting? slug)
-      (get (swap! state assoc-in [user-id slug] with-map-idents) user-id))))
+  (if-let [user-id (:id (t/unsign token))]
+    (let [slug            (:preference-list/slug preference-list)
+          preference-list (update preference-list :preferences (partial map ident->map))] ; idents to maps
+      (if (validate-preference-list preference-list)
+        (when (db/allow-voting? slug)
+          (go (second (<! (k/assoc-in storage [slug user-id] preference-list)))))
+        :decidotron.error/duplicated-position))
+    :decidotron.error/invalid-token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -89,9 +95,10 @@
    ::pc/output [:preference-list/slug
                 {:dbas/issue [:dbas.issue/slug]}
                 {:preferences [:dbas.position/id]}]}
-  (let [preferences (get-in @state [user-id slug])]
+  (go
     (merge {:dbas/issue {:dbas.issue/slug slug}}
-      (update preferences :preferences db/filter-disabled-positions))))
+      (update (<! (k/get-in storage [slug user-id]))
+        :preferences db/filter-disabled-positions))))
 
 (pc/defresolver preferences [_ {slug :preferences/slug}]
   {::pc/input  #{:preferences/slug}
@@ -111,9 +118,9 @@
     (let [issue       (db/get-issue slug)
           budget      (:dbas.issue/budget issue)
           costs       (db/get-costs issue)
-          preferences (->> @state vals (map #(->> (get-in % [slug :preferences])
-                                               db/filter-disabled-positions
-                                               (map :dbas.position/id))))
+          preferences (->> (<!! (k/get-in storage [slug]))
+                        vals
+                        (map #(->> % :preferences db/filter-disabled-positions (map :dbas.position/id))))
           {:keys [winners losers]} (b/borda-budget preferences budget costs)]
       {:result/show? true
        :result/positions

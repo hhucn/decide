@@ -23,3 +23,4 @@ resources/private
 resources/public/js/workspaces
 
 .lein-failures
+store
