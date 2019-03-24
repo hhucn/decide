@@ -8,7 +8,8 @@
     [decidotron.ui.components.login :as login]
     [decidotron.api :as ms]
     [fulcro.incubator.dynamic-routing :as dr]
-    [decidotron.ui.routing :as routing]))
+    [decidotron.ui.routing :as routing]
+    [decidotron.ui.static-pages.faq :refer [FAQ]]))
 
 (def was-sollen-wir-mit-20-000eur-anfangen ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"])
 
@@ -41,7 +42,7 @@
   (main-page this))
 
 (defrouter RootRouter [this {:keys [current-state]}]
-  {:router-targets [MainPage LoginScreen comp/PreferenceScreen]}
+  {:router-targets [MainPage LoginScreen comp/PreferenceScreen FAQ]}
   (case current-state
     :initial (main-page this)
     :pending (dom/div "Loading...")
@@ -60,6 +61,9 @@
       {:onClick #(routing/change-route! this ["login"])}
       (dom/i :.fas.fa-sign-in-alt) " Login")))
 
+(defn footer-link [label href]
+  (dom/a :.btn.btn-sm.btn-light {:href href} label))
+
 (defsc Root [this {:keys [dbas/connection root/router]}]
   {:query         [:dbas/connection
                    {:root/router (prim/get-query RootRouter)}]
@@ -70,9 +74,14 @@
     (dom/nav :.navbar.navbar-light.bg-light
       (dom/a :.navbar-brand.d-flex.align-items-center
         {:href    "#"
-         :onClick #(routing/change-route! this [""])}
+         :onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "Decidotron 3000")
       (ui-login-button this (dbas.client/logged-in? connection)))
     (dom/div :.container
-      (ui-router router))))
+      (ui-router router))
+    (dom/hr :.row)
+    (dom/div :.row.h-auto.mx-0.footer.d-flex.justify-content-around
+      (footer-link "FAQ" "/faq")
+      (footer-link "Kontakt" "/contact")
+      (footer-link "Datenschutz" "/privacy"))))

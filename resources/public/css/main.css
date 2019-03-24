@@ -68,3 +68,8 @@ body {
     -moz-transform: rotate(0turn);
     transform: rotate(0turn);
 }
+
+.footer {
+    margin-top: -10px;
+    margin-bottom: -10px;
+}
