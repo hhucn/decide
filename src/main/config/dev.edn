@@ -1,4 +1,8 @@
 {:dbas                            {:base      "http://0.0.0.0:4284"
-                                   :api-token "52874:79e8638f7333566efb89833c1cf9f54d4f19edb1748299d24033991747de1504"
-                                   :pubkey    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm\n8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"}
+                                   :api       "http://0.0.0.0:4284/api"
+                                   :api-token "0e9ba:bb3b1ac2c6cee9cb6aff8ed803406a6445c0a214a9337d54f3caebfa697fb8c5"
+                                   :pubkey    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm\n8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"
+                                   :database  {:db       "discussion"
+                                               :user     "postgres"
+                                               :password "DXxCNtfnt!MOo!f8LY1!P%sw3KGzt@s!"}}
  :ring.middleware/defaults-config {:security {:anti-forgery false}}}

@@ -9,7 +9,8 @@
             [decidotron.cookies :as cookie]
             [fulcro.client.primitives :as prim]
             [fulcro.client.data-fetch :as df]
-            [goog.crypt.base64 :as b64]))
+            [goog.crypt.base64 :as b64]
+            [clojure.string :as str]))
 
 (defonce app (atom nil))
 
@@ -44,7 +45,7 @@
 (defn- ->initial-dbas-data
   "Receives a D-BAS JWT and returns in the map containing all login data needed for decidotron"
   [token]
-  (let [{:keys [id nickname]} (-> token (clojure.string/split #"\.") second b64/decodeString parse-json)]
+  (let [{:keys [id nickname]} (-> token (str/split #"\.") second b64/decodeString parse-json)]
     {:dbas.client/base         (str js/dbas_host "/api")
      :dbas.client/id           id
      :dbas.client/nickname     nickname

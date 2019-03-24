@@ -1,7 +1,16 @@
-(ns decidotron.database.models
+(ns decidotron.server-components.database
   (:require [korma.core :as k :refer [select where with fields subselect]]
+            [decidotron.server-components.config :refer [config]]
             [clj-time.core :as t]
-            [clj-time.coerce :as tc]))
+            [clj-time.coerce :as tc]
+            [mount.core :refer [defstate]]
+            [korma.db :as kdb]))
+
+(defstate db
+  :start (let [db (kdb/postgres (get-in config [:dbas :database]))]
+           (kdb/defdb kdatabase db)
+           db))
+
 
 
 (declare cost textversion issue statement position decision-process)

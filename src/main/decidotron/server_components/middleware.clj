@@ -28,11 +28,12 @@
 ;; ================================================================================
 (log/set-level! :all)
 (defn wrap-api [handler uri]
-  (fn [request]
+  (fn api-middleware [request]
     (if (= uri (:uri request))
       (server/handle-api-request
         ;; Sub out a pathom parser here if you want to use pathom.
-        (fn [env query] (let [result (async/<!! (server-parser env query))] result))
+        (fn phantom-parser [env query]
+          (async/<!! (server-parser env query)))
         ;; this map is `env`. Put other defstate things in this map and they'll be
         ;; in the mutations/query env on server.
         {:config config}
@@ -116,7 +117,7 @@
         (println "Token could not be verified" e)))))
 
 (defn wrap-html-routes [ring-handler]
-  (fn [{:keys [uri anti-forgery-token] :as req}]
+  (fn html-route-middleware [{:keys [uri anti-forgery-token] :as req}]
     (cond
       ;; fetch the correct token from the user and redirect to the site without the token parameter.
       (get-in req [:params :token])
@@ -151,8 +152,10 @@
       (wrap-api "/api")
       server/wrap-transit-params
       server/wrap-transit-response
-      (server/wrap-protect-origins {:allow-when-origin-missing? false
-                                    :legal-origins              legal-origins})
+
+      ; This is just an additional layer, to protect if the CSRF Token is lost.
+      #_(server/wrap-protect-origins {:allow-when-origin-missing? false
+                                      :legal-origins              legal-origins})
       (wrap-html-routes)
       ;; If you want to set something like session store, you'd do it against
       ;; the defaults-config here (which comes from an EDN file, so it can't have

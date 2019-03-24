@@ -3,7 +3,7 @@
             [com.wsscode.pathom.connect :as pc]
             [mount.core :refer [defstate]]
             [decidotron.server-components.token :as t]
-            [decidotron.database.models :as db :refer [positions-for-issue index-by]]
+            [decidotron.server-components.database :as db :refer [positions-for-issue index-by]]
             [decidotron.server-components.budgets :as b]
             [decidotron.server-components.config :refer [config]]
             [konserve.filestore :as kfs]

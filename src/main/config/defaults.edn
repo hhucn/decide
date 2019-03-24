@@ -23,4 +23,5 @@
                              :xss-protection {:enable? true
                                               :mode    :block}}}
  :storage-dir   "store"
- :dbas          {:base "https://dbas.cs.uni-duesseldorf.de"}}
+ :dbas          {:base   "https://dbas.cs.uni-duesseldorf.de"
+                 :pubkey "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm\n8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"}}
