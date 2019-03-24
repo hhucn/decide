@@ -19,7 +19,8 @@ RUN lein uberjar
 
 ### Production
 FROM openjdk:11-jre-slim
+COPY src/main/config/prod.edn /config/production.edn
 COPY --from=clj-build /tmp/target/decidotron.jar decidotron.jar
 
 EXPOSE 8080
-CMD ["java", "-jar", "decidotron.jar"]
+ENTRYPOINT ["java", "-Dconfig=/config/production.edn", "-jar", "decidotron.jar"]
