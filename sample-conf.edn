@@ -1,0 +1,19 @@
+{:http-kit      {:port 8080}
+
+ ;; Legal Origins for API request.
+ :legal-origins #{"localhost" "0.0.0.0"}
+
+ ;; You probably want these set to true in real production:
+ :ring.middleware/defaults-config
+                {:proxy    false
+                 :security {:ssl-redirect false}}
+
+ :dbas          {:base      "http://0.0.0.0:4284"           ; for link generation "http://balbabla"
+                 :api       "web:4284/api"                  ; for talking to D-BAS e.g. "web:4284/api"
+                 :api-token "c3525:a3485f9b2a5105e01ba92f680374c249819ae2454a7d390d44961c6c4c6b6ad1"
+                 :pubkey    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"
+                 :database  {:host     "db"
+                             :port     5432
+                             :db       "discussion"
+                             :user     "postgres"
+                             :password "bla"}}}
