@@ -160,6 +160,46 @@
 
 (def ui-preferred-item (prim/factory PreferredItem {:keyfn :dbas.position/id}))
 
+(defn preferred-positions
+  "This subcomponent renders the positions, which the user does prefer"
+  [this slug preferences]
+  (dom/div :.preferred-positions
+    (dom/h2 "Deine Prioritätsliste")
+    (dom/h6 :.text-muted "Sortiere sie absteigend deinen Wünschen entsprechend. Du darfst dabei gerne über das Budget hinausgehen.")
+    (dom/ol :.list-group
+      (letfn [(assoc-levels [i v]
+                (assoc v
+                  :ui/preferred-level i
+                  :ui/last? (-> preferences count dec (= i))))
+
+              (add-computed [props]
+                (prim/computed props
+                  {:dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)
+                   :up-fn              (fn up-fn [level]
+                                         (prim/transact! this `[(ms/preference-up {:level ~level})]))
+                   :down-fn            (fn down-fn [level]
+                                         (prim/transact! this `[(ms/preference-down {:level ~level})]))
+                   :un-prefer-fn       (fn un-prefer-fn [position-id]
+                                         (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))]
+        (->> preferences
+          (map-indexed assoc-levels)
+          (map add-computed)
+          (map ui-preferred-item))))))
+
+(defn untouched-positions
+  "This subcomponent renders the positions, which the user does not prefer (yet)"
+  [this slug position-items]
+  (dom/div :.untouched-positions
+    (dom/h3 "Weitere Positionen")
+    (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen und lasse die unwichtigen hier.")
+    (dom/ul :.list-group
+      (map (fn [position-item]
+             (ui-pref-list-item
+               (prim/computed position-item
+                 {:prefer-fn          (fn [position-id] (prim/transact! this `[(ms/prefer {:position/id ~position-id})]))
+                  :dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)})))
+        position-items))))
+
 (defsc PreferenceList [this {:keys [preference-list/slug preferences dbas/issue]}]
   {:query [:preference-list/slug
            {:preferences (prim/get-query PreferredItem)}
@@ -170,33 +210,19 @@
           preferred-ids  (set (map :dbas.position/id preferences))
           position-items (->> positions
                            (remove #(preferred-ids (:dbas.position/id %))))]
-      (dom/div
+      (if (empty? positions)
+        (dom/div
+          (dom/p :.alert.alert-warning "Bisher gibt es keine Vorschläge. Füge welche hinzu!")
+          (dom/a :.btn.btn-primary
+            {:href (format "%s/discuss/%s" js/dbas-host slug)}
+            "Vorschläge hinzufügen"))
         (dom/div
           (when (not-empty preferences)
-            (dom/div (dom/h2 "Deine Prioritätsliste")
-              (dom/h6 :.text-muted "Sortiere sie absteigend deinen Wünschen entsprechend. Du darfst dabei gerne über das Budget hinausgehen.")))
-          (dom/ol :.list-group
-            (->> preferences
-              (map-indexed (fn [i v] (assoc v
-                                       :ui/preferred-level i
-                                       :ui/last? (= i (dec (count preferences))))))
-              (map #(prim/computed % {:dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)
-                                      :up-fn              (fn [level] (prim/transact! this `[(ms/preference-up {:level ~level})]))
-                                      :down-fn            (fn [level] (prim/transact! this `[(ms/preference-down {:level ~level})]))
-                                      :un-prefer-fn       (fn [position-id] (prim/transact! this `[(ms/un-prefer {:position/id ~position-id})]))}))
-              (map ui-preferred-item))))
-        (dom/div :.my-4)
-        (dom/div
+            (preferred-positions this slug preferences))
+
           (when (not-empty position-items)
-            (dom/div
-              (dom/h3 "Weitere Positionen")
-              (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen und lasse die unwichtigen hier.")))
-          (dom/ul :.list-group
-            (map #(ui-pref-list-item
-                    (prim/computed %
-                      {:prefer-fn          (fn [position-id] (prim/transact! this `[(ms/prefer {:position/id ~position-id})]))
-                       :dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)}))
-              position-items)))))
+            [(dom/div :.my-4)
+             (untouched-positions this slug position-items)]))))
     (dom/div :.alert.alert-danger "Du musst dich einloggen, bevor du deine Stimme abgeben kannst.")))
 
 (def ui-pref-list (prim/factory PreferenceList))
