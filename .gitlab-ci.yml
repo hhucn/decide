@@ -28,7 +28,7 @@ test:
 #    paths:
 #      - ./node_modules
 
-build_production_images:
+build_snapshot_images:
   stage: build-images
   image: docker
   script:
@@ -37,3 +37,13 @@ build_production_images:
     - docker push $CI_REGISTRY_IMAGE/decidotron:snapshot
   only:
     - master
+
+build_version_images:
+  stage: build-images
+  image: docker
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE/decidotron:$CI_COMMIT_TAG .
+    - docker push $CI_REGISTRY_IMAGE/decidotron:$CI_COMMIT_TAG
+  only:
+    - tags
