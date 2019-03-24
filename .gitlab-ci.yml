@@ -15,18 +15,18 @@ test:
   script:
     - lein test
 
-cljs-tests:
-  stage: test
-  image: circleci/clojure:lein-2.8.1-node-browsers
-  script:
-    - npm install
-    - npx shadow-cljs compile ci-tests
-    - npx karma start --single-run
-    - lein do clean, test-refresh :run-once # clean is needed in case AOT stuff is around
-  cache:
-    key: "$CI_JOB_NAME"
-    paths:
-      - ./node_modules
+#cljs-tests:
+#  stage: test
+#  image: circleci/clojure:lein-2.8.1-node-browsers
+#  script:
+#    - npm install
+#    - npx shadow-cljs compile ci-tests
+#    - npx karma start --single-run
+#    - lein do clean, test-refresh :run-once # clean is needed in case AOT stuff is around
+#  cache:
+#    key: "$CI_JOB_NAME"
+#    paths:
+#      - ./node_modules
 
 build_production_images:
   stage: build-images
