@@ -24,6 +24,9 @@
 (defn format-cost [cost]
   (format "%.0f €" (/ cost 100)))
 
+(defn price-tag [cost]
+  (dom/span :.price.text-muted (format-cost cost)))
+
 (defsc UpDownButton [_this {:keys [level last?] :or {last? false}} {:keys [up-fn down-fn]}]
   (let [chevron-button
         (fn [up_or_down props]
@@ -100,7 +103,7 @@
             (dom/i :.far.fa-thumbs-up))
           (dom/div :.col.d-flex.justify-content-between
             (dom/p (str "Ich bin dafür, dass " text "."))   ; TODO translate
-            (dom/span :.price.text-muted (format-cost cost))))
+            (price-tag cost)))
         (expand-button collapse-id))
       (ui-pro-con-addon (->> computed
                           (merge {:collapse-id (str "collapse-" collapse-id)})
@@ -146,8 +149,7 @@
               (dom/div {:className "align-center content card-text col"} (str "Ich bin dafür, dass " (or text "") ".")))
             (dom/div :.row.d-flex.justify-content-between
               (dom/div)
-              (dom/div :.price.text-muted.float-right
-                (format-cost cost))))))
+              (price-tag cost)))))
 
 
       (ui-pro-con-addon (->> computed
@@ -228,7 +230,7 @@
             (dom/p {:className (when-not winner? "text-muted")}
               (format (if winner? "Es wurde erfolgreich darüber abgestimmt, dass %s."
                                   "Nicht erfolgreich war der Vorschlag, dass %s.") text)) ; TODO translate
-            (dom/span :.price.text-muted (format-cost cost))))
+            (price-tag cost)))
         (expand-button collapse-id))
       (ui-pro-con-addon (->> computed
                           (merge {:collapse-id (str "collapse-" collapse-id)})
