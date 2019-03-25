@@ -1,19 +1,19 @@
 {:http-kit      {:port 8080}
 
- ;; Legal Origins for API request.
+ ;; Legal Origins for API request. # This is not used currently
  :legal-origins #{"localhost" :env/DECIDOTRON_URL}
 
  ;; You probably want these set to true in real production:
  :ring.middleware/defaults-config
-                {:proxy    false
+                {:proxy    true
                  :security {:ssl-redirect false}}
 
  :dbas          {:base      :env/DBAS_URL                   ; for link generation "http://balbabla"
-                 :api       :env/DBAS_API                   ; for talking to D-BAS e.g. "web:4284/api"
+                 :api       "web:4284/api"                  ; for talking to D-BAS e.g. "web:4284/api"
                  :api-token :env/API_TOKEN
-                 :pubkey    :env.edn/PUBKEY
-                 :database  {:host     :env/DB_HOST
-                             :port     :env/DB_PORT
+                 :pubkey    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm\n8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"
+                 :database  {:host     "db"
+                             :port     5432
                              :db       "discussion"
-                             :user     :env/DB_USER
+                             :user     "postgres"
                              :password :env/DB_PW}}}

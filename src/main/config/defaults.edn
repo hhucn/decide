@@ -23,5 +23,12 @@
                              :xss-protection {:enable? true
                                               :mode    :block}}}
  :storage-dir   "store"
- :dbas          {:base   "https://dbas.cs.uni-duesseldorf.de"
-                 :pubkey "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm\n8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"}}
+ :dbas          {:base      :env/DBAS_URL                   ; for link generation "http://balbabla"
+                 :api       :env/DBAS_API                   ; for talking to D-BAS e.g. "web:4284/api"
+                 :api-token :env/API_TOKEN
+                 :pubkey    :env.edn/PUBKEY
+                 :database  {:host     :env/DB_HOST
+                             :port     :env/DB_PORT
+                             :db       "discussion"
+                             :user     :env/DB_USER
+                             :password :env/DB_PW}}}
