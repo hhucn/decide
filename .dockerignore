@@ -1,6 +1,7 @@
 .shadow-cljs
 .idea
 .git
+store
 node_modules
 out
 target
