@@ -164,8 +164,8 @@
   "This subcomponent renders the positions, which the user does prefer"
   [this slug preferences]
   (dom/div :.preferred-positions
-    (dom/h2 "Deine Prioritätsliste")
-    (dom/h6 :.text-muted "Sortiere sie absteigend deinen Wünschen entsprechend. Du darfst dabei gerne über das Budget hinausgehen.")
+    (dom/h2 "Ihre Prioritätsliste")
+    (dom/h6 :.text-muted "Sortieren Sie sie absteigend Ihren Wünschen entsprechend. Sie dürfen dabei gerne über das Budget hinausgehen.")
     (dom/ol :.list-group
       (letfn [(assoc-levels [i v]
                 (assoc v
@@ -191,7 +191,7 @@
   [this slug position-items]
   (dom/div :.untouched-positions
     (dom/h3 "Weitere Positionen")
-    (dom/h6 :.text-muted "Wähle die für dich wichtige Positionen und lasse die unwichtigen hier.")
+    (dom/h6 :.text-muted "Wählen Sie die für Sie wichtigen Positionen und lassen Sie die unwichtigen hier.")
     (dom/ul :.list-group
       (map (fn [position-item]
              (ui-pref-list-item
@@ -212,7 +212,7 @@
                            (remove #(preferred-ids (:dbas.position/id %))))]
       (if (empty? positions)
         (dom/div
-          (dom/p :.alert.alert-info "Bisher gibt es keine Vorschläge. Füge welche hinzu!")
+          (dom/p :.alert.alert-info "Bisher gibt es keine Vorschläge. Fügen Sie welche hinzu!")
           (dom/a :.btn.btn-primary
             {:href (format "%s/discuss/%s" js/dbas-host slug)}
             "Vorschläge hinzufügen"))
@@ -223,7 +223,7 @@
           (when (not-empty position-items)
             [(dom/div :.my-4)
              (untouched-positions this slug position-items)]))))
-    (dom/div :.alert.alert-info "Du musst dich einloggen, bevor du deine Stimme abgeben kannst.")))
+    (dom/div :.alert.alert-info "Sie müssen sich einloggen, bevor Sie Ihre Stimme abgeben können.")))
 
 (def ui-pref-list (prim/factory PreferenceList))
 
@@ -236,10 +236,10 @@
     (dom/p :.text-muted info)
     (dom/p
       "Es werden für 20.000€ Vorschläge gewählt.
-      Dafür kannst du die Vorschläge auswählen, von welchen du möchtest, dass diese umgesetzt werden.")
+      Dafür können Sie die Vorschläge auswählen, von welchen Sie möchten, dass diese umgesetzt werden.")
     (dom/p
-      "Die Vorschläge lassen sich sortieren, wobei dein Favorit das meiste Gewicht bei der Abstimmung hat, dein zweit liebster Vorschlag etwas weniger usw.
-      Vorschläge, die du nicht magst, wählst du einfach nicht aus und lässt sie wo sie sind.")
+      "Die Vorschläge lassen sich sortieren, wobei Ihr Favorit das meiste Gewicht bei der Abstimmung hat, Ihr zweitliebster Vorschlag etwas weniger usw.
+      Vorschläge, die Sie nicht mögen, wählen Sie einfach nicht aus und lassen sie wo sie sind.")
     (when votes-end
       (dom/p (format "Die Stimmabgabe ist möglich bis zum %s. Danach werden die Ergebnise hier angezeigt." (format-votes-date votes-end))))))
 
@@ -274,7 +274,7 @@
   (let [overall-cost (reduce + (map :dbas.position/cost (:winners positions)))]
     (if show?
       (dom/div
-        (dom/p (str "Diese Vorschläge wurden von euch als die wichtigsten auserkoren. "
+        (dom/p (str "Diese Vorschläge wurden von Ihnen als die wichtigsten auserkoren. "
                  (format "Verteilt werden dadurch %d €." (format-cost overall-cost))))
         (dom/ol :.list-group.winners (map ui-result-entry-winner (:winners positions)))
         (dom/div :.mb-4)
@@ -306,14 +306,11 @@
    :route-segment   (fn [] ["preferences" :preferences/slug])
    :route-cancelled (fn [_])
    :will-enter      (fn [reconciler {:keys [preferences/slug]}]
-                      (js/console.log "Enter Preference Screen" slug)
                       (dr/route-deferred [:preferences/slug slug]
                         #(df/load reconciler [:preferences/slug slug] PreferenceScreen
                            {:post-mutation        `dr/target-ready
                             :post-mutation-params {:target [:preferences/slug slug]}})))
-   :will-leave      (fn [_]
-                      (js/console.log "Leaving Preference Screen")
-                      true)}
+   :will-leave      (fn [_] true)}
   (let [{:dbas.issue/keys [budget votes-start votes-end]} issue
         supported-issue? budget
         voting-started?  (or (not votes-start) (t/after? (t/now) (from-date votes-start)))
@@ -328,7 +325,7 @@
               (ui-pref-list list)))
 
           (dom/p :.alert.alert-info
-            (format "Die Stimmabgabe ist möglich ab dem %s. Du wirst darüber informiert!" (format-votes-date votes-start))))
+            (format "Die Stimmabgabe ist möglich ab dem %s. Sie werden darüber informiert!" (format-votes-date votes-start))))
 
         ; show results, if voting has begun and ended (or no end is defined) and told so by the backend.
         (when (and voting-started? show-results? (or voting-ended? (nil? voting-ended?)))
