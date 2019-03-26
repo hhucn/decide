@@ -212,7 +212,7 @@
                            (remove #(preferred-ids (:dbas.position/id %))))]
       (if (empty? positions)
         (dom/div
-          (dom/p :.alert.alert-warning "Bisher gibt es keine Vorschläge. Füge welche hinzu!")
+          (dom/p :.alert.alert-info "Bisher gibt es keine Vorschläge. Füge welche hinzu!")
           (dom/a :.btn.btn-primary
             {:href (format "%s/discuss/%s" js/dbas-host slug)}
             "Vorschläge hinzufügen"))
@@ -223,7 +223,7 @@
           (when (not-empty position-items)
             [(dom/div :.my-4)
              (untouched-positions this slug position-items)]))))
-    (dom/div :.alert.alert-danger "Du musst dich einloggen, bevor du deine Stimme abgeben kannst.")))
+    (dom/div :.alert.alert-info "Du musst dich einloggen, bevor du deine Stimme abgeben kannst.")))
 
 (def ui-pref-list (prim/factory PreferenceList))
 
