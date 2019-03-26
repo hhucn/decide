@@ -54,6 +54,15 @@
         :dbas.client/logged-in (alert :success "Login erfolgreich")
         nil)
       (dom/form
+        {:onSubmit (fn login [e]
+                     (.preventDefault e)
+                     (df/load this :dbas/connection models/Connection
+                       {:remote               :dbas
+                        :params               {:nickname   nickname
+                                               :password   password
+                                               :connection connection}
+                        :post-mutation        `post-login
+                        :post-mutation-params {:where ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"]}}))}
         (ui-input-field (prim/computed {:input/value nickname
                                         :ui/label    "Nickname"
                                         :ui/type     "text"}
@@ -63,16 +72,8 @@
                                         :ui/type     "password"}
                           {:onChange-fn (fn [e] (m/set-string! this :login-form/password :event e))}))
         (dom/button :.btn.btn-primary
-          {:type     "button"
-           :disabled not-complete?
-           :onClick  (fn login []
-                       (df/load this :dbas/connection models/Connection
-                         {:remote               :dbas
-                          :params               {:nickname   nickname
-                                                 :password   password
-                                                 :connection connection}
-                          :post-mutation        `post-login
-                          :post-mutation-params {:where ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"]}}))}
+          {:type     "submit"
+           :disabled not-complete?}
           "Login")))))
 
 (def ui-login-form (prim/factory LoginForm))
