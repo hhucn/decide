@@ -73,3 +73,7 @@ body {
     margin-top: -10px;
     margin-bottom: -10px;
 }
+
+.price {
+    white-space: nowrap;
+}
