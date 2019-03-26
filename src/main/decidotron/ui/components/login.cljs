@@ -62,9 +62,9 @@
                                                :password   password
                                                :connection connection}
                         :post-mutation        `post-login
-                        :post-mutation-params {:where ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"]}}))}
+                        :post-mutation-params {:where ["preferences" routing/hardcoded-slug]}}))}
         (ui-input-field (prim/computed {:input/value nickname
-                                        :ui/label    "Nickname"
+                                        :ui/label    "Uni-Kennung"
                                         :ui/type     "text"}
                           {:onChange-fn (fn [e] (m/set-string! this :login-form/nickname :event e))}))
         (ui-input-field (prim/computed {:input/value password

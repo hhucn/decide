@@ -11,7 +11,7 @@
     [decidotron.ui.routing :as routing]
     [decidotron.ui.static-pages.faq :refer [FAQ]]))
 
-(def was-sollen-wir-mit-20-000eur-anfangen ["preferences" "was-sollen-wir-mit-20-000eur-anfangen"])
+(def was-sollen-wir-mit-20-000eur-anfangen ["preferences" routing/hardcoded-slug])
 
 (defsc-route-target LoginScreen [_this {:keys [login/login-form]}]
   {:query           [{:login/login-form (prim/get-query login/LoginForm)}]
@@ -83,5 +83,5 @@
     (dom/hr :.row)
     (dom/div :.row.h-auto.mx-0.footer.d-flex.justify-content-around
       (footer-link "FAQ" "/faq")
-      (footer-link "Kontakt" "/contact")
-      (footer-link "Datenschutz" "/privacy"))))
+      (dom/a :.btn.btn-sm.btn-light.disabled "Kontakt") #_(footer-link "Kontakt" "/contact")
+      (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz")) #_(footer-link "Datenschutz" "/privacy")))
