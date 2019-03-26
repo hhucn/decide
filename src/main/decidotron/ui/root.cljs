@@ -27,10 +27,31 @@
 
 (defn main-page [this]
   (dom/div
-    (dom/p "Nothing to see here."
-      (dom/button :.btn.btn-sm.btn-link
-        {:onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
-        "Zur Abstimmung"))))
+   (dom/h1 "Verteilung von Qualitätsverbesserungsmitteln in der Informatik")
+   (dom/p :.lead
+          "Die WE Informatik möchte Ihnen die Möglichkeit geben selbst über
+          Qualitätsverbesserungsmittel und deren Verwendung abzustimmen. Daher
+          haben Sie hier die Möglichkeit Vorschläge einzubringen, die von der
+          Studierendenschaft der Informatik später zur Abstimmung freigegeben
+          werden.")
+
+   (dom/p
+    "Wichtig dabei ist, dass die Vorschläge alle der Qualitätsverbesserung
+    dienen, denn die dafür aufgebrachten Mittel müssen zweckgebunden verwendet
+    werden.")
+
+   (dom/p
+    "Diese Diskussion ist Teil einer wissenschaftlichen Studie. Wir möchten
+    hierbei unter Anderem unsere Softwaresysteme testen. Es handelt sich hierbei
+    um zwei verschiedene Systeme: D-BAS zum Diskutieren und Decidotron um
+    anschließend die Vorschläge zu Priorisieren. Wir beginnen zunächst mit der
+    Diskussion und schalten in der zweiten Woche die Priorisierung frei.")
+
+   (dom/br)
+   (dom/p :.text-center
+          (dom/a :.btn.btn-primary
+                 {:href "https://dbas.cs.uni-duesseldorf.de/discuss/verteilung-von-qualitatsverbesserungsmittel-in-der-informatik"}
+                 "Hier geht's zur Diskussion!"))))
 
 (defsc-route-target MainPage [this _]
   {:query           []
@@ -78,7 +99,7 @@
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "Decidotron")
       (ui-login-button this (dbas.client/logged-in? connection)))
-    (dom/div :.container
+    (dom/div :.container.pt-2
       (ui-router router))
     (dom/hr :.row)
     (dom/div :.row.h-auto.mx-0.footer.d-flex.justify-content-around
