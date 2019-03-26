@@ -33,8 +33,8 @@ build_snapshot_images:
   image: docker
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE/decidotron:snapshot .
-    - docker push $CI_REGISTRY_IMAGE/decidotron:snapshot
+    - docker build -t $CI_REGISTRY_IMAGE:snapshot .
+    - docker push $CI_REGISTRY_IMAGE:snapshot
   only:
     - master
 
@@ -43,8 +43,8 @@ build_version_images:
   image: docker
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE/decidotron:$CI_COMMIT_TAG .
-    - docker push $CI_REGISTRY_IMAGE/decidotron:$CI_COMMIT_TAG
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
   only:
     - tags
 
@@ -53,6 +53,8 @@ build_latest_images:
   image: docker
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE/decidotron:latest .
-    - docker push $CI_REGISTRY_IMAGE/decidotron:latest
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:latest
   when: manual
+  only:
+    - master
