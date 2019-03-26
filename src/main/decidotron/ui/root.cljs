@@ -76,7 +76,7 @@
         {:href    "#"
          :onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
-        "Decidotron 3000")
+        "Decidotron")
       (ui-login-button this (dbas.client/logged-in? connection)))
     (dom/div :.container
       (ui-router router))
