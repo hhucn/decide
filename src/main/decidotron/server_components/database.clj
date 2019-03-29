@@ -101,7 +101,6 @@
          (k/fields [:statement_uid :uid] :arguments.is_supportive :arguments.stmt_uid :arguments.arg_uid)
          (k/join :inner
            [(k/subselect "arguments"
-              (k/limit (count position-ids))
               (k/fields :premisegroup_uid :is_supportive
                 [:conclusion_uid :stmt_uid] [:uid :arg_uid])
               (k/where (and
