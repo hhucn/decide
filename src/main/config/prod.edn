@@ -10,7 +10,7 @@
 
  :dbas          {:base      :env/DBAS_URL                   ; for link generation "http://balbabla"
                  :api       "http://web:4284/api"           ; for talking to D-BAS e.g. "web:4284/api"
-                 :api-token :env/API_TOKEN
+                 :api-token :env/DECIDOTRON_API_TOKEN
                  :pubkey    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAENBekUS1iJljr/GT1rdjVLZIiamlm\n8Ro7OF6664j/217SSeimtfl8424hgscU21fP/tA+8/or6x5Q1BLlcD5xfA==\n-----END PUBLIC KEY-----"
                  :database  {:host     "db"
                              :port     5432
