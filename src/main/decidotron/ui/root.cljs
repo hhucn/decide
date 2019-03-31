@@ -50,8 +50,8 @@
    (dom/br)
    (dom/p :.text-center
           (dom/a :.btn.btn-primary
-            {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)
-                 "Hier geht's zur Diskussion!"}))))
+            {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
+            "Hier geht's zur Diskussion!"))))
 
 (defsc-route-target MainPage [this _]
   {:query           []
