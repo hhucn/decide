@@ -50,8 +50,8 @@
    (dom/br)
    (dom/p :.text-center
           (dom/a :.btn.btn-primary
-                 {:href "https://dbas.cs.uni-duesseldorf.de/discuss/verteilung-von-qualitatsverbesserungsmittel-in-der-informatik"}
-                 "Hier geht's zur Diskussion!"))))
+            {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)
+                 "Hier geht's zur Diskussion!"}))))
 
 (defsc-route-target MainPage [this _]
   {:query           []
@@ -105,4 +105,5 @@
     (dom/div :.row.h-auto.mx-0.footer.d-flex.justify-content-around
       (footer-link "FAQ" "/faq")
       (dom/a :.btn.btn-sm.btn-light.disabled "Kontakt") #_(footer-link "Kontakt" "/contact")
-      (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz")) #_(footer-link "Datenschutz" "/privacy")))
+      (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz") #_(footer-link "Datenschutz" "/privacy")
+      (footer-link "D-BAS" (str js/dbas_host "/discuss/" routing/hardcoded-slug))))) ; TODO Keep this only for the experiment
