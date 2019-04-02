@@ -210,23 +210,20 @@
           preferred-ids  (set (map :dbas.position/id preferences))
           position-items (->> positions
                            (remove #(preferred-ids (:dbas.position/id %))))]
-      (if (empty? positions)
-        (dom/div
-          (dom/p :.alert.alert-info "Bisher gibt es keine Vorschläge. Fügen Sie welche hinzu!")
-          (dom/a :.btn.btn-primary
-            {:href (format "%s/discuss/%s" js/dbas-host slug)}
-            "Vorschläge hinzufügen"))
-        (dom/div
-          (when (not-empty preferences)
-            (preferred-positions this slug preferences))
+      [(if (empty? positions)
+         (dom/div
+           (dom/p :.alert.alert-info "Bisher gibt es keine Vorschläge. Fügen Sie welche hinzu!"))
+         (dom/div
+           (when (not-empty preferences)
+             (preferred-positions this slug preferences))
 
-          (when (not-empty position-items)
-            [(dom/div :.my-4)
-             (untouched-positions this slug position-items)])
+           (when (not-empty position-items)
+             [(dom/div :.my-4)
+              (untouched-positions this slug position-items)])))
 
-          (dom/div :.my-2)
-          (dom/a :.btn.btn-outline-secondary.btn-block {:href (str js/dbas_host "/discuss/" slug)}
-            "Füge einen Vorschlag hinzu."))))
+       (dom/div :.my-2)
+       (dom/a :.btn.btn-outline-secondary.btn-block {:href (str js/dbas_host "/discuss/" slug)}
+         "Füge einen Vorschlag hinzu.")])
     (dom/div :.alert.alert-info "Sie müssen sich einloggen, bevor Sie Ihre Stimme abgeben können.")))
 
 (def ui-pref-list (prim/factory PreferenceList))
