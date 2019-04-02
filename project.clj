@@ -5,8 +5,8 @@
 
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [thheller/shadow-cljs "2.8.25"]
-                 [fulcrologic/fulcro "2.8.7" :exclusions [com.fasterxml.jackson.core/jackson-core]] ; jackson has a clash with buddy
-                 [fulcrologic/fulcro-incubator "0.0.31" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [fulcrologic/fulcro "2.8.8" :exclusions [com.fasterxml.jackson.core/jackson-core]] ; jackson has a clash with buddy
+                 [fulcrologic/fulcro-incubator "0.0.32" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [com.wsscode/pathom "2.2.12"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]

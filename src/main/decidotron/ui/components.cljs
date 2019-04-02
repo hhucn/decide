@@ -102,7 +102,7 @@
                                                            :height "2.5em"}}
             (dom/i :.far.fa-thumbs-up))
           (dom/div :.col.d-flex.justify-content-between
-            (dom/p (str "Ich bin dafür, dass " text "."))   ; TODO translate
+            (dom/p (str "Es wird vorgeschlagen, dass " text ".")) ; TODO translate
             (price-tag cost)))
         (expand-button collapse-id))
       (ui-pro-con-addon (->> computed
@@ -290,7 +290,7 @@
 (defn refresh-button [on-click-fn]
   (dom/button :.btn.btn-sm.btn-link
     {:onClick on-click-fn}
-    (dom/i :.fas.fa-redo) " Refresh!"))
+    (dom/i :.fas.fa-redo) " Aktualisieren"))
 
 (defn result-area [result-list]
   (dom/div :.result-area
