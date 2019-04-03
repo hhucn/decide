@@ -46,9 +46,9 @@
 ;; ================================================================================
 (defn index [csrf-token]
   (html5
-    [:html {:lang "en"}
-     [:head {:lang "en"}
-      [:title "Decidotron"]
+    [:html {:lang "de"}
+     [:head {:lang "de"}
+      [:title "Decide"]
       [:meta {:charset "utf-8"}]
       [:link
        {:href  "/favicons/apple-touch-icon.png",

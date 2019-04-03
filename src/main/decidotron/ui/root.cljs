@@ -43,7 +43,7 @@
    (dom/p
     "Diese Diskussion ist Teil einer wissenschaftlichen Studie. Wir möchten
     hierbei unter Anderem unsere Softwaresysteme testen. Es handelt sich hierbei
-    um zwei verschiedene Systeme: D-BAS zum Diskutieren und Decidotron um
+    um zwei verschiedene Systeme: D-BAS zum Diskutieren und Decide um
     anschließend die Vorschläge zu Priorisieren. Wir beginnen zunächst mit der
     Diskussion und schalten in der zweiten Woche die Priorisierung frei.")
 
@@ -97,7 +97,7 @@
         {:href    "#"
          :onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
-        "Decidotron")
+        "Decide")
       (ui-login-button this (dbas.client/logged-in? connection)))
     (dom/div :.container.pt-2
       (ui-router router))
