@@ -83,7 +83,7 @@
       (dom/i :.fas.fa-sign-in-alt) " Login")))
 
 (defn footer-link [label href]
-  (dom/a :.btn.btn-sm.btn-light {:href href} label))
+  (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href href} label)))
 
 (defsc Root [this {:keys [dbas/connection root/router]}]
   {:query         [:dbas/connection
@@ -98,12 +98,17 @@
          :onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "Decide")
+      (dom/ul :.nav.mr-auto
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href "/"} "Home"))
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)} "Diskussion"))
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str "/preferences/" routing/hardcoded-slug)} "Abstimmung")))
       (ui-login-button this (dbas.client/logged-in? connection)))
     (dom/div :.container.pt-2
       (ui-router router))
     (dom/hr :.row)
-    (dom/div :.row.h-auto.mx-0.footer.d-flex.justify-content-around
-      (footer-link "FAQ" "/faq")
-      (dom/a :.btn.btn-sm.btn-light.disabled "Kontakt") #_(footer-link "Kontakt" "/contact")
-      (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz") #_(footer-link "Datenschutz" "/privacy")
-      (footer-link "D-BAS" (str js/dbas_host "/discuss/" routing/hardcoded-slug))))) ; TODO Keep this only for the experiment
+    (dom/nav :.footer
+      (dom/ul :.nav.nav-fill.nav-pills
+        (footer-link "FAQ" "/faq")
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light.disabled "Kontakt") #_(footer-link "Kontakt" "/contact"))
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz") #_(footer-link "Datenschutz" "/privacy"))
+        (footer-link "D-BAS" (str js/dbas_host "/discuss/" routing/hardcoded-slug)))))) ; TODO Keep this only for the experiment
