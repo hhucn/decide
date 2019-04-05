@@ -267,10 +267,10 @@
                                           :dbas.position/cons cons}))))))
 
 (def ui-result-entry (prim/factory ResultEntry))
-(defn ui-result-entry-winner [props] (ui-result-entry (prim/computed props {:winner? true})))
-(defn ui-result-entry-loser [props] (ui-result-entry (prim/computed props {:winner? false})))
+(defn ui-result-entry-winner [props computed] (->> {:winner? true} (merge computed) (prim/computed props) ui-result-entry))
+(defn ui-result-entry-loser [props computed] (->> {:winner? false} (merge computed) (prim/computed props) ui-result-entry))
 
-(defsc ResultList [_this {:result/keys [show? positions]}]
+(defsc ResultList [_this {:result/keys [show? positions]} computed]
   {:query [:result/show?
            {:result/positions [{:winners (prim/get-query models/Position)}
                                {:losers (prim/get-query models/Position)}]}]}
@@ -279,11 +279,11 @@
       (dom/div
         (dom/p (str "Diese Vorschläge wurden von Ihnen als die wichtigsten auserkoren. "
                  (format "Verteilt werden dadurch %d €." (format-cost overall-cost))))
-        (dom/ol :.list-group.winners (map ui-result-entry-winner (:winners positions)))
+        (dom/ol :.list-group.winners (map #(ui-result-entry-winner % computed) (:winners positions)))
         (dom/div :.mb-4)
         (when-not (empty? (:losers positions))
           (dom/p "Diese Vorschläge waren nicht erfolgreich.")
-          (dom/ol :.list-group.losers (map ui-result-entry-loser (:losers positions)))))
+          (dom/ol :.list-group.losers (map #(ui-result-entry-loser % computed) (:losers positions)))))
       (dom/p "Die Ergebnisse werden nach der Wahl angezeigt."))))
 
 (def ui-result-list (prim/factory ResultList))
@@ -332,7 +332,7 @@
 
         ; show results, if voting has begun and ended (or no end is defined) and told so by the backend.
         (when (and voting-started? show-results? (or voting-ended? (nil? voting-ended?)))
-          (result-area result-list))
+          (result-area (prim/computed result-list {:dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)})))
 
         (refresh-button #(df/load this [:preferences/slug slug] PreferenceScreen)))
       (dom/div
