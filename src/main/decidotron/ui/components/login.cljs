@@ -27,6 +27,7 @@
 
 (defmutation post-login [{:keys [where]}]
   (action [{:keys [state component]}]
+    (prim/force-root-render! component)
     (let [{:dbas.client/keys [login-status token]} (:dbas/connection @state)]
       (when (= :dbas.client/logged-in login-status)
         (cookie/set! cookie/decidotron-token token)
@@ -50,7 +51,7 @@
         not-complete? (or (blank? nickname) (blank? password))]
     (dom/div :.login-form.mt-3
       (case (:dbas.client/login-status connection)
-        :dbas.client/failed (alert :bla "Login fehlgeschlagen")
+        :dbas.client/failed (alert :danger "Login fehlgeschlagen")
         :dbas.client/logged-in (alert :success "Login erfolgreich")
         nil)
       (dom/form
