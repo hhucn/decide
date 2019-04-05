@@ -43,7 +43,7 @@
    (dom/p
     "Diese Diskussion ist Teil einer wissenschaftlichen Studie. Wir möchten
     hierbei unter Anderem unsere Softwaresysteme testen. Es handelt sich hierbei
-    um zwei verschiedene Systeme: D-BAS zum Diskutieren und Decide um
+    um zwei verschiedene Systeme: D-BAS zum Diskutieren und decide um
     anschließend die Vorschläge zu Priorisieren. Wir beginnen zunächst mit der
     Diskussion und schalten in der zweiten Woche die Priorisierung frei.")
 
@@ -97,7 +97,7 @@
         {:href    "#"
          :onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
-        "Decide")
+        "decide")
       (dom/ul :.nav.mr-auto
         (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href "/"} "Home"))
         (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)} "Diskussion"))

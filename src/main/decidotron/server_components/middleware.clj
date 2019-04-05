@@ -48,7 +48,7 @@
   (html5
     [:html {:lang "de"}
      [:head {:lang "de"}
-      [:title "Decide"]
+      [:title "decide"]
       [:meta {:charset "utf-8"}]
       [:link
        {:href  "/favicons/apple-touch-icon.png",
