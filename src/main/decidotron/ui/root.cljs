@@ -9,7 +9,8 @@
     [decidotron.api :as ms]
     [fulcro.incubator.dynamic-routing :as dr]
     [decidotron.ui.routing :as routing]
-    [decidotron.ui.static-pages.faq :refer [FAQ]]))
+    [decidotron.ui.static-pages.faq :refer [FAQ]]
+    [decidotron.ui.static-pages.contact :refer [Contact]]))
 
 (def was-sollen-wir-mit-20-000eur-anfangen ["preferences" routing/hardcoded-slug])
 
@@ -63,7 +64,7 @@
   (main-page this))
 
 (defrouter RootRouter [this {:keys [current-state]}]
-  {:router-targets [MainPage LoginScreen comp/PreferenceScreen FAQ]}
+  {:router-targets [MainPage LoginScreen comp/PreferenceScreen FAQ Contact]}
   (case current-state
     :initial (main-page this)
     :pending (dom/div "Loading...")
@@ -109,6 +110,6 @@
     (dom/nav :.footer
       (dom/ul :.nav.nav-fill.nav-pills
         (footer-link "FAQ" "/faq")
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light.disabled "Kontakt") #_(footer-link "Kontakt" "/contact"))
+        (footer-link "Kontakt" "/contact")
         (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz") #_(footer-link "Datenschutz" "/privacy"))
         (footer-link "D-BAS" (str js/dbas_host "/discuss/" routing/hardcoded-slug)))))) ; TODO Keep this only for the experiment
