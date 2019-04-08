@@ -22,7 +22,7 @@
 
 
 (defn format-cost [cost]
-  (format "%.0f €" (/ cost 100)))
+  (format "%.0f €" cost))
 
 (defn price-tag [cost]
   (dom/span :.price.text-muted (format-cost cost)))
