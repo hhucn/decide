@@ -1,12 +1,10 @@
 (ns decidotron.server-components.budgets)
 
-(defn preferences-by-slug [state slug]
-  (->> (vals state)
-    (map slug)
-    :preferences
-    (map :dbas.position/id)))
+(defn approval-score
+  [votes]
+  (zipmap votes (repeat 1)))
 
-(defn score
+(defn borda-score
   "Given a top-value max-n, return the borda scores for this vote set
   Example: max-n = 5
   votes = [:a :b :c]
@@ -15,59 +13,40 @@
   "
 
   [max-n votes]
-  (map-indexed (fn [i v] {v (- max-n i)}) votes))
-
-(comment
-  (score 5 [83 42])
-  (apply max (map count [[83 42] [83 42] [83 42 666]])))
-
+  (into {} (map-indexed (fn [i v] [v (- max-n i)]) votes)))
 
 (defn find-max-n
   "Returns the max number of votes a user has submitted."
   [preferences]
-  (apply max (map count preferences)))
+  (if (empty? preferences)
+    0
+    (apply max (map count preferences))))
 
-(comment (find-max-n [[83 42] [83 666] [83 42 666]])
-  ((partial score 3) [83 42]))
+(defn initial-scores
+  "Returns a map which is initialized with 0 for every proposal."
+  [costs]
+  (zipmap (keys costs) (repeat 0)))
+
+(defn- tag-scores [tag scores]
+  (into {} (map (fn [[k v]] {k {tag v}}) scores)))
+
+(defn form-results [results]
+  (map (partial zipmap [:proposal :scores]) results))
 
 (defn borda-budget [votes budget costs]
-  (let [max-n             (find-max-n votes)
-        score             (partial score max-n)
-        union             (apply merge-with +
-                            (zipmap (keys costs) (repeat 0)) ; initialise
-                            (mapcat score votes))           ; get the global map: position -> score
-        ordered-positions (map (fn [[id score]] {:dbas.position/id id
-                                                 :score            score})
-                            (sort-by second > union))       ; Sort by score and take only position
-        in-budget?        (fn [extension] (>= budget (reduce + (map (comp costs :dbas.position/id) extension))))]
-    (loop [[position & r] ordered-positions
-           winners []]                                      ; ATTENTION! This has to be a vector, or else `conj` prepends...
-      (if position
-        (let [extension (conj winners position)]
-          (recur r
-            (if (and (in-budget? extension) (pos? (:score position)))
-              extension                                     ; extend winners
-              winners)))                                    ; skip this position
-        {:winners winners
-         :losers  (remove (set winners) ordered-positions)}))))
-
-(comment
-  (score 5 [83 42])
-  (apply max (map count [[83 42] [83 42] [83 42 666]]))
-
-  (apply merge-with +
-    (zipmap (keys {83 5 42 6 666 4 123 2}) (repeat 0))      ; initialise
-    (mapcat (partial score 3) [[83 42] [83 666] [83 42 666]]))
-
-  (sort-by second > (apply merge-with + (mapcat (partial score 3) [[83 42] [83 666] [83 42 666]])))
-
-
-
-  (def costs {83 5 42 6 666 4 123 2})
-  (def budget 10)
-
-  (apply merge-with +
-    (zipmap (keys costs) (repeat 0))                        ; initialise
-    (mapcat score votes))
-
-  (borda-budget [[83 42] [83 666] [83 42 666]] budget costs))
+  (let [borda-score       (partial borda-score (find-max-n votes))
+        global-merger     (fn global-merger [scores] (apply merge-with + (initial-scores costs) scores))
+        global-scores     (merge-with merge
+                            (->> votes (map borda-score) global-merger (tag-scores :borda))
+                            (->> votes (map approval-score) global-merger (tag-scores :approval)))
+        ordered-proposals (reverse (sort-by (comp (juxt :borda :approval) second) global-scores))]
+    (loop [rest-budget budget
+           [[proposal scores] & rest-proposals] ordered-proposals
+           winners     []]
+      (if proposal
+        (let [cost (costs proposal)]
+          (if (and (< cost rest-budget) (-> scores :borda pos?)) ; only allow proposals which fit in the budget and have at least 1 vote
+            (recur (- rest-budget cost) rest-proposals (conj winners [proposal scores]))
+            (recur rest-budget rest-proposals winners)))
+        {:winners (form-results winners)
+         :losers  (form-results (remove (set winners) ordered-proposals))}))))

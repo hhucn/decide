@@ -109,11 +109,15 @@
    :dbas/issue              {:dbas.issue/slug slug}
    :preferences/result-list {:result/slug slug}})
 
+(defn- proposal->dbas [{:keys [proposal scores]}]
+  {:dbas.position/id proposal
+   :scores           scores})
+
 (pc/defresolver result [_ {slug :result/slug}]
   {::pc/input  #{:result/slug}
    ::pc/output [:result/show?
-                {:result/positions [{:winners [:dbas.position/id :score]} ; make score publicly available?
-                                    {:losers [:dbas.position/id :score]}]}]}
+                {:result/positions [{:winners [:dbas.position/id :scores]}
+                                    {:losers [:dbas.position/id :scores]}]}]}
   (if (db/show-results? slug)
     (let [issue       (db/get-issue slug)
           budget      (:dbas.issue/budget issue)
@@ -124,8 +128,8 @@
           {:keys [winners losers]} (b/borda-budget preferences budget costs)]
       {:result/show? true
        :result/positions
-                     {:winners winners
-                      :losers  losers}})
+                     {:winners (map proposal->dbas winners)
+                      :losers  (map proposal->dbas losers)}})
     {:result/show?     false
      :result/positions {:winners []
                         :losers  []}}))
