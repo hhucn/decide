@@ -10,7 +10,8 @@
     [fulcro.incubator.dynamic-routing :as dr]
     [decidotron.ui.routing :as routing]
     [decidotron.ui.static-pages.faq :refer [FAQ]]
-    [decidotron.ui.static-pages.contact :refer [Contact]]))
+    [decidotron.ui.static-pages.contact :refer [Contact]]
+    [decidotron.ui.static-pages.algorithm :refer [Algorithm]]))
 
 (def was-sollen-wir-mit-20-000eur-anfangen ["preferences" routing/hardcoded-slug])
 
@@ -63,7 +64,7 @@
   (main-page this))
 
 (defrouter RootRouter [this {:keys [current-state]}]
-  {:router-targets [MainPage LoginScreen comp/PreferenceScreen FAQ Contact]}
+  {:router-targets [MainPage LoginScreen comp/PreferenceScreen FAQ Contact Algorithm]}
   (case current-state
     :initial (main-page this)
     :pending (dom/div "Loading...")
@@ -82,7 +83,7 @@
       {:onClick #(routing/change-route! this ["login"])}
       (dom/i :.fas.fa-sign-in-alt) " Login")))
 
-(defn footer-link [label href]
+(defn nav-link [label href]
   (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href href} label)))
 
 (defsc Root [this {:keys [dbas/connection root/router]}]
@@ -99,16 +100,17 @@
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "decide")
       (dom/ul :.nav.mr-auto
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href "/"} "Home"))
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)} "Diskussion"))
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str "/preferences/" routing/hardcoded-slug)} "Abstimmung")))
+        (nav-link "Home" "/")
+        (nav-link "Diskussion" (str js/dbas_host "/discuss/" routing/hardcoded-slug))
+        (nav-link "Abstimmung" (str "/preferences/" routing/hardcoded-slug))
+        (nav-link "Algorithmus" (str "/algorithm")))
       (ui-login-button this (dbas.client/logged-in? connection)))
     (dom/div :.container.pt-2
       (ui-router router))
     (dom/hr :.row)
     (dom/nav :.footer
       (dom/ul :.nav.nav-fill.nav-pills
-        (footer-link "FAQ" "/faq")
-        (footer-link "Kontakt" "/contact")
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz") #_(footer-link "Datenschutz" "/privacy"))
-        (footer-link "D-BAS" (str js/dbas_host "/discuss/" routing/hardcoded-slug)))))) ; TODO Keep this only for the experiment
+        (nav-link "FAQ" "/faq")
+        (nav-link "Kontakt" "/contact")
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz") #_(nav-link "Datenschutz" "/privacy"))
+        (nav-link "D-BAS" (str js/dbas_host "/discuss/" routing/hardcoded-slug)))))) ; TODO Keep this only for the experiment
