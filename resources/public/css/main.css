@@ -76,4 +76,5 @@ body {
 
 .price {
     white-space: nowrap;
+    padding-left: 1rem;
 }
