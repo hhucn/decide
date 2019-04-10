@@ -103,7 +103,8 @@
         "decide")
       (dom/ul :.nav.mr-auto
         (nav-link "Home" "/")
-        (nav-link "Diskussion" (str js/dbas_host "/discuss/" routing/hardcoded-slug))
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
+                             "Diskussion" (dom/sup (dom/i :.fas.fa-caret-up {:style {:transform "rotate(45deg)"}}))))
         (nav-link "Abstimmung" (str "/preferences/" routing/hardcoded-slug))
         (nav-link "Algorithmus" (str "/algorithm")))
       (ui-login-button this (dbas.client/logged-in? connection)))
@@ -114,5 +115,6 @@
       (dom/ul :.nav.nav-fill.nav-pills
         (nav-link "FAQ" "/faq")
         (nav-link "Kontakt" "/contact")
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light.disabled "Datenschutz") #_(nav-link "Datenschutz" "/privacy"))
-        (nav-link "D-BAS" (str js/dbas_host "/discuss/" routing/hardcoded-slug)))))) ; TODO Keep this only for the experiment
+        (nav-link "Datenschutz" "/privacy")
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
+                             "D-BAS" (dom/sup (dom/i :.fas.fa-caret-up {:style {:transform "rotate(45deg)"}}))))))))
