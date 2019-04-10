@@ -52,7 +52,9 @@
     (dom/br)
     (dom/p :.text-center
       (dom/a :.btn.btn-primary {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
-       "Hier geht's zur Diskussion!"))))
+        "Hier geht's zur Diskussion!")
+      (dom/a :.btn.btn-secondary.m-1 {:href (str "/preferences/" routing/hardcoded-slug)}
+        "Hier geht's zur Abstimmung!"))))
 
 (defsc-route-target MainPage [this _]
   {:query           []
