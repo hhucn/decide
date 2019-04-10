@@ -15,10 +15,12 @@
    (dom/div :.mb-3
      (dom/h2 "decide")
      (dom/address
-       (dom/strong :.name "Björn Ebbinghaus") (dom/br)
-       "Lehrstuhl für Rechnernetze" (dom/br)
-       (dom/a {:href "mailto:bjoern.ebbinghaus@uni-duesseldorf.de"} "bjoern.ebbinghaus@uni-duesseldorf.de") (dom/br)
-       "25.12.02.45"))
+       (dom/strong :.name "Björn Ebbinghaus")
+       " (" (dom/a {:href "mailto:bjoern.ebbinghaus@uni-duesseldorf.de"} "bjoern.ebbinghaus@uni-duesseldorf.de") ")" (dom/br)
+       "Gebäude: 25.12" (dom/br)
+       "Etage/Raum: 02.45" (dom/br)
+       "Universitätsstraße 1" (dom/br)
+       "40225 Düsseldorf" (dom/br)))
    (dom/div
      (dom/h2 "D-BAS")
      (dom/address
