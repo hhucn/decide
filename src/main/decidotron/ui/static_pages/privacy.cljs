@@ -42,16 +42,16 @@
      "Personenbezogene Daten dürfen von uns nur erhoben werden, wenn sie für die Inanspruchnahme von Funktionen oder Services unseres Angebotes erforderlich sind und sofern Ihre Einwilligung vorliegt oder es uns eine gesetzliche Vorschrift erlaubt. "
      "Neben den Zugriffsdaten (IP-Adresse; Zugriffszeitpunkte; genutzter Browser; Webseite, von der der Zugang erfolgt; Name des Internet-Zugangs / -Providers) fallen personenbezogene Daten auf diesem Online-Angebot erst an, wenn Sie eine Stimme abgeben. "
      "Diese Stimme kann ihrem Account bei D-BAS (" (dom/a {:href "https://dbas.cs.uni-duesseldorf.de"} "https://dbas.cs.uni-duesseldorf.de") ") zugewiesen werden. "
-     "Beim entfernen Ihrer Stimme, wird diese von uns dauerhaft gelöscht, nicht jedoch die Information, dass sie einmal eine Stimme abgegeben haben. ")
+     "Beim Entfernen Ihrer Stimme, wird diese von uns dauerhaft gelöscht, nicht jedoch die Information, dass sie einmal eine Stimme abgegeben haben. ")
    (dom/p
      "Die von Ihnen übertragenen Daten werden von uns anonymisiert im Rahmen von wissenschaftlichen Begleitforschungen weiterverwendet und eventuell veröffentlicht. ")
 
    (dom/h2 "Wissenschaftliche Begleitforschung")
    (dom/p
      "Dieses Angebot wird im Rahmen einer Masterarbeit wissenschaftlich begleitet. "
-     "Dies schließt unter anderem eine Analyse der übertragenen Daten sowie eine Befragung der Teilnehmerinnen und Teilnehmern ein. "
+     "Dies schließt unter anderem eine Analyse der übertragenen Daten sowie eine Befragung der Teilnehmerinnen und Teilnehmer ein. "
      "Alle Auswertungen werden vollständig anonym vorgenommen. "
-     "Eine Veröffentlichung der Ergebnisse findet ausschließlich in anonymisiert Form statt, die keine Rückschlüsse auf individuelle Teilnehmerinnen und Teilnehmer des Verfahrens zulässt. ")
+     "Eine Veröffentlichung der Ergebnisse findet ausschließlich in anonymisierter Form statt, die keine Rückschlüsse auf individuelle Teilnehmerinnen und Teilnehmer des Verfahrens zulässt. ")
 
    (dom/h2 "Nutzungsdaten")
    (dom/p
