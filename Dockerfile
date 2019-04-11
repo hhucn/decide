@@ -23,4 +23,4 @@ COPY src/main/config/prod.edn /config/production.edn
 COPY --from=clj-build /tmp/target/decidotron.jar decidotron.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-Dconfig=/config/production.edn", "-jar", "decidotron.jar"]
+ENTRYPOINT ["java", "-Dconfig=/config/production.edn", "-Dfulcro.logging=info", "-jar", "decidotron.jar"]
