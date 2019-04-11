@@ -4,7 +4,8 @@
             [clj-time.core :as t]
             [clj-time.coerce :as tc]
             [mount.core :refer [defstate]]
-            [korma.db :as kdb]))
+            [korma.db :as kdb]
+            [fulcro.logging :as log]))
 
 (defstate db
   :start (let [db (kdb/postgres (get-in config [:dbas :database]))]
@@ -58,7 +59,10 @@
   (k/table :decidotron_decision_process)
   (k/belongs-to issue {:fk :issue_id}))
 
-(defn positions-by-ids [ids]
+(defn positions-by-ids
+  [ids]
+  {:pre  [(do (log/trace "Query for the ids" (vec ids)) true)]
+   :post [(do (log/trace "Got results" (with-out-str (clojure.pprint/pprint (vec %)))) true)]}
   (for [{:keys [uid text cost is_disabled]}
         (k/select statement
           (k/fields :* [:textversions.content :text])

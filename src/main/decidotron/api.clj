@@ -8,7 +8,8 @@
             [decidotron.server-components.config :refer [config]]
             [konserve.filestore :as kfs]
             [konserve.core :as k]
-            [clojure.core.async :refer [go <! <!!]]))
+            [clojure.core.async :refer [go <! <!!]]
+            [fulcro.logging :as log]))
 
 (defstate storage
   :start (<!! (kfs/new-fs-store (:storage-dir config))))
@@ -36,8 +37,8 @@
 
 (pc/defresolver position [_ input]
   {::pc/input  #{:dbas.position/id}
-   ::pc/output [:dbas.position/id :dbas.position/text :dbas.position/cost :dbas.position/disabled?]
-   ::pc/batch? true}
+   ::pc/output [:dbas.position/id :dbas.position/text :dbas.position/cost :dbas.position/disabled?]}
+  ;   ::pc/batch? true}
   (if (sequential? input)
     (pc/batch-restore-sort {::pc/inputs input
                             ::pc/key    :dbas.position/id}
@@ -125,7 +126,8 @@
           preferences (->> (<!! (k/get-in storage [slug]))
                         vals
                         (map #(->> % :preferences db/filter-disabled-positions (map :dbas.position/id))))
-          {:keys [winners losers]} (b/borda-budget preferences budget costs)]
+          {:keys [winners losers] :as result} (b/borda-budget preferences budget costs)]
+      (log/trace "Result is:" result)
       {:result/show? true
        :result/positions
                      {:winners (map proposal->dbas winners)
