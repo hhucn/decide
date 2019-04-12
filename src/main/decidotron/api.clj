@@ -108,15 +108,16 @@
                 {:preferences/result-list [:result/slug]}]}
   {:preferences/list        {:preference-list/slug slug}
    :dbas/issue              {:dbas.issue/slug slug}
-   :preferences/result-list {:result/slug slug}})
+   :preferences/result-list {:dbas.issue/slug slug}})
 
 (defn- proposal->dbas [{:keys [proposal scores]}]
   {:dbas.position/id proposal
    :scores           scores})
 
-(pc/defresolver result [_ {slug :result/slug}]
-  {::pc/input  #{:result/slug}
+(pc/defresolver result [_ {slug :dbas.issue/slug}]
+  {::pc/input  #{:dbas.issue/slug}
    ::pc/output [:result/show?
+                :result/no-of-participants
                 {:result/positions [{:winners [:dbas.position/id :scores]}
                                     {:losers [:dbas.position/id :scores]}]}]}
   (if (db/show-results? slug)
@@ -128,10 +129,11 @@
                         (map #(->> % :preferences db/filter-disabled-positions (map :dbas.position/id))))
           {:keys [winners losers] :as result} (b/borda-budget preferences budget costs)]
       (log/trace "Result is:" result)
-      {:result/show? true
+      {:result/show?              true
+       :result/no-of-participants (count preferences)
        :result/positions
-                     {:winners (map proposal->dbas winners)
-                      :losers  (map proposal->dbas losers)}})
+                                  {:winners (map proposal->dbas winners)
+                                   :losers  (map proposal->dbas losers)}})
     {:result/show?     false
      :result/positions {:winners []
                         :losers  []}}))
