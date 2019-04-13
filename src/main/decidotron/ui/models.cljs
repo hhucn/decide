@@ -11,7 +11,8 @@
            :dbas.position/id
            :dbas.position/cost
            {:dbas.position/pros (prim/get-query Statement)}
-           {:dbas.position/cons (prim/get-query Statement)}]
+           {:dbas.position/cons (prim/get-query Statement)}
+           {:dbas.position/scores [:borda :approval]}]
    :ident [:dbas.position/id :dbas.position/id]})
 
 (defsc Issue [_ _]

@@ -61,30 +61,32 @@
     (apply js/React.createElement
       class props children)))
 
-(def bar-chart (factory-apply react-chartjs/Bar))
 (def horizontal-bar-chart (factory-apply react-chartjs/HorizontalBar))
-(def polar-chart (factory-apply react-chartjs/Polar))
-(def pie-chart (factory-apply react-chartjs/Pie))
 
-(defn ui-bar-chart [positions]
-  (let [tagged-winners (map #(assoc % :winner? true) (:winners positions))
-        tagged-losers  (map #(assoc % :winner? false) (:losers positions))
-        all-positions  (reverse (sort-by (comp (juxt :borda :approval) :scores) (concat tagged-winners tagged-losers)))]
-    (horizontal-bar-chart (clj->js {:data    {:labels   (map position->sentence all-positions)
-                                              :datasets [{:label           "Punkte"
-                                                          :xAxisID         "scores"
-                                                          :data            (map (comp :borda :scores) all-positions)
-                                                          :backgroundColor (map #(if (:winner? %) "rgba(255, 99, 132, 0.8)" "rgba(255, 99, 132, 0.2)") all-positions)}
-                                                         {:label           "Zustimmungen"
-                                                          :xAxisID         "scores"
-                                                          :data            (map (comp :approval :scores) all-positions)
-                                                          :backgroundColor (map #(if (:winner? %) "rgba(54, 162, 235, 0.8)" "rgba(54, 162, 235, 0.2)") all-positions)}]}
-                                    :options {:scales
-                                              {:xAxes [{:id       "scores"
-                                                        :position "top"
-                                                        :type     "linear"
-                                                        :ticks    {:beginAtZero true
-                                                                   :stepSize    1}}]}}}))))
+(defsc HorizontalBarChart [_ {:keys [winners losers]}]
+  {:query [{:winners (prim/get-query models/Position)}
+           {:losers (prim/get-query models/Position)}]}
+  (let [tagged-winners (map #(assoc % :winner? true) winners)
+        tagged-losers  (map #(assoc % :winner? false) losers)
+        all-positions  (reverse (sort-by (comp (juxt :borda :approval) :dbas.position/scores) (concat tagged-winners tagged-losers)))]
+    (dom/div :.score-chart
+      (horizontal-bar-chart (clj->js {:data    {:labels   (map position->sentence all-positions)
+                                                :datasets [{:label           "Punkte"
+                                                            :xAxisID         "scores"
+                                                            :data            (map (comp :borda :dbas.position/scores) all-positions)
+                                                            :backgroundColor (map #(if (:winner? %) "rgba(255, 99, 132, 0.8)" "rgba(255, 99, 132, 0.2)") all-positions)}
+                                                           {:label           "Zustimmungen"
+                                                            :xAxisID         "scores"
+                                                            :data            (map (comp :approval :dbas.position/scores) all-positions)
+                                                            :backgroundColor (map #(if (:winner? %) "rgba(54, 162, 235, 0.8)" "rgba(54, 162, 235, 0.2)") all-positions)}]}
+                                      :options {:scales
+                                                {:xAxes [{:id       "scores"
+                                                          :position "top"
+                                                          :type     "linear"
+                                                          :ticks    {:beginAtZero true
+                                                                     :stepSize    1}}]}}})))))
+
+(def h-bar-chart (prim/factory HorizontalBarChart))
 
 (defsc-route-target ResultScreen [_ {:result/keys     [show? no-of-participants positions]
                                      :dbas.issue/keys [slug budget votes-end] :as props}]
@@ -93,8 +95,8 @@
                      :dbas.issue/votes-end
                      :result/show?
                      :result/no-of-participants
-                     {:result/positions [{:winners (conj (prim/get-query models/Position) :scores)}
-                                         {:losers (conj (prim/get-query models/Position) :scores)}]}]
+                     {:result/positions [{:winners (prim/get-query models/Position)}
+                                         {:losers (prim/get-query models/Position)}]}]
    :ident           [:dbas.issue/slug :dbas.issue/slug]
    :route-segment   (fn [] ["preferences" :dbas.issue/slug "result"])
    :route-cancelled (fn [_])
@@ -108,7 +110,7 @@
     (dom/h1 "Ergebnis")
     (if show?
       (dom/div
-        (dom/p (str "Es gab insgesamt " no-of-participants " Teilnehmer."))
+        (dom/p (str "Es gab insgesamt " no-of-participants " Teilnehmer, welche abgestimmt haben."))
         (ui-result-list props)
         (dom/hr :.mx-3)
         (dom/div
@@ -117,7 +119,7 @@
             "Wenn Vorschläge dieselbe Punktzahl haben, wird der Vorschlag mit den meisten Zustimmungen, ungeachtet seiner Priorität, gewählt.
           Die blassen Vorschläge haben verloren, da sie nicht in das Budget gepasst haben.")
           (dom/p "Weiter Beispiele finden Sie auf der " (dom/a {:href "/algorithm"} "Erklärungsseite") ".")
-          (ui-bar-chart positions)))
+          (h-bar-chart positions)))
 
       (dom/div
         (dom/div :.alert.alert-info (str "Das Ergebnis wird erst ab " votes-end " angezeigt"))))))

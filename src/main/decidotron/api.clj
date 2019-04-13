@@ -111,15 +111,15 @@
    :preferences/result-list {:dbas.issue/slug slug}})
 
 (defn- proposal->dbas [{:keys [proposal scores]}]
-  {:dbas.position/id proposal
-   :scores           scores})
+  #:dbas.position{:id     proposal
+                  :scores scores})
 
 (pc/defresolver result [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
    ::pc/output [:result/show?
                 :result/no-of-participants
-                {:result/positions [{:winners [:dbas.position/id :scores]}
-                                    {:losers [:dbas.position/id :scores]}]}]}
+                {:result/positions [{:winners [:dbas.position/id :dbas.position/scores]}
+                                    {:losers [:dbas.position/id :dbas.position/scores]}]}]}
   (if (db/show-results? slug)
     (let [issue       (db/get-issue slug)
           budget      (:dbas.issue/budget issue)
@@ -131,8 +131,7 @@
       (log/trace "Result is:" result)
       {:result/show?              true
        :result/no-of-participants (count preferences)
-       :result/positions
-                                  {:winners (map proposal->dbas winners)
+       :result/positions          {:winners (map proposal->dbas winners)
                                    :losers  (map proposal->dbas losers)}})
     {:result/show?     false
      :result/positions {:winners []
