@@ -1,5 +1,6 @@
 body {
     background: rgba(235, 235, 235, 0.45);
+    word-wrap: break-word;
 }
 
 /* Borrowed from Googles Material Design Components ad the sense of material to areas */

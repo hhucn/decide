@@ -19,9 +19,7 @@
 
 (defsc VoteHeader [_ {:dbas.issue/keys [title info votes-end]}]
   (dom/div :.vote-header.mb-5
-    (dom/h1 {:style {:word-wrap     "break-word"
-                     :overflow-wrap "break-word"}}          ; it is recommended to use both
-      title)
+    (dom/h1 title)
     (dom/p :.text-muted info)
     (dom/p
       "Es werden für 20.000€ Vorschläge gewählt.
