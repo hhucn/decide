@@ -11,7 +11,7 @@
             [decidotron.ui.models :as models]
             [decidotron.ui.components.pro-con-addon :refer [ui-pro-con-addon]]
             [decidotron.ui.components.preferences :refer [expand-button]]
-            [decidotron.ui.utils :refer [logged-in? format-cost price-tag]]))
+            [decidotron.ui.utils :refer [logged-in? format-cost price-tag format-votes-date]]))
 
 (defsc ResultEntry [_ {:dbas.position/keys [text id cost pros cons]}
                     {:keys [winner?] :as computed}]
@@ -122,5 +122,5 @@
           (h-bar-chart positions)))
 
       (dom/div
-        (dom/div :.alert.alert-info (str "Das Ergebnis wird erst ab " votes-end " angezeigt"))))))
+        (dom/div :.alert.alert-info (str "Das Ergebnis wird erst ab " (format-votes-date votes-end) " angezeigt"))))))
                                             
