@@ -72,7 +72,7 @@
   (case current-state
     :initial (main-page this)
     :pending (dom/div "Loading...")
-    :failed (dom/div "Oops" (dom/a {:onClick #(js/location.reload) :target "_self"} "Neu laden!"))
+    :failed (dom/div "Oops! " (dom/button :.btn.btn-primary {:onClick #(js/location.reload) :target "_self"} "Neu laden!"))
     (main-page this)))
 
 (def ui-router (prim/factory RootRouter))
@@ -108,7 +108,7 @@
         (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
                              "Diskussion" (dom/sup (dom/i :.fas.fa-caret-up {:style {:transform "rotate(45deg)"}}))))
         (nav-link "Abstimmung" (str "/preferences/" routing/hardcoded-slug))
-        (nav-link "Algorithmus" (str "/algorithm")))
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-dark {:href "/algorithm"} "Ablauf")))
       (ui-login-button this (dbas.client/logged-in? connection)))
     (dom/div :.container.pt-2
       (ui-router router))
