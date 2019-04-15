@@ -111,7 +111,7 @@
     (if show?
       (dom/div
         (dom/p (str "Es gab insgesamt " no-of-participants " Teilnehmende, welche abgestimmt haben."))
-        (ui-result-list props)
+        (ui-result-list (prim/computed props {:dbas-argument-link (format "%s/discuss/%s" js/dbas-host slug)}))
         (dom/hr :.mx-3)
         (dom/div
           (dom/h3 "Punkteverteilung")
