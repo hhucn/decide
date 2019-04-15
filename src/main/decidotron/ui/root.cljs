@@ -3,6 +3,7 @@
   (:require
     [fulcro.client.dom :as dom]
     [fulcro.client.primitives :as prim :refer [defsc]]
+    [fulcro.incubator.dynamic-routing :as dr]
     [dbas.client :as dbas]
     [decidotron.ui.components :as comp]
     [decidotron.ui.components.login :as login]
@@ -32,8 +33,10 @@
   (dom/div
     (dom/h1 "Verteilung von Qualitätsverbesserungsmitteln in der Informatik")
     (dom/p :.lead
-      "Die Wissenschaftliche Einrichtung der Informatik möchte der Studierendenschaft die Möglichkeit geben über 20.000 € sogenannter Qualitätsverbesserungsmittel zu entscheiden.
-      Dazu können in " (dom/a {:href (str js/dbas_host "/discuss/")} "D-BAS") " Vorschläge mit grober Preisabschätzung abgegeben werden, die dann von Ihnen ausdiskutiert werden können.
+      "Die Wissenschaftliche Einrichtung Informatik möchte der Studierendenschaft die Möglichkeit geben, über die Verwendung von 20.000 € sogenannter Qualitätsverbesserungsmittel zu diskutieren und zu entscheiden.
+      Dazu können in " (dom/a {:href (str js/dbas_host "/discuss/")} "D-BAS") " Vorschläge mit grober Preisabschätzung abgegeben werden, die dann von Ihnen diskutiert werden und über die Sie auch abstimmen können.
+      Ihre Vorschläge können nur dann umgesetzt werden, wenn sie der Verbesserung der Qualität der Lehre dienen.
+
       Diese Diskussion ist Teil einer wissenschaftlichen Studie.
       Der genaue Ablauf kann " (dom/a {:href "https://decide.dbas.cs.uni-duesseldorf.de/algorithm"} "auf dieser Seite") " nachgelesen werden. ")
 
