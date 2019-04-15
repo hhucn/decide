@@ -26,7 +26,7 @@
    :will-enter      (fn [_ _] (dr/route-immediate [:screens/id :login-screen]))
    :will-leave      (fn [_] true)}
   (dom/div :.login-screen
-    (dom/p :.lead "Log dich bitte mit deiner Uni Kennung ein.")
+    (dom/p :.lead "Log dich bitte mit deiner Uni-Kennung ein.")
     (login/ui-login-form login-form)))
 
 (defn main-page [this]
