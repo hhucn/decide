@@ -33,23 +33,22 @@
   (dom/div
     (dom/h1 "Verteilung von Qualitätsverbesserungsmitteln in der Informatik")
     (dom/p :.lead
-      "Die WE Informatik möchte Ihnen die Möglichkeit geben selbst über
-     Qualitätsverbesserungsmittel und deren Verwendung abzustimmen. Daher
-     haben Sie hier die Möglichkeit Vorschläge einzubringen, die von der
-     Studierendenschaft der Informatik später zur Abstimmung freigegeben
-     werden.")
+      "Die Wissenschaftliche Einrichtung der Informatik möchte der Studierendenschaft die Möglichkeit geben über 20.000 Euro sogenannter Qualitätsverbesserungsmittel zu entscheiden.
+      Dazu können in " (dom/a {:href (str js/dbas_host "/discuss/")} "D-BAS") " Vorschläge mit grober Preisabschätzung abgegeben werden, die dann von Ihnen ausdiskutiert werden können.
+      Diese Diskussion ist Teil einer wissenschaftlichen Studie.
+      Der genaue Ablauf kann " (dom/a {:href "https://decide.dbas.cs.uni-duesseldorf.de/algorithm"} "auf dieser Seite") " nachgelesen werden. ")
 
     (dom/p
       "Wichtig dabei ist, dass die Vorschläge alle der Qualitätsverbesserung
-     dienen, denn die dafür aufgebrachten Mittel müssen zweckgebunden verwendet
-     werden.")
+      dienen, denn die dafür aufgebrachten Mittel müssen zweckgebunden verwendet
+      werden.")
 
     (dom/p
       "Diese Diskussion ist Teil einer wissenschaftlichen Studie. Wir möchten
-     hierbei unter Anderem unsere Softwaresysteme testen. Es handelt sich hierbei
-     um zwei verschiedene Systeme: D-BAS zum Diskutieren und decide um
-     anschließend die Vorschläge zu Priorisieren. Wir beginnen zunächst mit der
-     Diskussion und schalten in der zweiten Woche die Priorisierung frei.")
+      hierbei unter Anderem unsere Softwaresysteme testen. Es handelt sich hierbei
+      um zwei verschiedene Systeme: D-BAS zum Diskutieren und decide um
+      anschließend die Vorschläge zu Priorisieren. Wir beginnen zunächst mit der
+      Diskussion und schalten in der zweiten Woche die Priorisierung frei.")
 
     (dom/br)
     (dom/p :.text-center
