@@ -7,7 +7,6 @@
     [decidotron.ui.components :as comp]
     [decidotron.ui.components.login :as login]
     [decidotron.api :as ms]
-    [fulcro.incubator.dynamic-routing :as dr]
     [decidotron.ui.routing :as routing]
     [decidotron.ui.static-pages.faq :refer [FAQ]]
     [decidotron.ui.static-pages.contact :refer [Contact]]
@@ -99,8 +98,7 @@
   (dom/div :.root.container.mdc-card.mdc-card__root
     (dom/nav :.navbar.navbar-light.bg-light
       (dom/a :.navbar-brand.d-flex.align-items-center
-        {:href    "#"
-         :onClick #(routing/change-route! this was-sollen-wir-mit-20-000eur-anfangen)}
+        {:href "/"}
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "decide")
       (dom/ul :.nav.mr-auto
