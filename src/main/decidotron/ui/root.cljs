@@ -98,7 +98,7 @@
    :initial-state (fn [_]
                     {:root/router     (prim/get-initial-state RootRouter {})
                      :dbas/connection (dbas/new-connection (str js/dbas_host "/api"))})}
-  (dom/div :.root.container.mdc-card.mdc-card__root
+  (dom/div :.root.container.mdc-card.mdc-card__root.mt-sm-3
     (dom/nav :.navbar.navbar-light.bg-light
       (dom/a :.navbar-brand.d-flex.align-items-center
         {:href "/"}
