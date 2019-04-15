@@ -116,5 +116,4 @@
         (nav-link "FAQ" "/faq")
         (nav-link "Kontakt" "/contact")
         (nav-link "Datenschutz" "/privacy")
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
-                             "D-BAS" (dom/sup (dom/i :.fas.fa-caret-up {:style {:transform "rotate(45deg)"}}))))))))
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/")} "D-BAS"))))))
