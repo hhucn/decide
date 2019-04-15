@@ -104,11 +104,11 @@
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "decide")
       (dom/ul :.nav.mr-auto
-        (nav-link "Home" "/")
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
-                             "Diskussion" (dom/sup (dom/i :.fas.fa-caret-up {:style {:transform "rotate(45deg)"}}))))
+        (nav-link "Startseite" "/")
         (nav-link "Abstimmung" (str "/preferences/" routing/hardcoded-slug))
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-dark {:href "/algorithm"} "Ablauf")))
+        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href "/algorithm"} "Ablauf")))
+      (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
+        "Zur Diskussion" (dom/sup (dom/i :.fas.fa-caret-up {:style {:transform "rotate(45deg)"}})))
       (ui-login-button this (dbas.client/logged-in? connection)))
     (dom/div :.container.pt-2
       (ui-router router))

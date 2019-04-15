@@ -4,13 +4,13 @@
   :min-lein-version "2.7.0"
 
   :dependencies [[org.clojure/clojure "1.10.0"]
-                 [thheller/shadow-cljs "2.8.29"]
+                 [thheller/shadow-cljs "2.8.31"]
                  [fulcrologic/fulcro "2.8.8" :exclusions [com.fasterxml.jackson.core/jackson-core]] ; jackson has a clash with buddy
                  [fulcrologic/fulcro-incubator "0.0.33" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [com.wsscode/pathom "2.2.13"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
-                 [garden "1.3.6"]
+                 [garden "1.3.9"]
                  [mount "0.1.16"]
                  [hiccup "1.0.5"]
                  [org.postgresql/postgresql "42.2.5"]
