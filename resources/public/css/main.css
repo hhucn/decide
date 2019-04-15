@@ -48,6 +48,8 @@ body {
 
 /* Set the button for the pro/con addon in the center and let it animate quite fast */
 .expand-btn {
+    border-radius: 50%;
+
     position: absolute;
     bottom: 0px;
     right: 50%;
