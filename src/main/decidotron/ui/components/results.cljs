@@ -110,7 +110,7 @@
     (dom/h1 "Ergebnis")
     (if show?
       (dom/div
-        (dom/p (str "Es gab insgesamt " no-of-participants " Teilnehmer, welche abgestimmt haben."))
+        (dom/p (str "Es gab insgesamt " no-of-participants " Teilnehmende, welche abgestimmt haben."))
         (ui-result-list props)
         (dom/hr :.mx-3)
         (dom/div

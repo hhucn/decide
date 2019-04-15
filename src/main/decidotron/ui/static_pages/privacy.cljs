@@ -49,9 +49,9 @@
    (dom/h2 "Wissenschaftliche Begleitforschung")
    (dom/p
      "Dieses Angebot wird im Rahmen einer Masterarbeit wissenschaftlich begleitet. "
-     "Dies schließt unter anderem eine Analyse der übertragenen Daten sowie eine Befragung der Teilnehmerinnen und Teilnehmer ein. "
+     "Dies schließt unter anderem eine Analyse der übertragenen Daten sowie eine Befragung der Teilnehmenden ein. "
      "Alle Auswertungen werden vollständig anonym vorgenommen. "
-     "Eine Veröffentlichung der Ergebnisse findet ausschließlich in anonymisierter Form statt, die keine Rückschlüsse auf individuelle Teilnehmerinnen und Teilnehmer des Verfahrens zulässt. ")
+     "Eine Veröffentlichung der Ergebnisse findet ausschließlich in anonymisierter Form statt, die keine Rückschlüsse auf individuelle Teilnehmenden des Verfahrens zulässt. ")
 
    (dom/h2 "Nutzungsdaten")
    (dom/p

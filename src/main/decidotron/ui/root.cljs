@@ -46,7 +46,7 @@
     (dom/p
      "Wir werden die Diskussion und den Entscheidungsprozess wissenschaftlich
       auswerten und Sie im Anschluss an den Entscheidungsprozess zu einer (vollkommen
-      freiwilligen) Teilnehmerbefragung einladen. Die Erhebung, Verarbeitung und
+      freiwilligen) Teilnehmendenbefragung einladen. Die Erhebung, Verarbeitung und
       Nutzung der so gewonnenen Daten geschieht ausschließlich anonymisiert und zu
       Forschungszwecken, sie steht in keiner Verbindung mit Ihren Studienleistungen
       oder sonstigen personenbezogenen Eigenschaften.")
