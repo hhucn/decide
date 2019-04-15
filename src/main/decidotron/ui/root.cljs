@@ -32,7 +32,7 @@
   (dom/div
     (dom/h1 "Verteilung von Qualitätsverbesserungsmitteln in der Informatik")
     (dom/p :.lead
-      "Die Wissenschaftliche Einrichtung der Informatik möchte der Studierendenschaft die Möglichkeit geben über 20.000 Euro sogenannter Qualitätsverbesserungsmittel zu entscheiden.
+      "Die Wissenschaftliche Einrichtung der Informatik möchte der Studierendenschaft die Möglichkeit geben über 20.000 € sogenannter Qualitätsverbesserungsmittel zu entscheiden.
       Dazu können in " (dom/a {:href (str js/dbas_host "/discuss/")} "D-BAS") " Vorschläge mit grober Preisabschätzung abgegeben werden, die dann von Ihnen ausdiskutiert werden können.
       Diese Diskussion ist Teil einer wissenschaftlichen Studie.
       Der genaue Ablauf kann " (dom/a {:href "https://decide.dbas.cs.uni-duesseldorf.de/algorithm"} "auf dieser Seite") " nachgelesen werden. ")
