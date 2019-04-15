@@ -90,7 +90,7 @@
       (dom/i :.fas.fa-sign-in-alt) " Login")))
 
 (defn nav-link [label href]
-  (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href href} label)))
+  (dom/li :.nav-item (dom/a :.btn.btn-light {:href href} label)))
 
 (defsc Root [this {:keys [dbas/connection root/router]}]
   {:query         [:dbas/connection
@@ -99,18 +99,31 @@
                     {:root/router     (prim/get-initial-state RootRouter {})
                      :dbas/connection (dbas/new-connection (str js/dbas_host "/api"))})}
   (dom/div :.root.container.mdc-card.mdc-card__root.mt-sm-3
-    (dom/nav :.navbar.navbar-light.bg-light
+    (dom/nav :.navbar.navbar-expand-md.navbar-light.bg-light
       (dom/a :.navbar-brand.d-flex.align-items-center
         {:href "/"}
         (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
         "decide")
-      (dom/ul :.nav.mr-auto
-        (nav-link "Startseite" "/")
-        (nav-link "Abstimmung" (str "/preferences/" routing/hardcoded-slug))
-        (dom/li :.nav-item (dom/a :.btn.btn-sm.btn-light {:href "/algorithm"} "Ablauf")))
-      (dom/a :.btn.btn-sm.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
-        "Zur Diskussion" (dom/sup (dom/i :.fas.fa-caret-up {:style {:transform "rotate(45deg)"}})))
-      (ui-login-button this (dbas.client/logged-in? connection)))
+      (dom/button
+        {:type          "button",
+         :data-toggle   "collapse",
+         :data-target   "#navbarSupportedContent",
+         :aria-controls "navbarSupportedContent",
+         :aria-expanded "false",
+         :aria-label    "Toggle navigation",
+         :className     "navbar-toggler"}
+        (dom/span {:className "navbar-toggler-icon"}))
+      (dom/div :#navbarSupportedContent.collapse.navbar-collapse
+        (dom/ul :.navbar-nav.mr-auto
+          (nav-link "Startseite" "/")
+          (nav-link "Abstimmung" (str "/preferences/" routing/hardcoded-slug))
+          (dom/li :.nav-item (dom/a :.btn.btn-light {:href "/algorithm"} "Ablauf")))
+        (dom/hr :.d-md-none)
+        (dom/ul :.navbar-nav
+          (dom/li
+            (dom/a :.btn.btn-light {:href (str js/dbas_host "/discuss/" routing/hardcoded-slug)}
+              "Zur Diskussion" (dom/sup (dom/i :.fas.fa-caret-up {:style {:transform "rotate(45deg)"}}))))
+          (dom/li (ui-login-button this (dbas.client/logged-in? connection))))))
     (dom/div :.container.pt-2
       (ui-router router))
     (dom/hr :.row)
