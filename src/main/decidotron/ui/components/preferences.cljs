@@ -125,8 +125,8 @@
   "This subcomponent renders the positions, which the user does not prefer (yet)"
   [this slug position-items]
   (dom/div :.untouched-positions
-    (dom/h3 "Weitere Positionen")
-    (dom/h6 :.text-muted "Wählen Sie die für Sie wichtigen Positionen und lassen Sie die unwichtigen hier.")
+    (dom/h3 "Weitere Vorschläge")
+    (dom/h6 :.text-muted "Wählen Sie die für Sie wichtigen Vorschläge und lassen Sie die unwichtigen hier.")
     (dom/ul :.list-group
       (map (fn [position-item]
              (ui-pref-list-item

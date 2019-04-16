@@ -3,13 +3,11 @@
     [fulcro.client.primitives :as prim :refer [defsc]]
     [fulcro.client.dom :as dom]
     [fulcro.client.mutations :refer [defmutation]]
-    [decidotron.api :as ms]
     [fulcro.client.data-fetch :as df]
     [decidotron.ui.models :as models]
     [decidotron.ui.utils :refer [logged-in? format-cost price-tag refresh-button format-votes-date]]
     [decidotron.ui.components.results :refer [ResultList ui-result-list]]
     [decidotron.ui.components.preferences :refer [PreferenceList PreferredItem preferred-positions ui-pref-list ui-pref-list-item expand-button]]
-    [dbas.client :as dbas]
     [goog.string :refer [format]]
     [fulcro.incubator.dynamic-routing :as dr]
     [cljs-time.core :as t]
@@ -25,8 +23,9 @@
       "Es werden für 20.000 € Vorschläge gewählt.
       Dafür können Sie die Vorschläge auswählen, von welchen Sie möchten, dass diese umgesetzt werden.")
     (dom/p
-      "Die Vorschläge lassen sich sortieren, wobei Ihr Favorit das meiste Gewicht bei der Abstimmung hat, Ihr zweitliebster Vorschlag etwas weniger usw.
-      Vorschläge, die Sie nicht mögen, wählen Sie einfach nicht aus und lassen sie wo sie sind.")
+      "Sie können die Vorschläge sortieren, wobei Ihr Favorit das meiste Gewicht bei der Abstimmung hat, Ihr
+      zweitliebster Vorschlag etwas weniger usw. Vorschläge, die Sie nicht unterstützen wollen, wählen Sie einfach nicht
+      aus und lassen sie im Bereich \"Weitere Vorschläge\".")
     (dom/p
       "Eine genaue Erklärung, wie das Ergebnis gefunden wird, finden Sie auf " (dom/a {:href "/algorithm"} "dieser Seite") ".")
     (when votes-end
