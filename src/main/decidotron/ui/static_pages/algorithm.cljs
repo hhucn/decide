@@ -30,80 +30,83 @@
          :target "_blank"}
         "https://decide.dbas.cs.uni-duesseldorf.de/preferences/verteilung-von-qualitatsverbesserungsmittel-in-der-informatik/result"))
     (dom/h3 "Beispiel für die Auswertung")
-    (dom/p "Angenommen wir haben drei Teilnehmer Christian, Alexander und Markus. Sie wollen über drei mögliche Vorschläge entscheiden. Es stehen 10.000 € zur Verfügung. Vorgeschlagen werden ein Schokobrunnen für 4.000 €, ein Wasserspender für 2.000 € und ein Bällebad für 7.000 €. Sie geben Ihre Stimmen ab, wobei Christian nicht mit dem Bällebad einverstanden ist und Markus keinen Wasserspender will.")
-    (dom/table :.table
-      (dom/thead
-        (dom/tr
-          (dom/th)
-          (dom/th "1. Priorität (3 P)")
-          (dom/th "2. Priorität (2 P)")
-          (dom/th "3. Priorität (1 P)")
-          (dom/th "Abgelehnt (0 P)")))
-      (dom/tbody
-        (dom/tr
-          (dom/th "Christian")
-          (dom/td "Wasserspender")
-          (dom/td "Schokobrunnen")
-          (dom/td "-")
-          (dom/td "Bällebad"))
-        (dom/tr
-          (dom/th "Alexander")
-          (dom/td "Bällebad")
-          (dom/td "Schokobrunnen")
-          (dom/td "Wasserspender")
-          (dom/td "-"))
-        (dom/tr
-          (dom/th "Markus")
-          (dom/td "Schokobrunnen")
-          (dom/td "Bällebad")
-          (dom/td "-")
-          (dom/td "Wasserspender"))))
+    (dom/p "Angenommen wir haben drei Teilnehmer Christian, Alexander und Markus. Sie wollen über drei mögliche Vorschläge entscheiden. Es stehen 10.000 € zur Verfügung. Vorgeschlagen werden ein Hackathon für 4.000 €, ein Wasserspender im Eingangsbereich für 2.000 € und die Modernisierung des Computerraums für 7.000 €. Sie geben Ihre Stimmen ab, wobei Christian nicht mit dem Computerraum einverstanden ist und Markus keinen Wasserspender will.")
+    (dom/div :.table-responsive
+      (dom/table :.table
+        (dom/thead
+          (dom/tr
+            (dom/th)
+            (dom/th "1. Priorität (3 P)")
+            (dom/th "2. Priorität (2 P)")
+            (dom/th "3. Priorität (1 P)")
+            (dom/th "Abgelehnt (0 P)")))
+        (dom/tbody
+          (dom/tr
+            (dom/th "Christian")
+            (dom/td "Wasserspender")
+            (dom/td "Hackathon")
+            (dom/td "-")
+            (dom/td "Computerraum"))
+          (dom/tr
+            (dom/th "Alexander")
+            (dom/td "Computerraum")
+            (dom/td "Hackathon")
+            (dom/td "Wasserspender")
+            (dom/td "-"))
+          (dom/tr
+            (dom/th "Markus")
+            (dom/td "Hackathon")
+            (dom/td "Computerraum")
+            (dom/td "-")
+            (dom/td "Wasserspender")))))
     (dom/p
       "Nachdem die drei abgestimmt haben, werden ihre Entscheidungen gewertet. Ihre höchsten Prioritäten bekommen dieselben Punkte (P), alle weiteren Vorschläge jeweils einen Punkt weniger wie oben beschrieben. Vorschläge, die sie nicht gut finden, bekommen keine Punkte.")
     (dom/p "Zusammengerechnet ergeben sich also folgende Punktzahlen:")
-    (dom/table :.table
-      (dom/thead
-        (dom/tr (dom/th) (dom/th "Punkte") (dom/th "Kosten")))
-      (dom/tbody
-        (dom/tr
-          (dom/th "Schokobrunnen")
-          (dom/td "7")
-          (dom/td "4.000 €"))
-        (dom/tr
-          (dom/th "Bällebad")
-          (dom/td "5")
-          (dom/td "7.000 €"))
-        (dom/tr
-          (dom/th "Wasserspender")
-          (dom/td "4")
-          (dom/td "2.000 €"))))
+    (dom/div :.table-responsive
+      (dom/table :.table
+        (dom/thead
+          (dom/tr (dom/th) (dom/th "Punkte") (dom/th "Kosten")))
+        (dom/tbody
+          (dom/tr
+            (dom/th "Hackathon")
+            (dom/td "7")
+            (dom/td "4.000 €"))
+          (dom/tr
+            (dom/th "Computerraum")
+            (dom/td "5")
+            (dom/td "7.000 €"))
+          (dom/tr
+            (dom/th "Wasserspender")
+            (dom/td "4")
+            (dom/td "2.000 €")))))
     (dom/p
       "Nun werden die gewinnenden Vorschläge zusammengefasst. Nicht alle Vorschläge können angenommen werden, da dies das Budget sprengen würde."
       (dom/br)
-      "Als Vorschlag mit den meisten Punkten wird der Schokobrunnen ein Gewinner, denn er kostet 4.000 €, also bleiben noch 6.000 € übrig. Das Bällebad hat die zweitmeisten Punkte, passt mit den veranschlagten 7.000 € aber nicht ins Budget und wird damit kein Gewinner. Obwohl der Wasserspender am wenigsten Punkte bekommen hat, passt er mit seinen 2.000 € Kosten in das restliche Budget. Er wird also auch ein Gewinner.")
+      "Als Vorschlag mit den meisten Punkten wird der Hackathon ein Gewinner, denn er kostet 4.000 €, also bleiben noch 6.000 € übrig. Das Computerraum hat die zweitmeisten Punkte, passt mit den veranschlagten 7.000 € aber nicht ins Budget und wird damit kein Gewinner. Obwohl der Wasserspender am wenigsten Punkte bekommen hat, passt er mit seinen 2.000 € Kosten in das restliche Budget. Er wird also auch ein Gewinner.")
     (dom/p
-      "Die Gewinner sind: Der " (dom/strong "Schokobrunnen") " und der " (dom/strong "Wasserspender") "."
+      "Die Gewinner sind: Der " (dom/strong "Hackathon") " und der " (dom/strong "Wasserspender") "."
       (dom/br)
-      "Verloren hat das " (dom/strong "Bällebad") ".")
+      "Verloren hat das " (dom/strong "Computerraum") ".")
 
     (dom/h3 "Unentschieden")
     (dom/p "Angenommen es nimmt ein vierter Teilnehmer, Martin, teil.")
-    (dom/table :.table
-      (dom/thead
-        (dom/tr
-          (dom/th)
-          (dom/th "1. Priorität (3 P)")
-          (dom/th "2. Priorität (2 P)")
-          (dom/th "3. Priorität (1 P)")
-          (dom/th "Abgelehnt (0 P)")))
-      (dom/tbody
-        (dom/tr
-          (dom/th "Martin")
-          (dom/td "Bällebad")
-          (dom/td "Wasserspender")
-          (dom/td "Schokobrunnen")
-          (dom/td "-"))))
-    (dom/p "Nun sehen die Punkte etwas anders aus, das Bällebad hat aufgeholt! Es besteht die verzwickte Situation, dass es ein Unentschieden gibt. Da alle dem Schokobrunnen zustimmen und ihn somit keiner ablehnt, die anderen beiden Vorschläge allerdings nicht die Zustimmung aller bekommen haben, verliert hier das Bällebad schon wieder gegen den Schokobrunnen.")
+    (dom/div :.table-responsive
+      (dom/table :.table
+        (dom/thead
+          (dom/tr
+            (dom/th)
+            (dom/th "1. Priorität (3 P)")
+            (dom/th "2. Priorität (2 P)")
+            (dom/th "3. Priorität (1 P)")
+            (dom/th "Abgelehnt (0 P)")))
+        (dom/tbody
+          (dom/tr
+            (dom/th "Martin")
+            (dom/td "Computerraum")
+            (dom/td "Wasserspender")
+            (dom/td "Hackathon")
+            (dom/td "-")))))
+    (dom/p "Nun sehen die Punkte etwas anders aus, das Computerraum hat aufgeholt! Es besteht die verzwickte Situation, dass es ein Unentschieden gibt. Da alle dem Hackathon zustimmen und ihn somit keiner ablehnt, die anderen beiden Vorschläge allerdings nicht die Zustimmung aller bekommen haben, verliert hier das Computerraum schon wieder gegen den Hackathon.")
     (dom/table :.table
       (dom/thead
         (dom/tr
@@ -113,13 +116,13 @@
           (dom/th "Zustimmungen")))
       (dom/tbody
         (dom/tr
-          (dom/th "Bällebad")
+          (dom/th "Computerraum")
           (dom/td "8 (5+3)")
           (dom/td "7.000 €")
           (dom/td "3"))
 
         (dom/tr
-          (dom/th "Schokobrunnen")
+          (dom/th "Hackathon")
           (dom/td "8 (7+1)")
           (dom/td "4.000 €")
           (dom/td "4"))
@@ -131,7 +134,7 @@
           (dom/td "3"))))
     (dom/p
       "Die Gewinner werden wie bereits genannt bestimmt und wieder gewinnt der "
-      (dom/strong "Schokobrunnen")
+      (dom/strong "Hackathon")
       " und der "
       (dom/strong "Wasserspender")
-      ". Das Bällebad war dicht dran, aber es hat dennoch verloren.")))
+      ". Das Computerraum war dicht dran, aber es hat dennoch verloren.")))
