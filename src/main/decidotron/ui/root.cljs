@@ -31,7 +31,7 @@
 
 (defn main-page [this]
   (dom/div
-    (dom/h1 "Verteilung von Qualitätsverbesserungsmitteln in der Informatik")
+    (dom/h1 "Verteilung von Qualitätsverbesserungsmitteln")
     (dom/p :.lead
       "Die Wissenschaftliche Einrichtung Informatik möchte der Studierendenschaft die Möglichkeit geben, über die Verwendung von 20.000 € sogenannter Qualitätsverbesserungsmittel zu diskutieren und zu entscheiden.
       Dazu können in " (dom/a {:href (str js/dbas_host "/discuss/")} "D-BAS") " Vorschläge mit grober Preisabschätzung abgegeben werden, die dann von Ihnen diskutiert werden und über die Sie auch abstimmen können.
@@ -47,7 +47,7 @@
 
     (dom/p
      "Wir werden die Diskussion und den Entscheidungsprozess wissenschaftlich
-      auswerten und Sie im Anschluss an den Entscheidungsprozess zu einer (vollkommen
+      begleiten und Sie im Anschluss an den Entscheidungsprozess zu einer (vollkommen
       freiwilligen) Teilnehmendenbefragung einladen. Die Erhebung, Verarbeitung und
       Nutzung der so gewonnenen Daten geschieht ausschließlich anonymisiert und zu
       Forschungszwecken, sie steht in keiner Verbindung mit Ihren Studienleistungen
