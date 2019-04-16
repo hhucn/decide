@@ -12,8 +12,6 @@
            (kdb/defdb kdatabase db)
            db))
 
-
-
 (declare cost textversion issue statement position decision-process)
 
 (k/defentity cost
@@ -92,9 +90,6 @@
                               (k/where (and (= :slug slug))))))]
     #:dbas.position{:id uid :cost cost :text text}))
 
-(defn index-by [l k]
-  (apply hash-map (mapcat #(vector (k %) %) l)))
-
 (defn pro-con-for-positions [position-ids]
   (select [textversion :tv]
     (k/fields [:statements.stmt_uid :position_uid]
@@ -117,10 +112,6 @@
 
 (defn pro-con-for-position [position-id]
   (pro-con-for-positions [position-id]))
-
-(comment
-  (pro-con-for-position 85)
-  (pro-con-for-positions [83, 85]))
 
 (defn get-issue [slug]
   (let [{:keys [votes_end votes_start slug uid title long_info currency_symbol positions_end info budget statements]}
@@ -162,17 +153,18 @@
   (into {} (map (fn [{:dbas.position/keys [id cost]}] [id cost]))
     (:dbas.issue/positions issue)))
 
+(defn- position-ids
+  "Returns all not disabled position ids from an issue."
+  [slug]
+  (->> (select issue (where {:slug slug})
+         (with statement
+           (where {:is_disabled false :is_position true})))
+    first :statements (map :uid) set))
+
 (defn filter-disabled-positions
-  "Filters out all positions which are disabled"
-  [positions]
-  (let [position-ids (map :dbas.position/id positions)]
-    (filter
-      (comp (set (map :uid (select statement
-                             (fields :uid)
-                             (where (and (in :uid position-ids)
-                                      (= :is_disabled false))))))
-        :dbas.position/id)
-      positions)))
+  "Filters out all positions which are disabled do not belong to the issue."
+  [slug positions]
+  (filter #((position-ids slug) (:dbas.position/id %)) positions))
 
 (defn- votes-start-end [slug]
   (let [[{:keys [votes_start votes_end]}]
@@ -193,8 +185,8 @@
       (t/now))))
 
 (defn show-results?
+  "Returns whether the results for the issue with the given slug should be shown."
   [slug]
-  (let [{end :end} (votes-start-end slug)]
-    (if end
-      (t/after? (t/now) end)
-      true)))
+  (if-let [end (:end (votes-start-end slug))]
+    (t/after? (t/now) end)
+    true))

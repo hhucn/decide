@@ -3,7 +3,7 @@
             [com.wsscode.pathom.connect :as pc]
             [mount.core :refer [defstate]]
             [decidotron.server-components.token :as t]
-            [decidotron.server-components.database :as db :refer [positions-for-issue index-by]]
+            [decidotron.server-components.database :as db]
             [decidotron.server-components.budgets :as b]
             [decidotron.server-components.config :refer [config]]
             [konserve.filestore :as kfs]
@@ -18,15 +18,15 @@
 
 (defn- ident->map [[a b]] {a b})
 
-(defn- validate-preference-list [{:keys [preferences]}]
-  (distinct? (map :dbas.position/id preferences)))
+(defn- validate-preference-list [slug {:keys [preferences]}]
+  (distinct? (map :dbas.position/id (db/filter-disabled-positions slug preferences))))
 
 (pc/defmutation update-preferences [_ {:keys [preference-list dbas.client/token]}]
   {::pc/params [:preference-list :token]}
   (if-let [user-id (:id (t/unsign token))]
     (let [slug            (:preference-list/slug preference-list)
           preference-list (update preference-list :preferences (partial map ident->map))] ; idents to maps
-      (if (validate-preference-list preference-list)
+      (if (validate-preference-list slug preference-list)
         (when (db/allow-voting? slug)
           (go (second (<! (k/assoc-in storage [slug user-id] preference-list)))))
         :decidotron.error/duplicated-position))
@@ -99,7 +99,7 @@
   (go
     (merge {:dbas/issue {:dbas.issue/slug slug}}
       (update (<! (k/get-in storage [slug user-id]))
-        :preferences db/filter-disabled-positions))))
+        :preferences #(db/filter-disabled-positions slug %)))))
 
 (pc/defresolver preferences [_ {slug :preferences/slug}]
   {::pc/input  #{:preferences/slug}
@@ -126,7 +126,7 @@
           costs       (db/get-costs issue)
           preferences (->> (<!! (k/get-in storage [slug]))
                         vals
-                        (map #(->> % :preferences db/filter-disabled-positions (map :dbas.position/id))))
+                        (map #(->> % :preferences (db/filter-disabled-positions slug) (map :dbas.position/id))))
           {:keys [winners losers] :as result} (b/borda-budget preferences budget costs)]
       (log/trace "Result is:" result)
       {:result/show?              true
