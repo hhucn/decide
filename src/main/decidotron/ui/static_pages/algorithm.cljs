@@ -2,7 +2,8 @@
   (:require-macros [fulcro.incubator.dynamic-routing :as dr :refer [defsc-route-target]])
   (:require
     [fulcro.client.dom :as dom]
-    [fulcro.incubator.dynamic-routing :as dr]))
+    [fulcro.incubator.dynamic-routing :as dr]
+    [decidotron.ui.routing :refer [hardcoded-slug]]))
 
 (defsc-route-target Algorithm [_ _]
   {:query           []
@@ -26,9 +27,9 @@
     (dom/p "Anschließend werden die Werte aller Vorschläge summiert, um somit eine Rangfolge zu erhalten. In dem Ergebnis werden nun die am besten bewerteten Vorschläge eingebracht, solange sie mit in das restliche Budget passen.")
     (dom/p "Diese Phase dauert eine Woche und findet direkt im Anschluss an die Vorschlags-Phase statt. Im Anschluss finden Sie die Ergebnisse unter "
       (dom/a
-        {:href   "https://decide.dbas.cs.uni-duesseldorf.de/preferences/verteilung-von-qualitatsverbesserungsmittel-in-der-informatik/result",
+        {:href   (str "https://decide.dbas.cs.uni-duesseldorf.de/preferences/" hardcoded-slug "/result",)
          :target "_blank"}
-        "https://decide.dbas.cs.uni-duesseldorf.de/preferences/verteilung-von-qualitatsverbesserungsmittel-in-der-informatik/result"))
+        (str "https://decide.dbas.cs.uni-duesseldorf.de/preferences/" hardcoded-slug "/result")))
     (dom/h3 "Beispiel für die Auswertung")
     (dom/p "Angenommen wir haben drei Teilnehmer Christian, Alexander und Markus. Sie wollen über drei mögliche Vorschläge entscheiden. Es stehen 10.000 € zur Verfügung. Vorgeschlagen werden ein Hackathon für 4.000 €, ein Wasserspender im Eingangsbereich für 2.000 € und die Modernisierung des Computerraums für 7.000 €. Sie geben Ihre Stimmen ab, wobei Christian nicht mit dem Computerraum einverstanden ist und Markus keinen Wasserspender will.")
     (dom/div :.table-responsive

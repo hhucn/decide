@@ -5,7 +5,7 @@
     [fulcro.incubator.dynamic-routing :as dr]
     [clojure.string :as str]))
 
-(def hardcoded-slug "verteilung-von-qualitatsverbesserungsmittel-in-der-informatik")
+(def hardcoded-slug "verteilung-von-qualitatsverbesserungsmitteln")
 
 ;; To keep track of the global HTML5 pushy routing object
 (def history (atom nil))
