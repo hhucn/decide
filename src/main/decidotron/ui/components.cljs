@@ -15,10 +15,9 @@
 
   (:require-macros [fulcro.incubator.dynamic-routing :refer [defsc-route-target defrouter]]))
 
-(defsc VoteHeader [_ {:dbas.issue/keys [title info votes-end]}]
+(defsc VoteHeader [_ {:dbas.issue/keys [title votes-end]}]
   (dom/div :.vote-header.mb-5
     (dom/h1 title)
-    (dom/p :.text-muted info)
     (dom/p
       "Es werden für 20.000 € Vorschläge gewählt.
       Dafür können Sie die Vorschläge auswählen, von welchen Sie möchten, dass diese umgesetzt werden.")

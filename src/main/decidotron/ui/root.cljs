@@ -32,18 +32,12 @@
 (defn main-page [this]
   (dom/div
     (dom/h1 "Verteilung von Qualitätsverbesserungsmitteln")
-    (dom/p :.lead
+    (dom/p
       "Die Wissenschaftliche Einrichtung Informatik möchte der Studierendenschaft die Möglichkeit geben, über die Verwendung von 20.000 € sogenannter Qualitätsverbesserungsmittel zu diskutieren und zu entscheiden.
       Dazu können in " (dom/a {:href (str js/dbas_host "/discuss/")} "D-BAS") " Vorschläge mit grober Preisabschätzung abgegeben werden, die dann von Ihnen diskutiert werden und über die Sie auch abstimmen können.
       Ihre Vorschläge können nur dann umgesetzt werden, wenn sie der Verbesserung der Qualität der Lehre dienen.
 
-      Diese Diskussion ist Teil einer wissenschaftlichen Studie.
-      Der genaue Ablauf kann " (dom/a {:href "https://decide.dbas.cs.uni-duesseldorf.de/algorithm"} "auf dieser Seite") " nachgelesen werden. ")
-
-    (dom/p
-      "Wichtig dabei ist, dass die Vorschläge alle der Qualitätsverbesserung
-      dienen, denn die dafür aufgebrachten Mittel müssen zweckgebunden verwendet
-      werden.")
+      Der genaue Ablauf kann " (dom/a {:href "/algorithm"} "auf dieser Seite") " nachgelesen werden. ")
 
     (dom/p
      "Wir werden die Diskussion und den Entscheidungsprozess wissenschaftlich
