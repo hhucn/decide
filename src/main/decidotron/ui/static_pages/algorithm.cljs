@@ -14,18 +14,51 @@
    :will-leave      (fn [_] true)}
   (dom/div :#doc
     (dom/h1 "Erklärung des Ablaufes")
-    (dom/h2 "Vorschlags-Phase")
+    (dom/h2 "Phase 1: Vorschläge sammeln")
     (dom/p "In der ersten Phase ist es möglich über unser Argumentationssystem "
       (dom/em "D-BAS")
       " eigene Vorschläge und eine grobe Preisabschätzung für den Vorschlag abzugeben. Die Vorschläge können dann ausdiskutiert werden. Dabei wird Sie D-BAS durch einen Dialog führen und Ihre Meinungen zum eigenen Vorschlag sowie zu den anderen Vorschlägen einholen. Sie können jederzeit die Meinungen und Vorschläge der anderen Teilnehmenden einsehen und gegen/für diese Meinungen argumentieren. Sollte jemand auf eine Ihrer Aussagen Bezug nehmen, so werden Sie per Mail benachrichtigt. So können Sie direkt wieder in die Diskussion mit einsteigen und Ihre Aussagen verteidigen.")
-    (dom/p "Die erste Phase dauert eine Woche. In der zweiten Woche können Sie weiter auf D-BAS diskutieren, Sie sollten sich aber bewusst sein, dass die Abstimmungs-Phase dann schon begonnen hat.")
-    (dom/h2 "Abstimmungs-Phase")
+
+    (dom/h4 {:id "rules"} "Regeln für gute Vorschläge")
+    (dom/div
+      (dom/h6 {:id "Ein-Vorschlag-muss"} "Ein Vorschlag muss:")
+      (dom/ul
+        (dom/li "unter den 20.000 € bleiben")
+        (dom/li "mindestens 100 € kosten")
+        (dom/li "der Verbesserung der Lehrsituation dienen")
+        (dom/li "von der Informatik umsetzbar sein"))
+      (dom/p "Also bitte keine Vorschläge einbringen, welche die Infrastruktur der Universität betreffen,\n                beispielsweise:")
+      (dom/ul
+        (dom/li "Bauliche Maßnahmen")
+        (dom/li "Verbesserung des W-LANs")
+        (dom/li "Mehr Steckdosen"))
+      (dom/p "Diese Vorschläge liegen nicht im Ermessensbereich der Informatik, sondern beim ZIM oder dem Dezernat 6 (Gebäudemanagement)."))
+    (dom/div
+      (dom/h5 {:id "Beispiel-Vorschläge"} "Beispiele für Vorschläge:")
+      (dom/ul
+        (dom/li "Neue Veranstaltungen einführen"
+          (dom/ul
+            (dom/li "Zertifizierungsangebote")
+            (dom/li "extern organisierter Hackathon")
+            (dom/li "Kurse")))
+        (dom/li "Modernisierung des Computerlabors im EG")
+        (dom/li "digitale Tafeln in den Seminarräumen")
+        (dom/li "ein Wasserspender im Eingangsbereich")))
+
+    (dom/div
+      (dom/h2 {:name "phase-2"} "Phase 2: Begutachtung der Vorschläge")
+      (dom/p "Nachdem Vorschläge eingegangen sind, werden diese von uns begutachtet.
+              Dies geschieht damit klar wird, wovon die eingebrachten Vorschläge handeln und um Vorschläge die nicht umgesetzt werden können, weil sie gegen die obengenannten Regeln verstoßen, zu filtern.
+              Um die Transparenz zu wahren, werden Veränderungen an den Vorschlägen nur in Absprache mit den Autoren geschehen, egal ob sie nur umformuleirt werden oder entfernt.
+              Anschließend erhalten Sie noch eine Woche Zeit, um über diese überarbeiteten Vorschläge zu diskutieren und danach eine weitere Woche, um über die Vorschläge abzustimmen."))
+
+    (dom/h2 "Phase 3: Abstimmung")
     (dom/p "Für die Abstimmungs-Phase wechseln wir in unser Entscheidungsfindungssystem "
       (dom/em "decide") ". Schauen Sie sich dort nun die Vorschläge an und entscheiden Sie, von welchen Sie möchten, dass sie umgesetzt werden. Wenn Sie die Vorschläge nicht gut finden, dann wählen Sie diese einfach nicht aus.")
     (dom/p "Nachdem Sie eine Auswahl getätigt haben, sollten Sie die Vorschläge priorisieren. Klicken Sie die wichtigsten Vorhaben an die Spitze der Liste und die weniger wichtigen an das Ende.")
     (dom/p "Das endgültige Ergebnis an umzusetzenden Vorschlägen wird ausgewählt, indem jeder Priorität ein Wert zugeordnet wird. Neben Ihnen haben noch viele andere ihre Stimmen abgegeben und ihre Stimmen bekommt auch einen Wert. Jede erste Priorität bekommt denselben Wert, jede zweite Priorität denselben kleineren Wert, usw.")
     (dom/p "Anschließend werden die Werte aller Vorschläge summiert, um somit eine Rangfolge zu erhalten. In dem Ergebnis werden nun die am besten bewerteten Vorschläge eingebracht, solange sie mit in das restliche Budget passen.")
-    (dom/p "Diese Phase dauert eine Woche und findet direkt im Anschluss an die Vorschlags-Phase statt. Im Anschluss finden Sie die Ergebnisse unter "
+    (dom/p "Diese Phase dauert eine Woche. Im Anschluss finden Sie die Ergebnisse unter "
       (dom/a
         {:href   (str "https://decide.dbas.cs.uni-duesseldorf.de/preferences/" hardcoded-slug "/result",)
          :target "_blank"}
@@ -83,7 +116,7 @@
     (dom/p
       "Nun werden die gewinnenden Vorschläge zusammengefasst. Nicht alle Vorschläge können angenommen werden, da dies das Budget sprengen würde."
       (dom/br)
-      "Als Vorschlag mit den meisten Punkten wird der Hackathon ein Gewinner, denn er kostet 4.000 €, also bleiben noch 6.000 € übrig. Das Computerraum hat die zweitmeisten Punkte, passt mit den veranschlagten 7.000 € aber nicht ins Budget und wird damit kein Gewinner. Obwohl der Wasserspender am wenigsten Punkte bekommen hat, passt er mit seinen 2.000 € Kosten in das restliche Budget. Er wird also auch ein Gewinner.")
+      "Als Vorschlag mit den meisten Punkten wird der Hackathon ein Gewinner, denn er kostet 4.000 €, also bleiben noch 6.000 € übrig. Der Computerraum hat die zweitmeisten Punkte, passt mit den veranschlagten 7.000 € aber nicht ins Budget und wird damit kein Gewinner. Obwohl der Wasserspender am wenigsten Punkte bekommen hat, passt er mit seinen 2.000 € Kosten in das restliche Budget. Er wird also auch ein Gewinner.")
     (dom/p
       "Die Gewinner sind: Der " (dom/strong "Hackathon") " und der " (dom/strong "Wasserspender") "."
       (dom/br)
@@ -107,7 +140,7 @@
             (dom/td "Wasserspender")
             (dom/td "Hackathon")
             (dom/td "-")))))
-    (dom/p "Nun sehen die Punkte etwas anders aus, das Computerraum hat aufgeholt! Es besteht die verzwickte Situation, dass es ein Unentschieden gibt. Da alle dem Hackathon zustimmen und ihn somit keiner ablehnt, die anderen beiden Vorschläge allerdings nicht die Zustimmung aller bekommen haben, verliert hier das Computerraum schon wieder gegen den Hackathon.")
+    (dom/p "Nun sehen die Punkte etwas anders aus, der Computerraum hat aufgeholt! Es besteht die verzwickte Situation, dass es ein Unentschieden gibt. Da alle dem Hackathon zustimmen und ihn somit keiner ablehnt, die anderen beiden Vorschläge allerdings nicht die Zustimmung aller bekommen haben, verliert hier der Computerraum schon wieder gegen den Hackathon.")
     (dom/table :.table
       (dom/thead
         (dom/tr
@@ -138,4 +171,4 @@
       (dom/strong "Hackathon")
       " und der "
       (dom/strong "Wasserspender")
-      ". Das Computerraum war dicht dran, aber es hat dennoch verloren.")))
+      ". Der Computerraum war dicht dran, aber es hat dennoch verloren.")))
