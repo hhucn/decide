@@ -19,8 +19,8 @@
   (dom/div :.vote-header.mb-5
     (dom/h1 title)
     (dom/p
-      "Es werden für 20.000 € Vorschläge gewählt.
-      Dafür können Sie die Vorschläge auswählen, von welchen Sie möchten, dass diese umgesetzt werden.")
+      "Es können für 20.000 € Vorschläge umgesetzt werden.
+      Geben Sie dafür hier Ihre Präferenzen an.")
     (dom/p
       "Sie können die Vorschläge sortieren, wobei Ihr Favorit das meiste Gewicht bei der Abstimmung hat, Ihr
       zweitliebster Vorschlag etwas weniger usw. Vorschläge, die Sie nicht unterstützen wollen, wählen Sie einfach nicht
