@@ -117,7 +117,6 @@
 (pc/defresolver result [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
    ::pc/output [:result/show?
-                :result/no-of-participants
                 {:result/positions [{:winners [:dbas.position/id :dbas.position/scores]}
                                     {:losers [:dbas.position/id :dbas.position/scores]}]}]}
   (if (db/show-results? slug)
@@ -130,17 +129,21 @@
           {:keys [winners losers] :as result} (b/borda-budget preferences budget costs)]
       (log/trace "Result is:" result)
       {:result/show?              true
-       :result/no-of-participants (count preferences)
        :result/positions          {:winners (map proposal->dbas winners)
                                    :losers  (map proposal->dbas losers)}})
     {:result/show?     false
      :result/positions {:winners []
                         :losers  []}}))
 
+(pc/defresolver result-no-of-participants [_ {slug :dbas.issue/slug}]
+  {::pc/input  #{:dbas.issue/slug}
+   ::pc/output [:result/no-of-participants]}
+  {:result/no-of-participants (count (<!! (k/get-in storage [slug])))})
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; DON'T FORGET TO ADD EVERYTHING HERE!
-(def app-registry [position issue preferences preference-list position-pros-cons update-preferences result])
+(def app-registry [position issue preferences preference-list position-pros-cons update-preferences result result-no-of-participants])
 (def index (atom {}))
 
 (def token-param-plugin

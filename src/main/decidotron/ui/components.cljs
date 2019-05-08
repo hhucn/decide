@@ -63,8 +63,10 @@
         (ui-vote-header issue)
         (if voting-started?
           (when (not voting-ended?)
-            (dom/div :.voting-area
-              (ui-pref-list list)))
+            (dom/div
+              (dom/div :.voting-area
+                (ui-pref-list list))
+              (dom/p :.small.text-muted (str (:result/no-of-participants issue) " Teilnehmer haben bisher abgestimmt. "))))
 
           (dom/p :.alert.alert-info
             (format "Die Stimmabgabe ist möglich ab dem %s. Sie werden darüber informiert!" (format-votes-date votes-start))))

@@ -158,9 +158,9 @@
                 (dom/div :.my-4)
                 (untouched-positions this slug position-items)))))
 
-        (dom/div :.my-2)
-        (dom/a :.btn.btn-outline-secondary.btn-block {:href (str js/dbas_host "/discuss/" slug)}
-          "Füge einen Vorschlag hinzu.")))
+        #_(dom/div :.my-2)
+        #_(dom/a :.btn.btn-outline-secondary.btn-block {:href (str js/dbas_host "/discuss/" slug)}
+            "Fügen Sie einen Vorschlag hinzu.")))
     (dom/div :.alert.alert-info "Sie müssen sich einloggen, bevor Sie Ihre Stimme abgeben können.")))
 
 (def ui-pref-list (prim/factory PreferenceList))

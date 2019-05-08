@@ -25,7 +25,8 @@
            :dbas.issue/votes-end
            :dbas.issue/currency-symbol
            :dbas.issue/votes-start
-           {:dbas.issue/positions (prim/get-query Position)}]
+           {:dbas.issue/positions (prim/get-query Position)}
+           :result/no-of-participants]
    :ident [:dbas.issue/slug :dbas.issue/slug]})
 
 (defsc Connection [_ _]
