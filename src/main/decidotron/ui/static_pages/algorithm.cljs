@@ -48,8 +48,8 @@
     (dom/div
       (dom/h2 {:name "phase-2"} "Phase 2: Begutachtung der Vorschläge")
       (dom/p "Nachdem Vorschläge eingegangen sind, werden diese von uns begutachtet.
-              Dies geschieht damit klar wird, wovon die eingebrachten Vorschläge handeln und um Vorschläge die nicht umgesetzt werden können, weil sie gegen die obengenannten Regeln verstoßen, zu filtern.
-              Um die Transparenz zu wahren, werden Veränderungen an den Vorschlägen nur in Absprache mit den Autoren geschehen, egal ob sie nur umformuleirt werden oder entfernt.
+              Dies geschieht damit klar wird, wovon die eingebrachten Vorschläge handeln und um Vorschläge die nicht umgesetzt werden können, weil sie gegen die oben genannten Regeln verstoßen, zu filtern.
+              Um die Transparenz zu wahren, werden Veränderungen an den Vorschlägen nur in Absprache mit den Autoren geschehen, egal ob sie nur umformuliert werden oder entfernt.
               Anschließend erhalten Sie noch eine Woche Zeit, um über diese überarbeiteten Vorschläge zu diskutieren und danach eine weitere Woche, um über die Vorschläge abzustimmen."))
 
     (dom/h2 "Phase 3: Abstimmung")
@@ -116,7 +116,7 @@
     (dom/p
       "Nun werden die gewinnenden Vorschläge zusammengefasst. Nicht alle Vorschläge können angenommen werden, da dies das Budget sprengen würde."
       (dom/br)
-      "Als Vorschlag mit den meisten Punkten wird der Hackathon ein Gewinner, denn er kostet 4.000 €, also bleiben noch 6.000 € übrig. Der Computerraum hat die zweitmeisten Punkte, passt mit den veranschlagten 7.000 € aber nicht ins Budget und wird damit kein Gewinner. Obwohl der Wasserspender am wenigsten Punkte bekommen hat, passt er mit seinen 2.000 € Kosten in das restliche Budget. Er wird also auch ein Gewinner.")
+      "Als Vorschlag mit den meisten Punkten wird der Hackathon ein Gewinner, denn er kostet 4.000 €, also bleiben noch 6.000 € übrig. Der Computerraum hat die zweit meisten Punkte, passt mit den veranschlagten 7.000 € aber nicht ins Budget und wird damit kein Gewinner. Obwohl der Wasserspender am wenigsten Punkte bekommen hat, passt er mit seinen 2.000 € Kosten in das restliche Budget. Er wird also auch ein Gewinner.")
     (dom/p
       "Die Gewinner sind: Der " (dom/strong "Hackathon") " und der " (dom/strong "Wasserspender") "."
       (dom/br)

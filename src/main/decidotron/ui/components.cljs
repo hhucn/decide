@@ -23,12 +23,12 @@
       Geben Sie dafür hier Ihre Präferenzen an.")
     (dom/p
       "Sie können die Vorschläge sortieren, wobei Ihr Favorit das meiste Gewicht bei der Abstimmung hat, Ihr
-      zweitliebster Vorschlag etwas weniger usw. Vorschläge, die Sie nicht unterstützen wollen, wählen Sie einfach nicht
+      zweit liebster Vorschlag etwas weniger usw. Vorschläge, die Sie nicht unterstützen wollen, wählen Sie einfach nicht
       aus und lassen sie im Bereich \"Weitere Vorschläge\".")
     (dom/p
       "Eine genaue Erklärung, wie das Ergebnis gefunden wird, finden Sie auf " (dom/a {:href "/algorithm"} "dieser Seite") ".")
     (when votes-end
-      (dom/p "Die Stimmabgabe ist möglich bis zum " (dom/strong (format-votes-date votes-end)) ". Danach werden die Ergebnise hier angezeigt."))))
+      (dom/p "Die Stimmabgabe ist möglich bis zum " (dom/strong (format-votes-date votes-end)) ". Danach werden die Ergebnisse hier angezeigt."))))
 
 (def ui-vote-header (prim/factory VoteHeader))
 

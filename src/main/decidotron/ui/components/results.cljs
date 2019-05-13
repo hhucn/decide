@@ -118,7 +118,7 @@
           (dom/p
             "Wenn Vorschläge dieselbe Punktzahl haben, wird der Vorschlag mit den meisten Zustimmungen, ungeachtet seiner Priorität, gewählt.
           Die blassen Vorschläge haben verloren, da sie nicht in das Budget gepasst haben.")
-          (dom/p "Weiter Beispiele finden Sie auf der " (dom/a {:href "/algorithm"} "Erklärungsseite") ".")
+          (dom/p "Ein Beispiele finden Sie auf der " (dom/a {:href "/algorithm"} "Erklärungsseite") ".")
           (h-bar-chart positions)))
 
       (dom/div
