@@ -22,6 +22,8 @@
                              :frame-options  :sameorigin
                              :xss-protection {:enable? true
                                               :mode    :block}}}
+ :trace?        false
+
  :storage-dir   "store"
  :dbas          {:base      :env/DBAS_URL                   ; for link generation "http://balbabla"
                  :api       :env/DBAS_API                   ; for talking to D-BAS e.g. "web:4284/api"

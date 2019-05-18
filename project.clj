@@ -4,17 +4,17 @@
   :min-lein-version "2.7.0"
 
   :dependencies [[org.clojure/clojure "1.10.0"]
-                 [thheller/shadow-cljs "2.8.31"]
-                 [fulcrologic/fulcro "2.8.8" :exclusions [com.fasterxml.jackson.core/jackson-core]] ; jackson has a clash with buddy
-                 [fulcrologic/fulcro-incubator "0.0.33" :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [com.wsscode/pathom "2.2.13"]
+                 [thheller/shadow-cljs "2.8.37"]
+                 [fulcrologic/fulcro "2.8.11" :exclusions [com.fasterxml.jackson.core/jackson-core]] ; jackson has a clash with buddy
+                 [fulcrologic/fulcro-incubator "0.0.35" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [com.wsscode/pathom "2.2.14"]
                  [ring/ring-defaults "0.3.2"]
                  [org.clojure/core.async "0.4.490"]
                  [garden "1.3.9"]
                  [mount "0.1.16"]
                  [hiccup "1.0.5"]
                  [org.postgresql/postgresql "42.2.5"]
-                 [clj-http "3.9.1"]
+                 [clj-http "3.10.0"]
                  [cheshire "5.8.1"]
                  [buddy/buddy-sign "3.0.0"]
                  [korma "0.4.3"]
@@ -70,5 +70,5 @@
 
                           :dependencies [[org.clojure/tools.namespace "0.3.0-alpha4"]
                                          [org.clojure/tools.nrepl "0.2.13"]
-                                         [cider/piggieback "0.4.0"]]
+                                         [cider/piggieback "0.4.1"]]
                           :repl-options {:init-ns user}}})

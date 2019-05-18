@@ -26,7 +26,6 @@
 ;; defined in the book, but you'll have a much better time parsing queries with
 ;; Pathom.
 ;; ================================================================================
-(log/set-level! :all)
 (defn wrap-api [handler uri]
   (fn api-middleware [request]
     (if (= uri (:uri request))
@@ -151,7 +150,7 @@
     (-> not-found-handler
       (wrap-api "/api")
       server/wrap-transit-params
-      server/wrap-transit-response
+      (server/wrap-transit-response {:opts {:transform #(when-not (fn? %) %)}})
 
       ; This is just an additional layer, to protect if the CSRF Token is lost.
       #_(server/wrap-protect-origins {:allow-when-origin-missing? false

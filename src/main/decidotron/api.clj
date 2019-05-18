@@ -114,26 +114,33 @@
   #:dbas.position{:id     proposal
                   :scores scores})
 
+(defn- votes [slug]
+  (let [disabled-filter (db/filter-disabled-positions-fn slug)]
+    (->> (<!! (k/get-in storage [slug]))
+      vals
+      (map #(->> % :preferences disabled-filter (map :dbas.position/id))))))
+
 (pc/defresolver result [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
-   ::pc/output [:result/show?
-                {:result/positions [{:winners [:dbas.position/id :dbas.position/scores]}
+   ::pc/output [{:result/positions [{:winners [:dbas.position/id :dbas.position/scores]}
                                     {:losers [:dbas.position/id :dbas.position/scores]}]}]}
   (if (db/show-results? slug)
     (let [issue       (db/get-issue slug)
-          budget      (:dbas.issue/budget issue)
-          costs       (db/get-costs issue)
-          preferences (->> (<!! (k/get-in storage [slug]))
-                        vals
-                        (map #(->> % :preferences (db/filter-disabled-positions slug) (map :dbas.position/id))))
-          {:keys [winners losers] :as result} (b/borda-budget preferences budget costs)]
+          {:keys [winners losers] :as result}
+          (b/borda-budget
+            (votes slug)
+            (:dbas.issue/budget issue)
+            (db/get-costs issue))]
       (log/trace "Result is:" result)
-      {:result/show?              true
-       :result/positions          {:winners (map proposal->dbas winners)
-                                   :losers  (map proposal->dbas losers)}})
-    {:result/show?     false
-     :result/positions {:winners []
+      {:result/positions {:winners         (map proposal->dbas winners)
+                          :losers (map proposal->dbas losers)}})
+    {:result/positions {:winners []
                         :losers  []}}))
+
+(pc/defresolver show-result [_ {slug :dbas.issue/slug}]
+  {::pc/input  #{:dbas.issue/slug}
+   ::pc/output [:result/show?]}
+  {:result/show? (db/show-results? slug)})
 
 (pc/defresolver result-no-of-participants [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
@@ -142,8 +149,28 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn preprocess-parser-plugin
+  "Helper to create a plugin that can view/modify the env/tx of a top-level request.
+  f - (fn [{:keys [env tx]}] {:env new-env :tx new-tx})
+  If the function returns no env or tx, then the parser will not be called (aborts the parse)"
+  [f]
+  {::p/wrap-parser
+   (fn transform-parser-out-plugin-external [parser]
+     (fn transform-parser-out-plugin-internal [env tx]
+       (let [{:keys [env tx] :as req} (f {:env env :tx tx})]
+         (if (and (map? env) (seq tx))
+           (parser env tx)
+           {}))))})
+
+(pc/defresolver index-explorer [env _]
+  {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
+   ::pc/output [:com.wsscode.pathom.viz.index-explorer/index]}
+  (do
+    {:com.wsscode.pathom.viz.index-explorer/index
+     (get env ::pc/indexes)}))
+
 ; DON'T FORGET TO ADD EVERYTHING HERE!
-(def app-registry [position issue preferences preference-list position-pros-cons update-preferences result result-no-of-participants])
+(def app-registry [position issue preferences preference-list position-pros-cons update-preferences result show-result result-no-of-participants index-explorer])
 (def index (atom {}))
 
 (def token-param-plugin
@@ -153,18 +180,29 @@
        (let [token (get-in env [:ast :params :dbas.client/token])]
          (reader (cond-> env token (assoc :dbas.client/id (:id (t/unsign token))))))))})
 
+(defn log-requests [{:keys [env tx] :as req}]
+  (log/debug "Pathom transaction:" (pr-str tx))
+  req)
+
 (def server-parser
-  (p/parallel-parser
-    {::p/env     {::p/reader               [p/map-reader
-                                            pc/parallel-reader
-                                            pc/open-ident-reader
-                                            p/env-placeholder-reader]
-                  ::p/placeholder-prefixes #{">"}}
-     ::p/mutate  pc/mutate-async
-     ::p/plugins [(pc/connect-plugin {::pc/register app-registry
-                                      ::pc/indexes  index})
-                  p/error-handler-plugin
-                  p/request-cache-plugin
-                  p/trace-plugin
-                  token-param-plugin]}))
+  (let [real-parser (p/parallel-parser
+                      {::p/env     {::p/reader               [p/map-reader
+                                                              pc/parallel-reader
+                                                              pc/open-ident-reader
+                                                              p/env-placeholder-reader]
+                                    ::p/placeholder-prefixes #{">"}}
+                       ::p/mutate  pc/mutate-async
+                       ::p/plugins [(pc/connect-plugin {::pc/register app-registry})
+                                    (p/env-wrap-plugin (fn [env]
+                                                         ;; Here is where you can dynamically add things to the resolver/mutation
+                                                         ;; environment, like the server config, database connections, etc.
+                                                         (assoc env :config config)))
+                                    (preprocess-parser-plugin log-requests)
+                                    #_(p/post-process-parser-plugin p/elide-not-found)
+                                    p/error-handler-plugin
+                                    p/request-cache-plugin
+                                    p/trace-plugin
+                                    token-param-plugin]})]
+    (fn wrapped-parser [env tx]
+      (real-parser env (if (:trace? config) (conj tx :com.wsscode.pathom/trace) tx)))))
 

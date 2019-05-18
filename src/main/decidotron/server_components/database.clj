@@ -166,6 +166,13 @@
   [slug positions]
   (filter #((position-ids slug) (:dbas.position/id %)) positions))
 
+(defn filter-disabled-positions-fn
+  "Filters out all positions which are disabled do not belong to the issue."
+  [slug]
+  (let [ids (position-ids slug)]
+    (fn [positions]
+      (filter #(ids (:dbas.position/id %)) positions))))
+
 (defn- votes-start-end [slug]
   (let [[{:keys [votes_start votes_end]}]
         (select issue (where {:slug slug})
