@@ -1,5 +1,4 @@
-(defproject decidotron "0.1.0-SNAPSHOT"
-  :description "My Cool Project"
+(defproject decidotron "1.0.0"
   :license {:name "MIT" :url "https://opensource.org/licenses/MIT"}
   :min-lein-version "2.7.0"
 
