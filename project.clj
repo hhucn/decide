@@ -3,20 +3,20 @@
   :license {:name "MIT" :url "https://opensource.org/licenses/MIT"}
   :min-lein-version "2.7.0"
 
-  :dependencies [[org.clojure/clojure "1.10.0"]
-                 [thheller/shadow-cljs "2.8.37"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
+                 [thheller/shadow-cljs "2.8.39"]
                  [fulcrologic/fulcro "2.8.11" :exclusions [com.fasterxml.jackson.core/jackson-core]] ; jackson has a clash with buddy
-                 [fulcrologic/fulcro-incubator "0.0.35" :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [com.wsscode/pathom "2.2.14"]
+                 [fulcrologic/fulcro-incubator "0.0.37" :exclusions [com.fasterxml.jackson.core/jackson-core]]
+                 [com.wsscode/pathom "2.2.17"]
                  [ring/ring-defaults "0.3.2"]
-                 [org.clojure/core.async "0.4.490"]
+                 [org.clojure/core.async "0.4.500"]
                  [garden "1.3.9"]
                  [mount "0.1.16"]
                  [hiccup "1.0.5"]
-                 [org.postgresql/postgresql "42.2.5"]
+                 [org.postgresql/postgresql "42.2.6"]
                  [clj-http "3.10.0"]
                  [cheshire "5.8.1"]
-                 [buddy/buddy-sign "3.0.0"]
+                 [buddy/buddy-sign "3.1.0"]
                  [korma "0.4.3"]
                  [clj-time "0.15.1"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
@@ -33,7 +33,7 @@
                  ;[com.google.errorprone/error_prone_annotations "2.3.2"]
                  ;[com.google.code.findbugs/jsr305 "3.0.2"]
 
-                 [nubank/workspaces "1.0.8" :scope "test" :exclusions [com.cognitect/transit-java]]
+                 [nubank/workspaces "1.0.9" :scope "test" :exclusions [com.cognitect/transit-java]]
 
                  ; only required if you want to use this for tests
                  [fulcrologic/fulcro-spec "2.2.0" :scope "test" :upgrade false]
@@ -68,7 +68,7 @@
 
                           :plugins      [[com.jakemccrary/lein-test-refresh "0.23.0"]]
 
-                          :dependencies [[org.clojure/tools.namespace "0.3.0-alpha4"]
+                          :dependencies [[org.clojure/tools.namespace "0.3.0"]
                                          [org.clojure/tools.nrepl "0.2.13"]
                                          [cider/piggieback "0.4.1"]]
                           :repl-options {:init-ns user}}})

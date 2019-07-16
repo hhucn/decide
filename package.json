@@ -5,7 +5,7 @@
   "private": true,
   "dependencies": {
     "chart.js": "^2.8.0",
-    "highlight.js": "^9.15.6",
+    "highlight.js": "^9.15.8",
     "react-chartjs-2": "^2.7.6",
     "react-grid-layout": "^0.16.6",
     "react-icons": "^2.2.7",
@@ -13,12 +13,12 @@
   },
   "devDependencies": {
     "intl-messageformat": "^2.2.0",
-    "karma": "^4.0.1",
+    "karma": "^4.2.0",
     "karma-chrome-launcher": "^2.2.0",
     "karma-cljs-test": "^0.1.0",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
-    "shadow-cljs": "^2.8.15",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "shadow-cljs": "^2.8.40",
     "showdown": "^1.9.0"
   },
   "author": "",
