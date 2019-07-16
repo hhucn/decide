@@ -15,6 +15,18 @@
   [max-n votes]
   (into {} (map-indexed (fn [i v] [v (- max-n i)]) votes)))
 
+(defn first-priority-score [votes]
+  (if (empty? votes)
+    {}
+    (assoc (zipmap votes (repeat 0)) (first votes) 1)))
+
+(defn first-three-score [votes]
+  ;(first-priority-score (take 3 votes))
+  (-> votes
+    (zipmap (repeat 0))
+    (assoc (first votes) 1 (second votes) 1 (nth votes 2 nil) 1)
+    (dissoc nil)))
+
 (defn identity-score [votes]
   (zipmap votes votes))
 
@@ -24,14 +36,12 @@
 (defn find-max-n
   "Returns the max number of votes a user has submitted."
   [preferences]
-  (if (empty? preferences)
-    0
-    (apply max (map count preferences))))
+  (apply max 0 (map count preferences)))
 
 (defn- tag-scores [tag scores]
   (into {} (map (fn [[k v]] {k {tag v}}) scores)))
 
-(defn form-results [results]
+(defn format-results [results]
   (map (partial zipmap [:proposal :scores]) results))
 
 (defn- score-fns->tagging-fns [score-fns]
@@ -47,10 +57,18 @@
 (apply merge-with merge ((apply juxt (score-fns->tagging-fns {:approval approval-score :identity identity-score})) [:a :b :c]))
 
 
-(score-single [:a :b :c]
-  {:approval approval-score
-   :borda    (partial borda-score 5)
-   :identity identity-score})
+(comment
+  (score-single [:a :b :c]
+    {:approval approval-score
+     :borda    (partial borda-score 5)
+     :first    first-priority-score
+     :identity identity-score
+     :three first-three-score})
+  (score-single []
+    {:approval approval-score
+     :borda    (partial borda-score 5)
+     :first    first-priority-score
+     :identity identity-score}))
 
 (defn score
   "Calculates scores for a number of user votes.
@@ -79,17 +97,21 @@
 (defn sort-aggregations [aggs score-keys]
   (reverse (sort-by (comp (apply juxt score-keys) second) aggs)))
 
-(defn select-winners [sorted-proposals costs budget]
+(defn select-in-budget [votes costs budget]
   (loop [rest-budget budget
-         [[proposal scores] & rest-proposals] sorted-proposals
+         [[proposal scores] & rest-proposals] votes
          winners     []]
     (if proposal
       (let [cost (costs proposal)]
-        (if (and (< cost rest-budget) (-> scores :borda pos?)) ; only allow proposals which fit in the budget and have at least 1 vote
+        (if (and (<= cost rest-budget) (-> scores :borda pos?)) ; only allow proposals which fit in the budget and have at least 1 vote
           (recur (- rest-budget cost) rest-proposals (conj winners [proposal scores]))
           (recur rest-budget rest-proposals winners)))
-      {:winners (form-results winners)
-       :losers  (form-results (remove (set winners) sorted-proposals))})))
+      winners)))
+
+(defn select-winners [sorted-proposals costs budget]
+  (let [winners (select-in-budget sorted-proposals costs budget)]
+    {:winners (format-results winners)
+     :losers  (format-results (remove (set winners) sorted-proposals))}))
 
 (defn- initial-scores [proposals init-fn]
   (into {} (map #(vector % (init-fn %))) proposals))
