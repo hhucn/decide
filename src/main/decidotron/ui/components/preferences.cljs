@@ -148,8 +148,7 @@
   (if (logged-in? this)
     (let [positions      (:dbas.issue/positions issue)
           preferred-ids  (set (map :dbas.position/id preferences))
-          position-items (->> positions
-                           (remove #(preferred-ids (:dbas.position/id %))))]
+          position-items (remove (fn* [p1__1444129#] (preferred-ids (:dbas.position/id p1__1444129#))) positions)]
       (dom/div
         (if (empty? positions)
           (dom/div

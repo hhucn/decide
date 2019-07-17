@@ -28,7 +28,10 @@
           preference-list (update preference-list :preferences (partial map ident->map))] ; idents to maps
       (if (validate-preference-list slug preference-list)
         (when (db/allow-voting? slug)
-          (go (second (<! (k/assoc-in storage [slug user-id] preference-list)))))
+          (-> (if (empty? (:preferences preference-list))
+                (k/update-in storage [slug] #(dissoc % user-id))
+                (k/assoc-in storage [slug user-id] preference-list))
+            <! second go))
         :decidotron.error/duplicated-position))
     :decidotron.error/invalid-token))
 
@@ -165,9 +168,7 @@
 (pc/defresolver index-explorer [env _]
   {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
    ::pc/output [:com.wsscode.pathom.viz.index-explorer/index]}
-  (do
-    {:com.wsscode.pathom.viz.index-explorer/index
-     (get env ::pc/indexes)}))
+  {:com.wsscode.pathom.viz.index-explorer/index (get env :pc/indexes)})
 
 ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def app-registry [position issue preferences preference-list position-pros-cons update-preferences result show-result result-no-of-participants index-explorer])
