@@ -7,7 +7,7 @@
             [decidotron.api :as ms]
             [decidotron.cookies :as cookie]
             [fulcro.client.primitives :as prim]
-            [decidotron.utils :as utils]))
+            [decidotron.token :as token-util]))
 
 (defonce app (atom nil))
 
@@ -34,21 +34,12 @@
     (net/wrap-fulcro-request)
     (wrap-api->root-middleware)))
 
-(defn- ->initial-dbas-data
-  "Receives a D-BAS JWT and returns in the map containing all login data needed for decidotron"
-  [token]
-  (let [{:keys [id nickname]} (utils/payload-from-jwt token)]
-    {:dbas.client/base         (str js/dbas_host "/api")
-     :dbas.client/id           id
-     :dbas.client/nickname     nickname
-     :dbas.client/login-status :dbas.client/logged-in
-     :dbas.client/token        token}))
 
 (defn get-user-state-from-cookie!
   "Fetches the token from the cookies, if it is available. Transact the connection data into the state"
   [app-root]
   (when-let [token (cookie/get cookie/decidotron-token)]
-    (prim/transact! app-root `[(ms/set-dbas-connection {:dbas-state ~(->initial-dbas-data token)})])))
+    (prim/transact! app-root `[(ms/set-dbas-connection {:dbas-state ~(token-util/->connection token)})])))
 
 (defn ^:export init []
   (reset! app (fc/make-fulcro-client

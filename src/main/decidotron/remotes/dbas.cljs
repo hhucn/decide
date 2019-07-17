@@ -4,7 +4,7 @@
             [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc]
             [com.wsscode.pathom.fulcro.network :as pfn]
-            [decidotron.utils :as utils]))
+            [decidotron.token :as token-util]))
 
 (pc/defresolver issues [{{{connection :connection} :params} :ast} _]
   {::pc/output [{:dbas/issues [:dbas.issue/date
@@ -27,12 +27,15 @@
 (pc/defresolver login [{{{:keys [connection nickname password]} :params} :ast :as ast} _]
   {::pc/output [{:dbas/connection [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token ::dbas/login-status
                                    ::dbas/admin?]}]}
-  (go (let [con     (<! (dbas/login connection nickname password))
-            payload (utils/payload-from-jwt (::dbas/token con))]
-        {:dbas/connection
-         (-> con
-           (assoc ::dbas/id (:id payload))
-           (assoc ::dbas/admin? (= "admins" (:group payload))))})))
+  (go (let [con (<! (dbas/login connection nickname password))]
+        (if (= ::dbas/logged-in (::dbas/:login-status con))
+          (let [payload (token-util/payload-from-jwt (::dbas/token con))]
+            {:dbas/connection
+             (-> con
+               (assoc ::dbas/nickname (:nickname payload))
+               (assoc ::dbas/id (:id payload))
+               (assoc ::dbas/admin? (= "admins" (:group payload))))})
+          con))))
 
 (def app-registry [login issues positions attitudes]) ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def index (atom {}))
