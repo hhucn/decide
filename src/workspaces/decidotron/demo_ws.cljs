@@ -10,6 +10,7 @@
             [decidotron.ui.root :as root-ui]
             [dbas.client :as dbas]
             [fulcro.client.primitives :as prim]
+            [decidotron.ui.components.preferences :as pref-ui]
             [decidotron.remotes.dbas :refer [dbas-remote]]))
 
 (fp/defsc FulcroDemo
@@ -25,24 +26,13 @@
   (ct.fulcro/fulcro-card
     {::f.portal/root FulcroDemo}))
 
-(ws/defcard root-card
-  {::wsm/align {:flex 1}}
+(ws/defcard unselected-preference-card
   (ct.fulcro/fulcro-card
-    {::f.portal/root       root-ui/Root
-     ::f.portal/wrap-root? false
-     ::f.portal/app        {:networking    {:dbas dbas-remote}
-                            :initial-state (prim/get-initial-state root-ui/Root {:connection dbas/connection})}}))
-
-(ws/defcard input-field
-  (ct.fulcro/fulcro-card
-    {::f.portal/root ui/InputField}))
-
-(ws/defcard login-form
-  {::wsm/card-width  4
-   ::wsm/card-height 9
-   ::wsm/align       {:flex 1}}
-  (ct.fulcro/fulcro-card
-    {::f.portal/root ui/LoginForm
-     ::f.portal/app  {:networking    {:dbas dbas-remote}
-                      :initial-state {:dbas/connection dbas/connection
-                                      :ui/root         (prim/get-initial-state ui/LoginForm {:id 1 :nickname "bjebb" :password "secret"})}}}))
+    {::f.portal/root          pref-ui/PreferenceListItem
+     ::f.portal/initial-state (fn [] #:dbas.position{:id   1
+                                                     :text "wir eine Katze holen sollten."
+                                                     :cost 50
+                                                     :pros [#:dbas.statement{:id            42 :text "das eine gute Idee ist"
+                                                                             :is-supportive true
+                                                                             :argument-id   3}]
+                                                     :cons []})}))

@@ -101,7 +101,12 @@
 
 (defsc PreferenceListItem [_this {:dbas.position/keys [text id cost pros cons]}
                            {:keys [prefer-fn] :as computed}]
-  {:query [{:dbas/position (prim/get-query models/Position)}]}
+  {:query [:dbas.position/text
+           :dbas.position/id
+           :dbas.position/cost
+           {:dbas.position/pros (prim/get-query models/Statement)}
+           {:dbas.position/cons (prim/get-query models/Statement)}]
+   :ident [:dbas.position/id :dbas.position/id]}
   (let [collapse-id (random-uuid)]
     (dom/li :.mb-2.mdc-card
       (dom/div :.list-group-item.container
