@@ -4,13 +4,10 @@
             [fulcro.client.network :as net]
             [decidotron.remotes.dbas :refer [dbas-remote]]
             [decidotron.ui.routing :as routing]
-            [decidotron.ui.models :as models]
             [decidotron.api :as ms]
             [decidotron.cookies :as cookie]
             [fulcro.client.primitives :as prim]
-            [fulcro.client.data-fetch :as df]
-            [goog.crypt.base64 :as b64]
-            [clojure.string :as str]))
+            [decidotron.utils :as utils]))
 
 (defonce app (atom nil))
 
@@ -37,15 +34,10 @@
     (net/wrap-fulcro-request)
     (wrap-api->root-middleware)))
 
-(defn- parse-json
-  "Parse a JSON string to edn. Use only for small amounts of data"
-  [json]
-  (js->clj (.parse js/JSON json) :keywordize-keys true))
-
 (defn- ->initial-dbas-data
   "Receives a D-BAS JWT and returns in the map containing all login data needed for decidotron"
   [token]
-  (let [{:keys [id nickname]} (-> token (str/split #"\.") second b64/decodeString parse-json)]
+  (let [{:keys [id nickname]} (utils/payload-from-jwt token)]
     {:dbas.client/base         (str js/dbas_host "/api")
      :dbas.client/id           id
      :dbas.client/nickname     nickname

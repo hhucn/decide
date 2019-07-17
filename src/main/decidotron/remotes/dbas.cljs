@@ -3,7 +3,8 @@
             [dbas.client :as dbas]
             [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc]
-            [com.wsscode.pathom.fulcro.network :as pfn]))
+            [com.wsscode.pathom.fulcro.network :as pfn]
+            [decidotron.utils :as utils]))
 
 (pc/defresolver issues [{{{connection :connection} :params} :ast} _]
   {::pc/output [{:dbas/issues [:dbas.issue/date
@@ -24,8 +25,14 @@
   {:dbas.issue.position/attitudes (dbas/attitude connection slug position)})
 
 (pc/defresolver login [{{{:keys [connection nickname password]} :params} :ast :as ast} _]
-  {::pc/output [{:dbas/connection [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token ::dbas/login-status]}]}
-  {:dbas/connection (dbas/login connection nickname password)})
+  {::pc/output [{:dbas/connection [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token ::dbas/login-status
+                                   ::dbas/admin?]}]}
+  (go (let [con     (<! (dbas/login connection nickname password))
+            payload (utils/payload-from-jwt (::dbas/token con))]
+        {:dbas/connection
+         (-> con
+           (assoc ::dbas/id (:id payload))
+           (assoc ::dbas/admin? (= "admins" (:group payload))))})))
 
 (def app-registry [login issues positions attitudes]) ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def index (atom {}))

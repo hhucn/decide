@@ -30,4 +30,4 @@
    :ident [:dbas.issue/slug :dbas.issue/slug]})
 
 (defsc Connection [_ _]
-  {:query [::client/base ::client/nickname ::client/id ::client/token ::client/login-status]})
+  {:query [::client/base ::client/nickname ::client/id ::client/token ::client/login-status ::client/admin?]})

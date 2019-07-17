@@ -5,7 +5,7 @@
                                    :database  {:db       "discussion"
                                                :user     "postgres"
                                                :port     5432
-                                               :password "DXxCNtfnt!MOo!f8LY1!P%sw3KGzt@s!"}}
+                                               :password "DXxCNtfnt!MOo!f8LY1!Psw3KGzt@s!"}}
  :ring.middleware/defaults-config {:security {:anti-forgery false}}
  :storage-dir                     "decidotron_store"
  :trace?                          true}
