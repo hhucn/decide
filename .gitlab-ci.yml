@@ -1,5 +1,8 @@
 image: clojure:openjdk-11-lein
 
+services:
+  - docker:stable-dind
+
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
 
