@@ -15,9 +15,10 @@
 (defn- ->connection
   "Receives a D-BAS JWT and returns in the map containing all login data needed for decidotron"
   [token]
-  (let [{:keys [id nickname]} (payload-from-jwt token)]
+  (let [{:keys [id nickname group]} (payload-from-jwt token)]
     {:dbas.client/base         (str js/dbas_host "/api")
      :dbas.client/id           id
+     :dbas.client/admin?       (= "admins" group)
      :dbas.client/nickname     nickname
      :dbas.client/login-status :dbas.client/logged-in
      :dbas.client/token        token}))
