@@ -13,7 +13,8 @@
     [decidotron.ui.static-pages.contact :refer [Contact]]
     [decidotron.ui.static-pages.algorithm :refer [Algorithm]]
     [decidotron.ui.static-pages.privacy :refer [Privacy]]
-    [decidotron.ui.components.results :refer [ResultScreen]]))
+    [decidotron.ui.components.results :refer [ResultScreen]]
+    [decidotron.ui.components.result-status :refer [ResultStatusScreen]]))
 
 (def was-sollen-wir-mit-20-000eur-anfangen ["preferences" routing/hardcoded-slug])
 
@@ -64,7 +65,7 @@
   (main-page this))
 
 (defrouter RootRouter [this {:keys [current-state]}]
-  {:router-targets [MainPage LoginScreen ResultScreen comp/PreferenceScreen FAQ Contact Algorithm Privacy]}
+  {:router-targets [MainPage LoginScreen ResultScreen ResultStatusScreen comp/PreferenceScreen FAQ Contact Algorithm Privacy]}
   (case current-state
     :initial (main-page this)
     :pending (dom/div "Loading...")

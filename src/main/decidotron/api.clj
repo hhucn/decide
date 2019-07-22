@@ -150,6 +150,20 @@
    ::pc/output [:result/no-of-participants]}
   {:result/no-of-participants (count (<!! (k/get-in storage [slug])))})
 
+(pc/defmutation save-status [_ {:keys [status/content status/state dbas.position/id dbas.client/token]}]
+  {::pc/params [:status/content :status/state :token :dbas.position/id]}
+  (if (= "admins" (:group (t/unsign token)))                ; TODO Function! Or better: Middleware
+    (k/assoc-in storage [:status id] {:status/content content
+                                      :status/state   state})
+    :decidotron.error/invalid-token))
+
+(pc/defresolver result-status [_ {id :dbas.position/id}]
+  {::pc/input  #{:dbas.position/id}
+   ::pc/output [:status/content :status/state]}
+  (go
+    (or (<! (k/get-in storage [:status id]))
+      {:status/content ""
+       :status/state   :status/in-work})))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn preprocess-parser-plugin
@@ -171,7 +185,11 @@
   {:com.wsscode.pathom.viz.index-explorer/index (get env ::pc/indexes)})
 
 ; DON'T FORGET TO ADD EVERYTHING HERE!
-(def app-registry [position issue preferences preference-list position-pros-cons update-preferences result show-result result-no-of-participants index-explorer])
+(def app-registry [position issue preferences preference-list position-pros-cons update-preferences
+                   result show-result result-no-of-participants
+                   result-status save-status
+
+                   index-explorer])
 (def index (atom {}))
 
 (def token-param-plugin
