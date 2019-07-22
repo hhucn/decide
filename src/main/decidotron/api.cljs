@@ -33,10 +33,6 @@
   (action [{:keys [state]}]
     (swap! state assoc :dbas/connection dbas-state)))
 
-(defmutation toggle-drawer [{:keys [drawer/id]}]
-  (action [{:keys [state]}]
-    (swap! state update-in [:drawer/by-id id :drawer/open?] not)))
-
 ;;;;
 
 (defn- update-preferences* [{:keys [state ast ref]}]

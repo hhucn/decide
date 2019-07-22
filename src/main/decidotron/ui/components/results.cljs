@@ -35,20 +35,20 @@
 (defn ui-result-entry-winner [props computed] (->> {:winner? true} (merge computed) (prim/computed props) ui-result-entry))
 (defn ui-result-entry-loser [props computed] (->> {:winner? false} (merge computed) (prim/computed props) ui-result-entry))
 
-(defsc ResultList [_this {:result/keys [show? positions]} computed]
+(defsc ResultList [_this {:result/keys [show? winners losers]} computed]
   {:query [:result/show?
-           {:result/positions [{:winners (prim/get-query models/Position)}
-                               {:losers (prim/get-query models/Position)}]}]}
-  (let [overall-cost (reduce + (map :dbas.position/cost (:winners positions)))]
+           {:result/winners (prim/get-query models/Position)}
+           {:result/losers (prim/get-query models/Position)}]}
+  (let [overall-cost (reduce + (map :dbas.position/cost winners))]
     (if show?
       (dom/div
         (dom/p (str "Diese Vorschläge wurden von Ihnen als die wichtigsten auserkoren. "
                  (format "Verteilt werden dadurch %d €." (format-cost overall-cost))))
-        (dom/ol :.list-group.winners (map #(ui-result-entry-winner % computed) (:winners positions)))
+        (dom/ol :.list-group.winners (map #(ui-result-entry-winner % computed) winners))
         (dom/div :.mb-4)
-        (when-not (empty? (:losers positions))
+        (when-not (empty? losers)
           (dom/p "Diese Vorschläge waren nicht erfolgreich.")
-          (dom/ol :.list-group.losers (map #(ui-result-entry-loser % computed) (:losers positions)))))
+          (dom/ol :.list-group.losers (map #(ui-result-entry-loser % computed) losers))))
       (dom/p "Die Ergebnisse werden nach der Wahl angezeigt."))))
 
 (def ui-result-list (prim/factory ResultList))
@@ -88,15 +88,15 @@
 
 (def h-bar-chart (prim/factory HorizontalBarChart))
 
-(defsc-route-target ResultScreen [_ {:result/keys     [show? no-of-participants positions]
+(defsc-route-target ResultScreen [_ {:result/keys     [show? no-of-participants winners losers]
                                      :dbas.issue/keys [slug budget votes-end] :as props}]
   {:query           [:dbas.issue/slug
                      :dbas.issue/budget
                      :dbas.issue/votes-end
                      :result/show?
                      :result/no-of-participants
-                     {:result/positions [{:winners (prim/get-query models/Position)}
-                                         {:losers (prim/get-query models/Position)}]}]
+                     {:result/winners (prim/get-query models/Position)}
+                     {:result/losers (prim/get-query models/Position)}]
    :ident           [:dbas.issue/slug :dbas.issue/slug]
    :route-segment   (fn [] ["preferences" :dbas.issue/slug "result"])
    :route-cancelled (fn [_])
@@ -119,7 +119,8 @@
             "Wenn Vorschläge dieselbe Punktzahl haben, wird der Vorschlag mit den meisten Zustimmungen, ungeachtet seiner Priorität, gewählt.
           Die blassen Vorschläge haben verloren, da sie nicht in das Budget gepasst haben.")
           (dom/p "Ein Beispiele finden Sie auf der " (dom/a {:href "/algorithm"} "Erklärungsseite") ".")
-          (h-bar-chart positions)))
+          (h-bar-chart {:winners winners
+                        :losers  losers})))
 
       (dom/div
         (dom/div :.alert.alert-info (str "Das Ergebnis wird erst ab " (format-votes-date votes-end) " angezeigt"))))))

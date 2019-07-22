@@ -125,20 +125,20 @@
 
 (pc/defresolver result [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
-   ::pc/output [{:result/positions [{:winners [:dbas.position/id :dbas.position/scores]}
-                                    {:losers [:dbas.position/id :dbas.position/scores]}]}]}
+   ::pc/output [{:result/winners [:dbas.position/id :dbas.position/scores]}
+                {:result/losers [:dbas.position/id :dbas.position/scores]}]}
   (if (db/show-results? slug)
-    (let [issue       (db/get-issue slug)
+    (let [issue (db/get-issue slug)
           {:keys [winners losers] :as result}
           (b/borda-budget
             (votes slug)
             (:dbas.issue/budget issue)
             (db/get-costs issue))]
       (log/trace "Result is:" result)
-      {:result/positions {:winners         (map proposal->dbas winners)
-                          :losers (map proposal->dbas losers)}})
-    {:result/positions {:winners []
-                        :losers  []}}))
+      {:result/winners (map proposal->dbas winners)
+       :result/losers  (map proposal->dbas losers)})
+    {:result/winners []
+     :result/losers  []}))
 
 (pc/defresolver show-result [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
@@ -168,7 +168,7 @@
 (pc/defresolver index-explorer [env _]
   {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
    ::pc/output [:com.wsscode.pathom.viz.index-explorer/index]}
-  {:com.wsscode.pathom.viz.index-explorer/index (get env :pc/indexes)})
+  {:com.wsscode.pathom.viz.index-explorer/index (get env ::pc/indexes)})
 
 ; DON'T FORGET TO ADD EVERYTHING HERE!
 (def app-registry [position issue preferences preference-list position-pros-cons update-preferences result show-result result-no-of-participants index-explorer])
