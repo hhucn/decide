@@ -18,7 +18,8 @@
                         :status/keys        [content state]
                         :dbas.position/keys [id text]
                         :or                 {editing? false}}]
-  {:query         [:status/content :status/state :ui/editing? :dbas.position/text :dbas.position/id]
+  {:query         [:status/content :status/state :ui/editing? :dbas.position/text :dbas.position/id
+                   {[:dbas/connection '_] [:dbas.client/admin?]}]
    :initial-state (fn [p]
                     (merge p {:ui/editing? false}))
    :ident         [:result-status/position-id :dbas.position/id]}
@@ -26,26 +27,32 @@
         form-id (random-uuid)]
 
     (dom/div :.mb-2.card
-      (dom/div :.card-header.d-flex.justify-content-between
-        {:classes [(case state
-                     :status/done "bg-success"
-                     :status/in-work "bg-warning"
-                     :status/cancelled "bg-danger"
-                     "")
-                   (str "text-" shade)]}
-        (dom/div (str "Der Vorschlag, dass " text "."))
-        (if (prim/shared this [:dbas/connection :dbas.client/admin?]) ; TODO Use real value
-          (if editing?
+      (dom/div :.card-header.d-flex
+        (dom/div
+          (dom/span :.badge
+            {:classes [(str "badge-" (case state
+                                       :status/done "success"
+                                       :status/in-work "warning"
+                                       :status/cancelled "danger"
+                                       ""))]}
+            (case state
+              :status/done "Fertig!"
+              :status/in-work "In Arbeit"
+              :status/cancelled "Abgebrochen"
+              ""))
+          (str " Der Vorschlag, dass " text "."))
+        (when (prim/shared this [:dbas/connection :dbas.client/admin?])
+          (dom/div :.ml-auto
+            (if editing?
+              (dom/button :.btn.btn-sm.btn-primary
+                {:type "submit"
+                 :form form-id}
+                "Speichern")
 
-            (dom/button :.btn.btn-sm.btn-primary
-              {:type "submit"
-               :form form-id}
-              "Speichern")
-
-            (dom/button :.btn.btn-sm
-              {:onClick #(m/toggle! this :ui/editing?)
-               :classes [(str "btn-outline-" shade)]}
-              "Bearbeiten"))))
+              (dom/button :.btn.btn-sm
+                {:onClick #(m/toggle! this :ui/editing?)
+                 :classes [(str "btn-outline-" shade)]}
+                "Bearbeiten")))))
       (dom/div :.card-body
         (if editing?
           (dom/form
