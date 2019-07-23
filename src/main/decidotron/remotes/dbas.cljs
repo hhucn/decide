@@ -28,7 +28,7 @@
   {::pc/output [{:dbas/connection [::dbas/base ::dbas/nickname ::dbas/id ::dbas/token ::dbas/login-status
                                    ::dbas/admin?]}]}
   (go (let [con (<! (dbas/login connection nickname password))]
-        (if (= ::dbas/logged-in (::dbas/:login-status con))
+        (if (= ::dbas/logged-in (::dbas/login-status con))
           (let [payload (token-util/payload-from-jwt (::dbas/token con))]
             {:dbas/connection
              (-> con
