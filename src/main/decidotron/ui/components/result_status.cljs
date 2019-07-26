@@ -8,7 +8,8 @@
             [fulcro.client.data-fetch :as df]
             [cljs-time.core :as t]
             [cljs-time.coerce :as tc]
-            [cljs-time.format :as tf]))
+            [cljs-time.format :as tf]
+            [markdown.core :as markdown]))
 
 (defn- set-status [comp status]
   (fn [e] (m/set-value! comp :status/state status)))
@@ -89,8 +90,13 @@
           (dom/div :.card-text
             (if (empty? content)
               (dom/i "Bislang gibt es keinen Status.")
-              [(when last-modified (last-modified-info last-modified))
-               (map dom/p (str/split-lines content))])))))))
+              [(when last-modified (dom/p (last-modified-info last-modified)))
+               (dom/div {:dangerouslySetInnerHTML {:__html (markdown/md->html (clojure.string/escape content
+                                                                                {\& "&amp;"
+                                                                                 \< "&lt;"
+                                                                                 \> "&gt;"
+                                                                                 \" "&quot;"
+                                                                                 \' "&#39;"}))}})])))))))
 
 (def ui-status-box (prim/factory StatusBox {:keyfn :dbas.position/id}))
 

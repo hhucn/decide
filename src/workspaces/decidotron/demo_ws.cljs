@@ -39,5 +39,5 @@
      ::f.portal/initial-state {:dbas.position/id     42
                                :dbas.position/text   "Steckerleisten gekauft werden sollten"
                                :status/state         :status/in-work
-                               :status/content       "Es werden gerade neue Steckerleisten besorgt. Diese lassen sich bei Herr Spitzlei von den Tutoren ausleihen."
+                               :status/content       "Es werden gerade neue Steckerleisten besorgt. Diese lassen sich bei Herr Spitzlei von den Tutoren ausleihen.\n\n#Test\n\nEs wird geguckt, was gebraucht wird.\n<script>alert(\"I'm evil!\");</script>"
                                :status/last-modified 1562153769000}}))
