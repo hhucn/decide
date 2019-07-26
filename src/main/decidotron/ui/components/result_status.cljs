@@ -5,7 +5,10 @@
             [fulcro.client.mutations :as m :refer [defmutation]]
             [clojure.string :as str]
             [fulcro.incubator.dynamic-routing :as dr]
-            [fulcro.client.data-fetch :as df]))
+            [fulcro.client.data-fetch :as df]
+            [cljs-time.core :as t]
+            [cljs-time.coerce :as tc]
+            [cljs-time.format :as tf]))
 
 (defn- set-status [comp status]
   (fn [e] (m/set-value! comp :status/state status)))
@@ -14,18 +17,22 @@
   (remote [{:keys [ast]}]
     (assoc ast :key 'decidotron.api/save-status)))
 
-(defsc StatusBox [this {:keys               [ui/editing?]
-                        :status/keys        [content state]
-                        :dbas.position/keys [id text]
-                        :or                 {editing? false}}]
-  {:query         [:status/content :status/state :ui/editing? :dbas.position/text :dbas.position/id
-                   {[:dbas/connection '_] [:dbas.client/admin?]}]
-   :initial-state (fn [p]
-                    (merge p {:ui/editing? false}))
-   :ident         [:result-status/position-id :dbas.position/id]}
-  (let [shade   (if (= state :status/in-work) "dark" "light") ; dark on yellow, light on green and red
-        form-id (random-uuid)]
+(defn- last-modified-info [last-modified]
+  (let [date     (tc/from-long last-modified)
+        days-ago (t/in-days (t/interval date (t/now)))]
+    (dom/small {:title (->> date t/to-default-time-zone (tf/unparse (tf/formatter "dd.MM.yyyy HH:mm")))}
+      "Aktualisiert: " (case days-ago 0 "Heute" 1 "Gestern" (str "Vor " days-ago " Tagen")))))
 
+(defsc StatusBox [this {:keys               [ui/editing?]
+                        :status/keys        [content state last-modified]
+                        :dbas.position/keys [id text]
+                        :or                 {editing? false}}
+                  {:keys [admin?]}]
+  {:query         [:status/content :status/state :status/last-modified :ui/editing?
+                   :dbas.position/text :dbas.position/id]
+   :initial-state (fn [p] (assoc p :ui/editing? false))
+   :ident         [:result-status/position-id :dbas.position/id]}
+  (let [form-id (random-uuid)]
     (dom/div :.mb-2.card
       (dom/div :.card-header.d-flex
         (dom/div
@@ -41,7 +48,7 @@
               :status/cancelled "Abgebrochen"
               ""))
           (str " Der Vorschlag, dass " text "."))
-        (when (prim/shared this [:dbas/connection :dbas.client/admin?])
+        (when admin?
           (dom/div :.ml-auto
             (if editing?
               (dom/button :.btn.btn-sm.btn-primary
@@ -49,9 +56,8 @@
                  :form form-id}
                 "Speichern")
 
-              (dom/button :.btn.btn-sm
-                {:onClick #(m/toggle! this :ui/editing?)
-                 :classes [(str "btn-outline-" shade)]}
+              (dom/button :.btn.btn-sm.btn-outline-dark
+                {:onClick #(m/toggle! this :ui/editing?)}
                 "Bearbeiten")))))
       (dom/div :.card-body
         (if editing?
@@ -60,9 +66,10 @@
              :onSubmit (fn submit-status [e]
                          (.preventDefault e)
                          (m/toggle! this :ui/editing?)
-                         (prim/transact! this `[(save-status ~{:dbas.position/id id
-                                                               :status/content   content
-                                                               :status/state     state})]))} ; TODO Mutate on remote
+                         (prim/transact! this `[{(save-status ~{:dbas.position/id id
+                                                                :status/content   content
+                                                                :status/state     state})
+                                                 ~(vec (remove #{:dbas.position/text} (prim/get-query StatusBox)))}]))}
             (dom/div :.form-group
               (dom/div :.btn-group.btn-group-toggle.d-flex
                 (dom/label :.btn.btn-success.flex-fill "Fertig"
@@ -82,11 +89,12 @@
           (dom/div :.card-text
             (if (empty? content)
               (dom/i "Bislang gibt es keinen Status.")
-              (map dom/p (str/split-lines content)))))))))
+              [(when last-modified (last-modified-info last-modified))
+               (map dom/p (str/split-lines content))])))))))
 
 (def ui-status-box (prim/factory StatusBox {:keyfn :dbas.position/id}))
 
-(defsc-route-target ResultStatusScreen [this {:keys [dbas.issue/slug result/show? result/winners]}]
+(defsc-route-target ResultStatusScreen [this {:keys [result/show? result/winners]}]
   {:query           [:dbas.issue/slug
                      :result/show?
                      {:result/winners (prim/get-query StatusBox)}]
@@ -95,16 +103,14 @@
    :route-cancelled (fn [_])
    :will-enter      (fn [reconciler {:keys [dbas.issue/slug]}]
                       (js/console.log slug)
-                      #_(dr/route-immediate [:screens/ResultStatusScreen slug])
                       (dr/route-deferred [:dbas.issue/slug slug]
                         #(df/load reconciler [:dbas.issue/slug slug] ResultStatusScreen
                            {:post-mutation        `dr/target-ready
                             :post-mutation-params {:target [:dbas.issue/slug slug]}})))
    :will-leave      (fn [_] true)}
   (if show?
-    (dom/div (map ui-status-box winners))
+    (dom/div
+      (for [winner winners]
+        (ui-status-box (prim/computed winner {:admin? (prim/shared this [:dbas/connection :dbas.client/admin?])}))))
     (dom/div "Nothing to see here!")))
-
-
-;;;;
 

@@ -36,7 +36,8 @@
 (ws/defcard status-box-card
   (ct.fulcro/fulcro-card
     {::f.portal/root          result-status-ui/StatusBox
-     ::f.portal/initial-state {:dbas.position/id 42
-                               :status/title     "Steckerleisten"
-                               :status/state     :status/in-work
-                               :status/content   "Es werden gerade neue Steckerleisten besorgt. Diese lassen sich bei Herr Spitzlei von den Tutoren ausleihen."}}))
+     ::f.portal/initial-state {:dbas.position/id     42
+                               :dbas.position/text   "Steckerleisten gekauft werden sollten"
+                               :status/state         :status/in-work
+                               :status/content       "Es werden gerade neue Steckerleisten besorgt. Diese lassen sich bei Herr Spitzlei von den Tutoren ausleihen."
+                               :status/last-modified 1562153769000}}))

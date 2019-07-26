@@ -9,7 +9,8 @@
             [konserve.filestore :as kfs]
             [konserve.core :as k]
             [clojure.core.async :refer [go <! <!!]]
-            [fulcro.logging :as log]))
+            [fulcro.logging :as log])
+  (:import (java.time Instant)))
 
 (defstate storage
   :start (<!! (kfs/new-fs-store (:storage-dir config))))
@@ -153,17 +154,20 @@
 (pc/defmutation save-status [_ {:keys [status/content status/state dbas.position/id dbas.client/token]}]
   {::pc/params [:status/content :status/state :token :dbas.position/id]}
   (if (= "admins" (:group (t/unsign token)))                ; TODO Function! Or better: Middleware
-    (k/assoc-in storage [:status id] {:status/content content
-                                      :status/state   state})
+    (go (-> (second (<! (k/assoc-in storage [:status id] {:status/content       content
+                                                          :status/state         state
+                                                          :status/last-modified (System/currentTimeMillis)})))
+          (assoc :dbas.position/id id)))
     :decidotron.error/invalid-token))
 
 (pc/defresolver result-status [_ {id :dbas.position/id}]
   {::pc/input  #{:dbas.position/id}
-   ::pc/output [:status/content :status/state]}
+   ::pc/output [:status/content :status/state :status/last-modified]}
   (go
     (or (<! (k/get-in storage [:status id]))
-      {:status/content ""
-       :status/state   :status/in-work})))
+      {:status/content       ""
+       :status/state         :status/in-work
+       :status/last-modified nil})))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn preprocess-parser-plugin
