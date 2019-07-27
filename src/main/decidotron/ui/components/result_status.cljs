@@ -19,7 +19,7 @@
     (assoc ast :key 'decidotron.api/save-status)))
 
 (defn- last-modified-info [last-modified]
-  (let [date     (tc/from-long last-modified)
+  (let [date     (tc/from-date last-modified)
         days-ago (t/in-days (t/interval date (t/now)))]
     (dom/small {:title (->> date t/to-default-time-zone (tf/unparse (tf/formatter "dd.MM.yyyy HH:mm")))}
       "Aktualisiert: " (case days-ago 0 "Heute" 1 "Gestern" (str "Vor " days-ago " Tagen")))))
@@ -70,7 +70,7 @@
                          (prim/transact! this `[{(save-status ~{:dbas.position/id id
                                                                 :status/content   content
                                                                 :status/state     state})
-                                                 ~(vec (remove #{:dbas.position/text} (prim/get-query StatusBox)))}]))}
+                                                 ~(prim/get-query StatusBox)}]))}
             (dom/div :.form-group
               (dom/div :.btn-group.btn-group-toggle.d-flex
                 (dom/label :.btn.btn-success.flex-fill "Fertig"

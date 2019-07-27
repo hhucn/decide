@@ -9,8 +9,8 @@
             [konserve.filestore :as kfs]
             [konserve.core :as k]
             [clojure.core.async :refer [go <! <!!]]
-            [fulcro.logging :as log])
-  (:import (java.time Instant)))
+            [fulcro.logging :as log]
+            [clj-time.coerce :as tc]))
 
 (defstate storage
   :start (<!! (kfs/new-fs-store (:storage-dir config))))
@@ -157,17 +157,20 @@
     (go (-> (second (<! (k/assoc-in storage [:status id] {:status/content       content
                                                           :status/state         state
                                                           :status/last-modified (System/currentTimeMillis)})))
-          (assoc :dbas.position/id id)))
+          (assoc :dbas.position/id id)
+          (update :status/last-modified #(some-> % tc/from-long tc/to-date))))
     :decidotron.error/invalid-token))
 
 (pc/defresolver result-status [_ {id :dbas.position/id}]
   {::pc/input  #{:dbas.position/id}
    ::pc/output [:status/content :status/state :status/last-modified]}
   (go
-    (or (<! (k/get-in storage [:status id]))
-      {:status/content       ""
-       :status/state         :status/in-work
-       :status/last-modified nil})))
+    (-> (or (<! (k/get-in storage [:status id]))
+          {:status/content       ""
+           :status/state         :status/in-work
+           :status/last-modified nil})
+      (update :status/last-modified #(some-> % tc/from-long tc/to-date)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn preprocess-parser-plugin
