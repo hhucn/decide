@@ -3,7 +3,7 @@
   (:require [fulcro.client.dom :as dom]
             [fulcro.client.primitives :as prim :refer [defsc]]
             [fulcro.client.mutations :as m :refer [defmutation]]
-            [clojure.string :as str]
+            [clojure.string :refer [escape]]
             [fulcro.incubator.dynamic-routing :as dr]
             [fulcro.client.data-fetch :as df]
             [cljs-time.core :as t]
@@ -18,11 +18,33 @@
   (remote [{:keys [ast]}]
     (assoc ast :key 'decidotron.api/save-status)))
 
-(defn- last-modified-info [last-modified]
+(defn last-modified-label [last-modified]
   (let [date     (tc/from-date last-modified)
         days-ago (t/in-days (t/interval date (t/now)))]
-    (dom/small {:title (->> date t/to-default-time-zone (tf/unparse (tf/formatter "dd.MM.yyyy HH:mm")))}
-      "Aktualisiert: " (case days-ago 0 "Heute" 1 "Gestern" (str "Vor " days-ago " Tagen")))))
+    (dom/p (dom/small {:title (->> date t/to-default-time-zone (tf/unparse (tf/formatter "dd.MM.yyyy HH:mm")))}
+             "Aktualisiert: " (case days-ago 0 "Heute" 1 "Gestern" (str "Vor " days-ago " Tagen"))))))
+
+
+(def state->class {:status/done "success"
+                   :status/in-work "warning"
+                   :status/cancelled "danger"})
+
+(defn status-badge [state]
+  (dom/span :.badge
+    {:classes [(str "badge-" (state->class state))]}
+    (case state
+      :status/done "Fertig!"
+      :status/in-work "In Arbeit"
+      :status/cancelled "Abgebrochen"
+      "")))
+
+(defn markdown-render [content]
+  (dom/div {:dangerouslySetInnerHTML {:__html (markdown/md->html (escape content
+                                                                   {\& "&amp;"
+                                                                    \< "&lt;"
+                                                                    \> "&gt;"
+                                                                    \" "&quot;"
+                                                                    \' "&#39;"}))}}))
 
 (defsc StatusBox [this {:keys               [ui/editing?]
                         :status/keys        [content state last-modified]
@@ -37,17 +59,7 @@
     (dom/div :.mb-2.card
       (dom/div :.card-header.d-flex
         (dom/div
-          (dom/span :.badge
-            {:classes [(str "badge-" (case state
-                                       :status/done "success"
-                                       :status/in-work "warning"
-                                       :status/cancelled "danger"
-                                       ""))]}
-            (case state
-              :status/done "Fertig!"
-              :status/in-work "In Arbeit"
-              :status/cancelled "Abgebrochen"
-              ""))
+          (status-badge state)
           (str " Der Vorschlag, dass " text "."))
         (when admin?
           (dom/div :.ml-auto
@@ -66,8 +78,8 @@
             {:id       form-id
              :onSubmit (fn submit-status [e]
                          (.preventDefault e)
-                         (m/toggle! this :ui/editing?)
-                         (prim/transact! this `[{(save-status ~{:dbas.position/id id
+                         (prim/transact! this `[(m/toggle {:field :ui/editing?})
+                                                {(save-status ~{:dbas.position/id id
                                                                 :status/content   content
                                                                 :status/state     state})
                                                  ~(prim/get-query StatusBox)}]))}
@@ -90,13 +102,8 @@
           (dom/div :.card-text
             (if (empty? content)
               (dom/i "Bislang gibt es keinen Status.")
-              [(when last-modified (dom/p (last-modified-info last-modified)))
-               (dom/div {:dangerouslySetInnerHTML {:__html (markdown/md->html (clojure.string/escape content
-                                                                                {\& "&amp;"
-                                                                                 \< "&lt;"
-                                                                                 \> "&gt;"
-                                                                                 \" "&quot;"
-                                                                                 \' "&#39;"}))}})])))))))
+              [(when last-modified (last-modified-label last-modified))
+               (markdown-render content)])))))))
 
 (def ui-status-box (prim/factory StatusBox {:keyfn :dbas.position/id}))
 

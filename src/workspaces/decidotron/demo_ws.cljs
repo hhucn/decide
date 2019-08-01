@@ -5,9 +5,7 @@
             [nubank.workspaces.card-types.fulcro :as ct.fulcro]
             [nubank.workspaces.lib.fulcro-portal :as f.portal]
             [fulcro.client.mutations :as fm]
-            [decidotron.ui.components.preferences :as pref-ui]
-            [decidotron.ui.components.result-status :as result-status-ui]
-            [decidotron.remotes.dbas :refer [dbas-remote]]))
+            [decidotron.ui.components.preferences :as pref-ui]))
 
 (fp/defsc FulcroDemo
   [this {:keys [counter]}]
@@ -32,12 +30,3 @@
                                                                              :is-supportive true
                                                                              :argument-id   3}]
                                                      :cons []})}))
-
-(ws/defcard status-box-card
-  (ct.fulcro/fulcro-card
-    {::f.portal/root          result-status-ui/StatusBox
-     ::f.portal/initial-state {:dbas.position/id     42
-                               :dbas.position/text   "Steckerleisten gekauft werden sollten"
-                               :status/state         :status/in-work
-                               :status/content       "Es werden gerade neue Steckerleisten besorgt. Diese lassen sich bei Herr Spitzlei von den Tutoren ausleihen.\n\n#Test\n\nEs wird geguckt, was gebraucht wird.\n<script>alert(\"I'm evil!\");</script>"
-                               :status/last-modified 1562153769000}}))
