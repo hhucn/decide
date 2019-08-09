@@ -6,16 +6,11 @@
             [decidotron.server-components.database :as db]
             [decidotron.server-components.budgets :as b]
             [decidotron.server-components.config :refer [config]]
-            [konserve.filestore :as kfs]
+            [decidotron.server-components.votes-store :as v-store]
             [konserve.core :as k]
-            [clojure.core.async :refer [go <! <!!]]
+            [clojure.core.async :refer [<! <!!]]
             [fulcro.logging :as log]
             [clj-time.coerce :as tc]))
-
-(defstate storage
-  :start (<!! (kfs/new-fs-store (:storage-dir config))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- ident->map [[a b]] {a b})
 
@@ -29,10 +24,9 @@
           preference-list (update preference-list :preferences (partial map ident->map))] ; idents to maps
       (if (validate-preference-list slug preference-list)
         (when (db/allow-voting? slug)
-          (-> (if (empty? (:preferences preference-list))
-                (k/update-in storage [slug] #(dissoc % user-id))
-                (k/assoc-in storage [slug user-id] preference-list))
-            <! second go))
+          (if (empty? (:preferences preference-list))
+            (v-store/remove-votes slug user-id)
+            (v-store/update-votes slug user-id preference-list)))
         :decidotron.error/duplicated-position))
     :decidotron.error/invalid-token))
 
@@ -100,10 +94,9 @@
    ::pc/output [:preference-list/slug
                 {:dbas/issue [:dbas.issue/slug]}
                 {:preferences [:dbas.position/id]}]}
-  (go
-    (merge {:dbas/issue {:dbas.issue/slug slug}}
-      (update (<! (k/get-in storage [slug user-id]))
-        :preferences #(db/filter-disabled-positions slug %)))))
+  (merge {:dbas/issue {:dbas.issue/slug slug}}
+    (update (v-store/get-votes slug user-id)
+      :preferences #(db/filter-disabled-positions slug %))))
 
 (pc/defresolver preferences [_ {slug :preferences/slug}]
   {::pc/input  #{:preferences/slug}
@@ -120,9 +113,9 @@
 
 (defn- votes [slug]
   (let [disabled-filter (db/filter-disabled-positions-fn slug)]
-    (->> (<!! (k/get-in storage [slug]))
-      vals
-      (map #(->> % :preferences disabled-filter (map :dbas.position/id))))))
+    (map
+      #(->> % :preferences disabled-filter (map :dbas.position/id))
+      (v-store/all-votes slug))))
 
 (pc/defresolver result [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
@@ -149,27 +142,26 @@
 (pc/defresolver result-no-of-participants [_ {slug :dbas.issue/slug}]
   {::pc/input  #{:dbas.issue/slug}
    ::pc/output [:result/no-of-participants]}
-  {:result/no-of-participants (count (<!! (k/get-in storage [slug])))})
+  {:result/no-of-participants (v-store/no-of-voters slug)})
 
 (pc/defmutation save-status [_ {:keys [status/content status/state dbas.position/id dbas.client/token]}]
   {::pc/params [:status/content :status/state :token :dbas.position/id]}
   (if (= "admins" (:group (t/unsign token)))                ; TODO Function! Or better: Middleware
-    (go (-> (second (<! (k/assoc-in storage [:status id] {:status/content       content
-                                                          :status/state         state
-                                                          :status/last-modified (System/currentTimeMillis)})))
-          (assoc :dbas.position/id id)
-          (update :status/last-modified #(some-> % tc/from-long tc/to-date))))
+    (-> (second (<!! (k/assoc-in v-store/storage [:status id] {:status/content       content
+                                                               :status/state         state
+                                                               :status/last-modified (System/currentTimeMillis)})))
+      (assoc :dbas.position/id id)
+      (update :status/last-modified #(some-> % tc/from-long tc/to-date)))
     :decidotron.error/invalid-token))
 
 (pc/defresolver result-status [_ {id :dbas.position/id}]
   {::pc/input  #{:dbas.position/id}
    ::pc/output [:status/content :status/state :status/last-modified]}
-  (go
-    (-> (or (<! (k/get-in storage [:status id]))
-          {:status/content       ""
-           :status/state         :status/in-work
-           :status/last-modified nil})
-      (update :status/last-modified #(some-> % tc/from-long tc/to-date)))))
+  (-> (or (<!! (k/get-in v-store/storage [:status id]))
+        {:status/content       ""
+         :status/state         :status/in-work
+         :status/last-modified nil})
+    (update :status/last-modified #(some-> % tc/from-long tc/to-date))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
