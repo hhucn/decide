@@ -204,7 +204,9 @@
    (fn [reader]
      (fn [env]
        (let [token (get-in env [:ast :params :dbas.client/token])]
-         (reader (cond-> env token (assoc :dbas.client/id (:id (t/unsign token))))))))})
+         (reader (cond-> env 
+                         :always (dissoc :dbas.client/id)
+                         token (assoc :dbas.client/id (:id (t/unsign token))))))))})
 
 (defn log-requests [{:keys [env tx] :as req}]
   (log/debug "Pathom transaction:" (pr-str tx))
