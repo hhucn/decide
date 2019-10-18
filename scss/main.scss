@@ -1,0 +1,81 @@
+$hhu-blue: #006AB3;
+$light-grey: #A0A0A0;
+$dark-grey: #6C6C6C;
+$green: #30B110;
+$hhu-red: #BE0A26;
+
+$primary: $hhu-blue;
+$secondary: $light-grey;
+$success: $green;
+$danger: $hhu-red;
+
+
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+
+.proposal {
+  max-width: 655px;
+  height: 200px;
+  border: 2px solid $light-grey;
+  border-radius: 10px;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+
+  .proposal-buttons {
+    height: 100%;
+    width: 70px;
+    flex: none;
+    border-right: 1px solid $light-grey;
+
+    display: flex;
+    flex-direction: column;
+
+    .btn {
+      height: 100%;
+      background-color: white;
+      border: 0 white;
+      border-radius: 0;
+      padding: auto;
+
+      &:hover {
+        fill: white;
+
+        &.proposal-accept{background-color: $success;}
+        &.proposal-decline{background-color: $danger;}
+      }
+    }
+
+    .spacer {
+      border-top: .5px solid $light-grey;
+      flex: none;
+    }
+  }
+
+  .proposal-title {
+    font-size: 24px;
+    line-height: 1.5;
+  }
+
+  .proposal-price {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    min-width: 160px;
+    padding: 0.333rem 1.5rem 0.333rem 1.5rem;
+
+    display: flex;
+    align-items: center;
+    text-align: center;
+
+    .proposal-price__text {
+      width: 100%;
+      color: white;
+      font-size: 24px;
+      line-height: 28px;
+    }
+
+    background-color: $hhu-blue;
+    border-radius: 20px 0 8px 0;
+  }
+}
