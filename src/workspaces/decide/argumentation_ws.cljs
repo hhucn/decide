@@ -10,11 +10,14 @@
            (fn [] #:argument{:id 1
                              :text "Es soll ein 3D Drucker angeschafft werden."
                              :pros [#:argument{:id 42
-                                               :text "3d Drucker sind praktisch"}
+                                               :text "3d Drucker sind praktisch"
+                                               :type :pro}
                                     #:argument{:id 421
-                                               :text "3d Drucker sind sehr praktisch"}]
+                                               :text "3d Drucker sind sehr praktisch"
+                                               :type :pro}]
                              :cons [#:argument{:id 43
-                                               :text "3d Drucker sind teuer"}]})}))
+                                               :text "3d Drucker sind teuer"
+                                               :type :con}]})}))
 
 (ws/defcard argumentation-card
   (ct.fulcro/fulcro-card
@@ -24,13 +27,17 @@
                                   :upstream []
                                   :current-argument #:argument{:id 1
                                                                :text "Es soll ein 3D Drucker angeschafft werden."
+                                                               :type :position
                                                                :pros [#:argument{:id 42
                                                                                  :text "3d Drucker sind praktisch"
-                                                                                 :pros [#:argument{:id 142 :text "Weil sie praktisch sind."}]}
+                                                                                 :pros [#:argument{:id 142 :text "Weil sie praktisch sind." :type :pro}]
+                                                                                 :type :pro}
                                                                       #:argument{:id 421
-                                                                                 :text "3d Drucker sind sehr praktisch"}]
+                                                                                 :text "3d Drucker sind sehr praktisch"
+                                                                                 :type :pro}]
                                                                :cons [#:argument{:id 43
-                                                                                 :text "3d Drucker sind teuer"}]}})}))
+                                                                                 :text "3d Drucker sind teuer"
+                                                                                 :type :con}]}})}))
 
 (ws/defcard Argument
   (ct.fulcro/fulcro-card
