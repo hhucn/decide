@@ -58,14 +58,14 @@
 
 (def ui-procon (comp/factory ProCon {:keyfn :argument/id}))
 
+(defn *navigate-forward [{:argumentation/keys [current-argument] :as argumentation} next-argument]
+  (-> argumentation
+    (assoc :argumentation/current-argument next-argument)
+    (update :argumentation/upstream conj current-argument)))
+
 (defmutation navigate-forward [{id :argument/id}]
-  (action [{:keys [component state] :as env}]
-    (let [ident (comp/get-ident component)
-          current (comp/get-ident Argument (:argumentation/current-argument (comp/props component)))]
-      (swap! state
-        #(-> %
-           (assoc-in (conj ident :argumentation/current-argument) [:argument/id id])
-           (update-in (conj ident :argumentation/upstream) conj current))))))
+  (action [{:keys [ref state]}]
+    (swap! state update-in ref *navigate-forward [:argument/id id])))
 
 (defn *jump-backwards
   [{:argumentation/keys [upstream] :as argumentation}
@@ -77,8 +77,8 @@
     argumentation))
 
 (defmutation jump-backwards [{:keys [position]}]
-  (action [{:keys [component state] :as env}]
-    (swap! state update-in (comp/get-ident component) *jump-backwards position)))
+  (action [{:keys [ref state]}]
+    (swap! state update-in ref *jump-backwards position)))
 
 (defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [jmp-fn index]}]
   {:query [:argument/id :argument/text :argument/type]
