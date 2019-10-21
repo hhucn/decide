@@ -34,6 +34,12 @@
 
 (def ui-argument (comp/factory Argument {:keyfn :argument/id}))
 
+(defn half-row [& children]
+  (div :.col-sm-6
+    {:style {:display "flex"
+             :flexDirection "column"}}
+    children))
+
 (defsc ProCon [this {:argument/keys [pros cons]}]
   {:query [:argument/id
            :argument/text
@@ -42,24 +48,12 @@
            {:argument/cons (comp/get-query Argument)}]
    :ident :argument/id}
   (div :.row
-    (div :.col-sm-6
-      {:style {:display "flex"
-               :flexDirection "column"}}
-      (div {:style {:height "24px"
-                    :backgroundColor "green"
-                    :color "white"
-                    :textAlign "center"}}
-        "Pro Argumente")
+    (half-row
+      (dom/h6 :.argumentation-header.bg-success "Pro Argumente")
       (map ui-argument pros))
 
-    (div :.col-sm-6
-      {:style {:display "flex"
-               :flexDirection "column"}}
-      (div {:style {:height "24px"
-                    :backgroundColor "red"
-                    :color "white"
-                    :textAlign "center"}}
-        "Con Argumente")
+    (half-row
+      (dom/h6 :.argumentation-header.bg-danger "Con Argumente")
       (map ui-argument cons))))
 
 (def ui-procon (comp/factory ProCon {:keyfn :argument/id}))
@@ -86,19 +80,17 @@
   (action [{:keys [component state] :as env}]
     (swap! state update-in (comp/get-ident component) *jump-backwards position)))
 
-(def border-colors {:pro "btn-outline-success"
-                    :con "btn-outline-danger"
-                    :position "btn-outline-dark"})
-
-(defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [parent index]}]
+(defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [jmp-fn parent index]}]
   {:query [:argument/id :argument/text :argument/type]
    :ident :argument/id}
-  (dom/li :.btn
+  (dom/button :.list-group-item.list-group-item-action
     {:key index
-     :className (border-colors type)
+     :className (type {:pro "list-group-item-success"
+                       :con "list-group-item-danger"
+                       :position "list-group-item-info"})
      :style {:textAlign "center"
              :borderRadius "10px"}
-     :onClick #(comp/transact! parent [(jump-backwards {:position index})])}
+     :onClick jmp-fn}
     text))
 
 (def ui-upstream-item (comp/factory UpstreamItem))
@@ -109,14 +101,13 @@
            {:argumentation/current-argument (comp/get-query ProCon)}]
    :ident :argument/id
    :initial-state {:argumentation/upstream []}}
-  (js/console.log (map :argument/id (cons current-argument upstream)))
   (div
     (dom/ol :.list-group
-      {:style {:display "flex"
-               :flexDirection "column"}}
       (map-indexed
-        (fn [i props] (ui-upstream-item (comp/computed props {:index i
-                                                              :parent this})))
+        (fn [i props]
+          (ui-upstream-item
+            (comp/computed props
+              {:jmp-fn #(comp/transact! this [(jump-backwards {:position i})])})))
         (concat upstream [current-argument])))
     (ui-procon current-argument)
     (dom/button :.btn.btn-block.btn-danger
