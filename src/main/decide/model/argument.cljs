@@ -17,19 +17,19 @@
                     :opt-un [:argument/text :argument/type
                              :argument/pros :argument/cons]))
 
-(defsc Argument [this {:argument/keys [id text]}]
+(defsc Argument [this {:argument/keys [id text]} {:keys [argumentation-root]}]
   {:query [:argument/id :argument/text
            :argument/type ; pro, con, position, ...
            :argument/subtype ; undercut, undermine, ...
            {:argument/pros '...}
            {:argument/cons '...}]
    :ident :argument/id}
-  (div :.btn.btn-light
+  (dom/button :.btn.btn-light
     {:style
      {:border "1px solid black"
       :borderRadius "10px"
       :padding "24px"}
-     :onClick (fn [_e])}
+     :onClick #(comp/transact! argumentation-root `[(navigate-forward {:argument/id ~id})])}
     text))
 
 (def ui-argument (comp/factory Argument {:keyfn :argument/id}))
@@ -40,7 +40,7 @@
              :flexDirection "column"}}
     children))
 
-(defsc ProCon [this {:argument/keys [pros cons]}]
+(defsc ProCon [this {:argument/keys [pros cons]} computed]
   {:query [:argument/id
            :argument/text
            :argument/type
@@ -50,11 +50,11 @@
   (div :.row
     (half-row
       (dom/h6 :.argumentation-header.bg-success "Pro Argumente")
-      (map ui-argument pros))
+      (map #(ui-argument (comp/computed % computed)) pros))
 
     (half-row
       (dom/h6 :.argumentation-header.bg-danger "Con Argumente")
-      (map ui-argument cons))))
+      (map #(ui-argument (comp/computed % computed)) cons))))
 
 (def ui-procon (comp/factory ProCon {:keyfn :argument/id}))
 
@@ -80,7 +80,7 @@
   (action [{:keys [component state] :as env}]
     (swap! state update-in (comp/get-ident component) *jump-backwards position)))
 
-(defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [jmp-fn parent index]}]
+(defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [jmp-fn index]}]
   {:query [:argument/id :argument/text :argument/type]
    :ident :argument/id}
   (dom/button :.list-group-item.list-group-item-action
@@ -109,7 +109,6 @@
             (comp/computed props
               {:jmp-fn #(comp/transact! this [(jump-backwards {:position i})])})))
         (concat upstream [current-argument])))
-    (ui-procon current-argument)
-    (dom/button :.btn.btn-block.btn-danger
-      {:onClick #(comp/transact! this [(navigate-forward {:argument/id 42})])}
-      "Nav Test")))
+    (ui-procon
+      (comp/computed current-argument
+        {:argumentation-root this}))))
