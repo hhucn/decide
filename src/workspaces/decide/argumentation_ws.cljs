@@ -1,9 +1,11 @@
 (ns decide.argumentation-ws
   (:require [nubank.workspaces.core :as ws]
+            [nubank.workspaces.model :as wsm]
             [nubank.workspaces.card-types.fulcro3 :as ct.fulcro]
             [decide.model.argument :as arg]))
 
 (ws/defcard pro-con-card
+  {::wsm/card-width 4 ::wsm/card-height 8}
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root arg/ProCon
      ::ct.fulcro/initial-state
@@ -20,6 +22,7 @@
                                                :type :con}]})}))
 
 (ws/defcard argumentation-card
+  {::wsm/card-width 4 ::wsm/card-height 10}
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root arg/Argumentation
      ::ct.fulcro/initial-state
@@ -40,6 +43,7 @@
                                                                                  :type :con}]}})}))
 
 (ws/defcard Argument
+  {::wsm/card-width  2 ::wsm/card-height 5}
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root arg/Argument
      ::ct.fulcro/initial-state
