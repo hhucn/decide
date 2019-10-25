@@ -1,7 +1,7 @@
 (ns decide.model.argument-test
   (:require
     [decide.model.argument :as argument]
-    [clojure.test :refer [deftest]]
+    [nubank.workspaces.core :refer [deftest]]
     [fulcro-spec.core :refer [specification provided behavior assertions]]))
 
 (def =>)
@@ -11,15 +11,21 @@
                   :current-argument current})
 
 
-(specification "Navigation of the argumentation stack"
+(deftest navigation-argumentation-stack
   (let [empty-upstream (argumentation [:argument/id 1] [])]
-    (assertions
-      "should work for jumping backwards"
-      (argument/*jump-backwards empty-upstream 0) => empty-upstream
-      (argument/*jump-backwards empty-upstream 1) => empty-upstream
+    (behavior "should work for jumping backwards"
+      (assertions
+        "when the upstream is empty"
+        (argument/*jump-backwards empty-upstream 0) => empty-upstream
+        "when trying to jump out of the stack"
+        (argument/*jump-backwards empty-upstream 1) => empty-upstream
 
-      (argument/*jump-backwards (argumentation [:argument/id 2] [[:argument/id 1]]) 0) => empty-upstream
-      (argument/*jump-backwards (argumentation [:argument/id 3] [[:argument/id 1] [:argument/id 2]]) 1) => (argumentation [:argument/id 2] [[:argument/id 1]]))
-    (assertions
-      "should work for navigating forwards"
-      (argument/*navigate-forward empty-upstream [:argument/id 2]) => (argumentation [:argument/id 2] [[:argument/id 1]]))))
+        "when jumping to the root argument"
+        (argument/*jump-backwards (argumentation [:argument/id 2] [[:argument/id 1]]) 0) => empty-upstream
+
+        "when jumping back to a specific position below the root"
+        (argument/*jump-backwards (argumentation [:argument/id 3] [[:argument/id 1] [:argument/id 2]]) 1) => (argumentation [:argument/id 2] [[:argument/id 1]])))
+    (behavior "should work for navigating forwards"
+      (assertions
+        "When adding a new argument to an empty upstream"
+        (argument/*navigate-forward empty-upstream [:argument/id 2]) => (argumentation [:argument/id 2] [[:argument/id 1]])))))
