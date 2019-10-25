@@ -46,7 +46,10 @@
            :argument/type
            {:argument/pros (comp/get-query Argument)}
            {:argument/cons (comp/get-query Argument)}]
-   :ident :argument/id}
+   :ident :argument/id
+   :initial-state (fn [argument] (merge {:argument/pros []
+                                         :argument/cons []}
+                                   argument))}
   (div :.row
     (half-row
       (dom/h6 :.argumentation-header.bg-success "Pro Argumente")
@@ -96,7 +99,11 @@
            {:argumentation/upstream (comp/get-query UpstreamItem)}
            {:argumentation/current-argument (comp/get-query ProCon)}]
    :ident :argument/id
-   :initial-state {:argumentation/upstream []}}
+   :initial-state (fn [{:argument/keys [id] :as root-arg}]
+                    {:argument/id id
+                     :argumentation/upstream []
+                     :argumentation/current-argument (comp/initial-state ProCon {:argument/id id})})}
+
   (div
     (dom/ol :.list-group
       (map-indexed
@@ -108,3 +115,5 @@
     (ui-procon
       (comp/computed current-argument
         {:argumentation-root this}))))
+
+(def ui-argumentation (comp/factory Argumentation {:keyfn :argument/id}))

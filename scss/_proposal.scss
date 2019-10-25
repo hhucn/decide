@@ -1,4 +1,5 @@
 @import "../node_modules/bootstrap/scss/variables";
+@import "../node_modules/bootstrap/scss/list-group";
 
 .proposal {
   max-width: 655px;
@@ -56,5 +57,38 @@
 
     background-color: $blue;
     border-radius: 20px 0 8px 0;
+  }
+}
+
+.price-tag-big {
+  min-width: 165px;
+  margin: 5px;
+
+  :first-child {
+    border: {
+      width: 2px;
+      top-left-radius: 20px;
+      top-right-radius: 20px;
+      color: $primary;
+    }
+    font-size: 1.75rem;
+    color: $primary;
+    text-align: center;
+
+    @extend .list-group-item;
+  }
+
+  :last-child {
+    border: {
+      width: 2px;
+      bottom-left-radius: 20px;
+      bottom-right-radius: 20px;
+      color: $secondary;
+    }
+    font-size: 1rem;
+    color: $secondary;
+    text-align: center;
+
+    @extend .list-group-item;
   }
 }

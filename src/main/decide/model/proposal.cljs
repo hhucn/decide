@@ -4,22 +4,40 @@
             [com.fulcrologic.fulcro-css.css :as css]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
             [fulcro.client.mutations :as m]
+            [decide.model.argument :as arg]
             ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline]]))
 
-(defsc ArgumentListEntry [this props]
-  {:query []})
+(defn big-price-tag
+  ([price budget]
+   (big-price-tag price budget ""))
+  ([price budget unit]
+   (div :.price-tag-big
+     (div price unit)
+     (div (str "von " budget unit)))))
 
-(defsc ProposalDetails [this {:proposal/keys [title arguments]}]
-  {:query [:proposal/id :proposal/title :proposal/arguments]
-   :ident :proposal/id}
-  (div :.container
-    (dom/ol :.list-group
-      (for [argument arguments]
-        (dom/li :.list-item "Item 1")))))
 
-(defsc ProposalCard [this {:proposal/keys [id title subtitle price]}]
-  {:query [:proposal/id :proposal/title :proposal/subtitle :proposal/price]
-   :ident :proposal/id
+(defsc ProposalDetails [this {:keys [argument/text]
+                              :proposal/keys [subtext cost argumentation]}]
+  {:query [:argument/id
+           :argument/text
+           :proposal/subtext
+           :proposal/cost
+           {:proposal/argumentation (comp/get-query arg/Argumentation)}]
+   :ident :argument/id}
+  (div :.container.border
+    (div :.row
+      (dom/h2 text)
+      (big-price-tag cost 1000000000 " $")
+      (dom/button :.close.align-self-baseline
+        {:style {:position "absolute"}} "x"))
+    (dom/p subtext)
+    (arg/ui-argumentation argumentation)))
+
+
+(defsc ProposalCard [this {:proposal/keys [subtitle price]
+                           :argument/keys [text]}]
+  {:query [:argument/id :argument/text :proposal/subtitle :proposal/price]
+   :ident :argument/id
    :initial-state (fn [_] {:ui/modal-open? false})}
   (div :.proposal
     (div :.proposal-buttons
@@ -34,7 +52,7 @@
         {:style {:display "flex"
                  :padding "10px 5px 10px 10px"
                  :justifyContent "space-between"}}
-        (dom/h2 :.proposal-title title)
+        (dom/h2 :.proposal-title text)
         (dom/button :.btn
           {:style {:position "absolute"
                    :right "0px"
