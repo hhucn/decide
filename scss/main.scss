@@ -22,13 +22,13 @@ $red: #BE0A26;
   text-align: center;
   border-radius: 10px;
 
-  &[data-type="pro"] {
+  &[data-type=pro] {
     @extend .list-group-item-success;
   }
-  &[data-type="con"] {
+  &[data-type=con] {
     @extend .list-group-item-danger;
   }
-  &[data-type="position"] {
+  &[data-type=position] {
     @extend .list-group-item-info;
   }
 }

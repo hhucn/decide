@@ -4,10 +4,7 @@
             [com.fulcrologic.fulcro-css.css :as css]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
             [fulcro.client.mutations :as m]
-            ["react-icons/fa" :refer [FaRegCheckCircle FaRegTimesCircle]]
-            ["react-icons/md" :refer [MdMoreVert]]))
-
-
+            ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline]]))
 
 (defsc ArgumentListEntry [this props]
   {:query []})
@@ -27,10 +24,10 @@
   (div :.proposal
     (div :.proposal-buttons
       (dom/button :.btn.btn-outline-success
-        (FaRegCheckCircle #js {:size "32px"}))
+        (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
       (dom/div :.spacer)
       (dom/button :.btn.btn-outline-danger
-        (FaRegTimesCircle #js {:size "32px"})))
+        (IoIosCloseCircleOutline #js {:size "3rem"})))
 
     (div :.proposal-content
       (div
@@ -38,7 +35,12 @@
                  :padding "10px 5px 10px 10px"
                  :justifyContent "space-between"}}
         (dom/h2 :.proposal-title title)
-        (MdMoreVert #js {:size "24px"}))
+        (dom/button :.btn
+          {:style {:position "absolute"
+                   :right "0px"
+                   :top "0px"
+                   :padding "0.2rem 0"}}
+          (IoMdMore #js {:size "24px"})))
       (div
         {:style {:display "flex"
                  :padding "10px"
