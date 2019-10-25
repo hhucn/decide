@@ -83,13 +83,9 @@
 (defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [jmp-fn index]}]
   {:query [:argument/id :argument/text :argument/type]
    :ident :argument/id}
-  (dom/button :.list-group-item.list-group-item-action
+  (dom/button :.argumentation-upstream-item
     {:key index
-     :className (type {:pro "list-group-item-success"
-                       :con "list-group-item-danger"
-                       :position "list-group-item-info"})
-     :style {:textAlign "center"
-             :borderRadius "10px"}
+     :data-type type
      :onClick jmp-fn}
     text))
 

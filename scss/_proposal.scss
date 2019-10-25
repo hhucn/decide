@@ -1,0 +1,60 @@
+@import "../node_modules/bootstrap/scss/variables";
+
+.proposal {
+  max-width: 655px;
+  height: 200px;
+  border: 2px solid $secondary;
+  border-radius: 10px;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+
+  .proposal-buttons {
+    height: 100%;
+    width: 70px;
+    flex: none;
+    border-right: 1px solid $secondary;
+
+    display: flex;
+    flex-direction: column;
+
+    .btn {
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+      padding: auto;
+    }
+
+    .spacer {
+      border-top: .5px solid $secondary;
+      flex: none;
+    }
+  }
+
+  .proposal-title {
+    font-size: 24px;
+    line-height: 1.5;
+  }
+
+  .proposal-price {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    min-width: 160px;
+    padding: 0.333rem 1.5rem 0.333rem 1.5rem;
+
+    display: flex;
+    align-items: center;
+    text-align: center;
+
+    .proposal-price__text {
+      width: 100%;
+      color: white;
+      font-size: 24px;
+      line-height: 28px;
+    }
+
+    background-color: $blue;
+    border-radius: 20px 0 8px 0;
+  }
+}
