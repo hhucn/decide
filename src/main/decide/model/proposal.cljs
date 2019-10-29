@@ -5,15 +5,15 @@
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
             [fulcro.client.mutations :as m]
             [decide.model.argument :as arg]
-            ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline]]))
+            ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline IoMdClose]]))
 
 (defn big-price-tag
   ([price budget]
    (big-price-tag price budget ""))
   ([price budget unit]
    (div :.price-tag-big
-     (div price unit)
-     (div (str "von " budget unit)))))
+     (div (str price " " unit))
+     (div "von " budget " " unit))))
 
 
 (defsc ProposalDetails [this {:keys [argument/text]
@@ -24,13 +24,16 @@
            :proposal/cost
            {:proposal/argumentation (comp/get-query arg/Argumentation)}]
    :ident :argument/id}
-  (div :.container.border
-    (div :.row
-      (dom/h2 text)
-      (big-price-tag cost 1000000000 " $")
-      (dom/button :.close.align-self-baseline
-        {:style {:position "absolute"}} "x"))
-    (dom/p subtext)
+  (div :.container-fluid.border
+    {:style {:position "relative"}}
+    (dom/button :.close
+      {:style {:position "absolute"
+               :top ".5rem"
+               :right ".5rem"}} (IoMdClose))
+    (div :.row.justify-content-between.m-4
+      (dom/h2 :.detail-card__header text)
+      (big-price-tag cost 1000000000 "$"))
+    (dom/p (interpose (dom/br) (clojure.string/split-lines subtext)))
     (arg/ui-argumentation argumentation)))
 
 

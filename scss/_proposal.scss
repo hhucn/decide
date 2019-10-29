@@ -61,34 +61,41 @@
 }
 
 .price-tag-big {
+  $price-tag-border-radius: 20px;
   min-width: 165px;
-  margin: 5px;
+  flex-grow: 1;
+
+  @mixin price-tag-borders($color, $top) {
+    color: $color;
+    text-align: center;
+    padding: .5rem 1rem;
+    border: $color solid 2px;
+  }
 
   :first-child {
+    @include price-tag-borders($primary, true);
+    font-size: $h5-font-size;
     border: {
-      width: 2px;
-      top-left-radius: 20px;
-      top-right-radius: 20px;
-      color: $primary;
+      top-left-radius: $price-tag-border-radius;
+      top-right-radius: $price-tag-border-radius;
     }
-    font-size: 1.75rem;
-    color: $primary;
-    text-align: center;
-
-    @extend .list-group-item;
   }
 
   :last-child {
-    border: {
-      width: 2px;
-      bottom-left-radius: 20px;
-      bottom-right-radius: 20px;
-      color: $secondary;
-    }
-    font-size: 1rem;
-    color: $secondary;
-    text-align: center;
+    @include price-tag-borders($secondary, false);
+    font-size: $font-size-base;
 
-    @extend .list-group-item;
+    border: {
+      bottom-left-radius: $price-tag-border-radius;
+      bottom-right-radius: $price-tag-border-radius;
+    }
+  }
+}
+
+.detail-card {
+  &__header {
+    max-width: 750px;
+    flex-basis: 500px;
+    flex-grow: 2;
   }
 }
