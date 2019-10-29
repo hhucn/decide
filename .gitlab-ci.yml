@@ -1,0 +1,27 @@
+image: clojure:openjdk-11-tools-deps
+
+services:
+  - docker:stable-dind
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
+
+stages:
+  - build
+  - test
+  - build-images
+  - analysis
+  - deploy
+
+cljs-test:
+  image: circleci/clojure:openjdk-11-tools-deps-node-browsers
+  stage: test
+  script:
+    - npm install
+    - npx shadow-cljs compile ci-tests
+    - npx karma start --single-run
+
+clj-test:
+  stage: test
+  script:
+    - clojure -A:dev:clj-tests
