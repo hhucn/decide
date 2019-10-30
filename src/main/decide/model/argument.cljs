@@ -5,9 +5,12 @@
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
             [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
+            [com.fulcrologic.fulcro.algorithms.merge :as mrg]
             [ghostwheel.core :as g :refer [>defn => | ?]]
             [clojure.spec.alpha :as s]
-            [com.fulcrologic.fulcro.dom.events :as evt]))
+            [com.fulcrologic.fulcro.dom.events :as evt]
+            ["react-icons/io" :refer [IoMdAdd]]
+            [com.fulcrologic.fulcro.algorithms.tempid :as tempid]))
 
 (s/def :argument/id int?)
 (s/def :argument/text string?)
@@ -17,6 +20,23 @@
 (s/def ::argument (s/keys :req-un [:argument/id]
                     :opt-un [:argument/text :argument/type
                              :argument/pros :argument/cons]))
+
+(defsc Argument [this {:argument/keys [id text]} {:keys [argumentation-root]}]
+  {:query [:argument/id :argument/text
+           :argument/type ; pro, con, position, ...
+           :argument/subtype ; undercut, undermine, ...
+           {:argument/pros '...}
+           {:argument/cons '...}]
+   :ident :argument/id}
+  (dom/button :.btn.btn-light
+    {:style
+              {:border "1px solid black"
+               :borderRadius "10px"
+               :padding "24px"}
+     :onClick #(comp/transact! argumentation-root `[(navigate-forward {:argument/id ~id})])}
+    text))
+
+(def ui-argument (comp/factory Argument {:keyfn :argument/id}))
 
 (defn select [comp attribute options current-value]
   (dom/select :.form-control
@@ -28,30 +48,40 @@
                :value value}
         label))))
 
-(defmutation add-argument [{:keys [argument subtype]}]
-  (action [env] true))
+(defn argument [id text type subtype]
+  #:argument{:id id
+             :text text
+             :type type
+             :subtype subtype})
 
-(defsc NewArgumentForm [this {:keys [new-argument/id]
-                              :ui/keys [open? new-argument new-subtype pro?]}]
-  {:query [:new-argument/id
+(defmutation add-argument [{:keys [id text type subtype parent-ident]}]
+  (action [{:keys [state]}]
+    (let [new-argument (argument id text type subtype)]
+      (swap! state mrg/merge-component Argument new-argument :append (conj parent-ident (if (= type :pro) :argument/pros :argument/cons))))))
+
+(defsc NewArgumentForm [this {:ui/keys [parent-argument-id open? new-argument new-subtype pro?]}]
+  {:query [:ui/parent-argument-id
            :ui/open?
            :ui/new-argument :ui/new-subtype :ui/pro?
            fs/form-config-join]
-   :ident :new-argument/id
+   :ident (fn [] [:component/id :new-argument-form])
    :form-fields #{:ui/new-argument :ui/new-subtype}
-   :initial-state (fn [{:keys [argument/id pro?] :or {pro? true}}]
-                    {:new-argument/id id
+   :initial-state (fn [{:keys [parent-argument-id pro? open?] :or {pro? true open? false}}]
+                    {:ui/parent-argument-id parent-argument-id
                      :ui/new-argument ""
                      :ui/pro? pro?
-                     :ui/open? false
+                     :ui/open? open?
                      :ui/new-subtype :undermine})}
   (div :.collapse
     {:classes [(when open? "show")]}
     (form :.container.border
-      {:onSubmit #(fn submit [e]
-                    (evt/prevent-default! e)
-                    #_(comp/transact! this [(add-argument {:argument new-argument
-                                                           :subtype :subtype})]))}
+      {:onSubmit (fn submit [e]
+                   (evt/prevent-default! e)
+                   (comp/transact! this [(add-argument {:id        (tempid/tempid)
+                                                        :text      new-argument
+                                                        :type      (if pro? :pro :con)
+                                                        :subtype   new-subtype
+                                                        :parent-ident [:argument/id parent-argument-id]})]))}
       (div :.form-group
         (label "Dein neues Argument "
           (if pro?
@@ -62,13 +92,14 @@
           {:type "text" :value new-argument
            :onChange #(m/set-string! this :ui/new-argument :event %)}))
 
-      (div :.form-group
-        (label "Wieso nennst du dieses Argument?")
-        (select this
-          :ui/new-subtype
-          {:undermine "Undermine"
-           :undercut "Undercut"}
-          (name new-subtype)))
+      (when-not pro?
+        (div :.form-group
+          (label "Wieso nennst du dieses Argument?")
+          (select this
+            :ui/new-subtype
+            {:undermine "Undermine"
+             :undercut "Undercut"}
+            (name new-subtype))))
 
       (button :.btn.btn-primary
         {:type "submit"}
@@ -79,27 +110,9 @@
 (defmutation open-add-new-argument [{:keys [argument/id pro?]}]
   (action [{:keys [state ref]}]
     (js/console.log ref)
-    (swap! state update-in [:new-argument/id id]
-      #(-> %
-         (assoc :ui/pro? pro?)
-         (assoc :ui/open? true)))))
-
-(defsc Argument [this {:argument/keys [id text]} {:keys [argumentation-root]}]
-  {:query [:argument/id :argument/text
-           :argument/type ; pro, con, position, ...
-           :argument/subtype ; undercut, undermine, ...
-           {:argument/pros '...}
-           {:argument/cons '...}]
-   :ident :argument/id}
-  (dom/button :.btn.btn-light
-    {:style
-     {:border "1px solid black"
-      :borderRadius "10px"
-      :padding "24px"}
-     :onClick #(comp/transact! argumentation-root `[(navigate-forward {:argument/id ~id})])}
-    text))
-
-(def ui-argument (comp/factory Argument {:keyfn :argument/id}))
+    (swap! state assoc-in [:component/id :new-argument-form]
+      (assoc (comp/initial-state NewArgumentForm {:parent-argument-id id :pro? pro?})
+        :ui/open? true))))
 
 (defn half-row [& children]
   (div :.col-sm-6
@@ -120,14 +133,14 @@
   (div :.row
     (half-row
       (dom/h6 :.argumentation-header.bg-success "Pro Argumente"
-        (button {:onClick #(comp/transact! this [(open-add-new-argument {:argument/id id
-                                                                         :pro? true})])} "+"))
+        (a {:onClick #(comp/transact! this [(open-add-new-argument {:argument/id id
+                                                                    :pro? true})])} (IoMdAdd)))
       (map #(ui-argument (comp/computed % computed)) pros))
 
     (half-row
       (dom/h6 :.argumentation-header.bg-danger "Con Argumente"
-        (button {:onClick #(comp/transact! this [(open-add-new-argument {:argument/id id
-                                                                         :pro? false})])} "+"))
+        (button :.btn.btn-sm.btn-outline-light {:onClick #(comp/transact! this [(open-add-new-argument {:argument/id id
+                                                                                                        :pro? false})])} (IoMdAdd)))
       (map #(ui-argument (comp/computed % computed)) cons))))
 
 (def ui-procon (comp/factory ProCon {:keyfn :argument/id}))
@@ -173,7 +186,7 @@
    :ident :argument/id
    :initial-state (fn [{:argument/keys [id] :as root-arg}]
                     {:argument/id id
-                     :argumentation/new-argument (comp/initial-state NewArgumentForm {:argument/id id})
+                     :argumentation/new-argument (comp/initial-state NewArgumentForm {:parent-argument-id id})
                      :argumentation/upstream []
                      :argumentation/current-argument (comp/initial-state ProCon (:argumentation/current-argument root-arg))})}
 
