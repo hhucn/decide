@@ -1,9 +1,7 @@
 (ns decide.model.proposal
   (:require [com.fulcrologic.fulcro.dom :as dom :refer [div]]
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-            [com.fulcrologic.fulcro-css.css :as css]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
-            [fulcro.client.mutations :as m]
             [decide.model.argument :as arg]
             ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline IoMdClose]]))
 

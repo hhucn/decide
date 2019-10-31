@@ -8,4 +8,10 @@ cljs-tests:
 clj-tests:
 	clj -A:dev:clj-tests
 
-.PHONY: test cljs-tests clj-tests
+production:
+	@echo "Compiling SCSS";
+	sass scss/main.scss resources/public/css/main.css --no-source-map --style compressed
+	@echo ""; echo "Building JAR..."
+	lein uberjar
+
+.PHONY: test cljs-tests clj-tests production
