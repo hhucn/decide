@@ -56,16 +56,11 @@
              :type type
              :subtype subtype})
 
-
-(defn *add-argument [state {:keys [id text type subtype parent]}]
-  (let [new-argument  (argument id text type subtype)
-        parent-target (conj parent (if (= type :pro) :argument/pros :argument/cons))]
-    (mrg/merge-component state Argument new-argument :append parent-target)))
-
-
-(defmutation add-argument [{:keys [id text type subtype parent-ident] :as params}]
+(defmutation add-argument [{:keys [id text type subtype parent]}]
   (action [{:keys [state]}]
-    (swap! state *add-argument params)))
+    (let [new-argument  (argument id text type subtype)
+          parent-target (conj parent (if (= type :pro) :argument/pros :argument/cons))]
+      (swap! mrg/merge-component Argument new-argument :append parent-target))))
 
 (defsc NewArgumentForm [this {:argumentation/keys [current-argument]
                               :ui/keys            [open? new-argument new-subtype pro?]}]
