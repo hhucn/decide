@@ -23,13 +23,14 @@
                              :argument/pros :argument/cons]))
 
 (defsc Argument [this {:argument/keys [id text]} {:keys [argumentation-root]}]
-  {:query [:argument/id :argument/text
+  {:query [:argument/id
+           :argument/text
            :argument/type ; pro, con, position, ...
            :argument/subtype ; undercut, undermine, ...
            {:argument/pros '...}
            {:argument/cons '...}]
    :ident :argument/id}
-  (dom/button :.btn.btn-light
+  (dom/button :.btn.btn-light.py-3
     {:style
               {:border "1px solid black"
                :borderRadius "10px"
@@ -85,7 +86,7 @@
                      :ui/new-subtype   :undermine})}
   (div :.collapse
     {:classes [(when open? "show")]}
-    (form :.container.border
+    (form :.container.border.p-4.my-3
       {:onSubmit (fn submit [e]
                    (evt/prevent-default! e)
                    (comp/transact! this [(add-argument {:id      (tempid/tempid)
@@ -144,15 +145,13 @@
 (defsc ProCon [this {:argument/keys [pros cons]}
                {:keys [add-argument-fn] :as computed
                 :or   {add-argument-fn #()}}]
-  {:query         (fn []
-                    (into [:argument/id
-                           {:argument/pros (comp/get-query Argument)}
-                           {:argument/cons (comp/get-query Argument)}]
-                      (comp/get-query Argument)))
-   :ident :argument/id
-   :initial-state (fn [argument] (merge {:argument/pros []
-                                         :argument/cons []}
-                                   argument))}
+  {:query         #(into [:argument/id
+                          {:argument/pros (comp/get-query Argument)}
+                          {:argument/cons (comp/get-query Argument)}]
+                     (comp/get-query Argument))
+   :ident         :argument/id
+   :initial-state (fn [{:keys [id] :as argument}]
+                    (merge #:argument{:id id, :pros [], :cons []} argument))}
   (div :.row
     (half-row
       (div :.argumentation-header.bg-success
@@ -210,7 +209,6 @@
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         [:argumentation/id :argument/id]
    :initial-state (fn [{:argument/keys [id] :as root-arg}]
-                    (log/debug root-arg)
                     {:argument/id                    id
                      :argumentation/new-argument     (comp/initial-state NewArgumentForm {:argumentation/id id})
                      :argumentation/upstream         []
