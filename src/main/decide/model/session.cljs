@@ -63,9 +63,9 @@
                                                              (dr/change-route SPA ["main"])
                                                              (-> env
                                                                (uism/assoc-aliased :error "")
-                                                               (uism/load ::current-session :actor/current-session
-                                                                 {::uism/ok-event    :event/complete
-                                                                  ::uism/error-event :event/failed})))}
+                                                               #_(uism/load ::current-session :actor/current-session
+                                                                   {::uism/ok-event    :event/complete
+                                                                    ::uism/error-event :event/failed})))}
                            :event/failed   {::uism/target-state :state/logged-out}
                            :event/complete {::uism/target-states #{:state/logged-in :state/logged-out}
                                             ::uism/handler       #(process-session-result % "")}}}

@@ -16,12 +16,15 @@
 
 (defsc ProposalDetails [this {:keys [argument/text]
                               :proposal/keys [subtext cost argumentation]}]
-  {:query [:argument/id
-           :argument/text
-           :proposal/subtext
-           :proposal/cost
-           {:proposal/argumentation (comp/get-query arg/Argumentation)}]
-   :ident :argument/id}
+  {:query         [:argument/id
+                   :argument/text
+                   :proposal/subtext
+                   :proposal/cost
+                   {:proposal/argumentation (comp/get-query arg/Argumentation)}]
+   :ident         [:proposal :argument/id]
+   :initial-state (fn [arg]
+                    (merge arg
+                      {:proposal/argumentation (comp/initial-state arg/Argumentation arg)}))}
   (div :.container-fluid.border
     {:style {:position "relative"}}
     (dom/button :.close
@@ -34,6 +37,7 @@
     (dom/p (interpose (dom/br) (clojure.string/split-lines subtext)))
     (arg/ui-argumentation argumentation)))
 
+(def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :argument/id}))
 
 (defsc ProposalCard [this {:proposal/keys [subtitle price]
                            :argument/keys [text]}]
