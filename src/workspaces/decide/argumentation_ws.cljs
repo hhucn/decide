@@ -44,7 +44,7 @@
 (ws/defcard NewArgumentForm
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root          arg/NewArgumentForm
-     ::ct.fulcro/initial-state {:argument/id 420
+     ::ct.fulcro/initial-state {:proposal/id 420
                                 :open?       true}}))
 
 (comment

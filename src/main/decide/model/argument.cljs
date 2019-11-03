@@ -60,28 +60,44 @@
   (action [{:keys [state]}]
     (let [new-argument  (argument id text type subtype)
           parent-target (conj parent (if (= type :pro) :argument/pros :argument/cons))]
-      (swap! mrg/merge-component Argument new-argument :append parent-target))))
+      (swap! state mrg/merge-component Argument new-argument
+        :append parent-target))))
 
 (defsc NewArgumentForm [this {:argumentation/keys [current-argument]
                               :ui/keys            [open? new-argument new-subtype pro?]}]
-  {:query         [:proposal/id
-                   :argumentation/current-argument
-                   :ui/open?
-                   :ui/new-argument :ui/new-subtype :ui/pro?
-                   fs/form-config-join]
-   :ident         :proposal/id
-   :form-fields   #{:ui/new-argument :ui/new-subtype :ui/pro?}
-   :initial-state (fn [{:keys [proposal/id pro? open?]
-                        :or   {pro?  true
-                               open? false}}]
-                    {:proposal/id     id
-                     :ui/new-argument ""
-                     :ui/pro?         pro?
-                     :ui/open?        open?
-                     :ui/new-subtype  :undermine})}
-  (div :.collapse
+  {:query              [:proposal/id
+                        :argumentation/current-argument
+                        :ui/open?
+                        :ui/new-argument :ui/new-subtype :ui/pro?
+                        fs/form-config-join]
+   :ident              :proposal/id
+   :form-fields        #{:ui/new-argument :ui/new-subtype :ui/pro?}
+   :componentDidUpdate (fn [this _prev-props _prev-state]
+                         (log/info "Component did update")
+                         (let [{:ui/keys [new-subtype pro?]} (log/spy :info "Props" (comp/props this))]
+                           (if (= new-subtype :support)
+                             (when-not pro?
+                               (m/set-value! this :ui/new-subtype :undermine))
+                             (when pro?
+                               (m/set-value! this :ui/new-subtype :support)))))
+   :initial-state      (fn [{:keys [proposal/id pro? open?]
+                             :or   {pro?  true
+                                    open? false}}]
+                         {:proposal/id     id
+                          :ui/new-argument ""
+                          :ui/pro?         pro?
+                          :ui/open?        open?
+                          :ui/new-subtype  :undermine})}
+  (div :.collapse.container.border.p-4.my-3
     {:classes [(when open? "show")]}
-    (form :.container.border.p-4.my-3
+    (dom/button :.close
+      {:type    "button"
+       :style   {:position "relative"
+                 :top      "-1.2rem"
+                 :right    "-1.2rem"}
+       :onClick #(m/toggle! this :ui/open?)}
+      (IoMdClose))
+    (form
       {:onSubmit (fn submit [e]
                    (evt/prevent-default! e)
                    (comp/transact! this [(add-argument {:id      (tempid/tempid)
@@ -89,12 +105,6 @@
                                                         :type    (if pro? :pro :con)
                                                         :subtype new-subtype
                                                         :parent  current-argument})]))}
-      (dom/button :.close
-        {:style   {:position "relative"
-                   :top      "-20px"
-                   :right    "-18px"}
-         :onClick #(m/toggle! this :ui/open?)}
-        (IoMdClose))
       (div :.form-group
         (label "Dein neues Argument "
           (if pro?
@@ -133,9 +143,6 @@
     {:style {:display "flex"
              :flexDirection "column"}}
     children))
-
-(defn merge-queries [query & clzs]
-  (vec (apply concat query (map comp/get-query clzs))))
 
 (defn ui-add-argument-button [type add-argument-fn]
   (button :.btn
@@ -209,11 +216,11 @@
                    {:argumentation/current-argument (comp/get-query ProCon)}
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         :proposal/id
-   :initial-state (fn [{:argument/keys [id] :as root-arg}]
+   :initial-state (fn [{:argument/keys [id] :as argument}]
                     {:proposal/id                    id
                      :argumentation/new-argument     (comp/initial-state NewArgumentForm {:proposal/id id})
                      :argumentation/upstream         []
-                     :argumentation/current-argument (comp/initial-state ProCon root-arg)})}
+                     :argumentation/current-argument (comp/initial-state ProCon argument)})}
 
   (div
     (dom/ol :.list-group

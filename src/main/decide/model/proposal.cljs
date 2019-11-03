@@ -16,15 +16,15 @@
 
 (defsc ProposalDetails [this {:keys [argument/text]
                               :proposal/keys [subtext cost argumentation]}]
-  {:query         [:argument/id
+  {:query         [:proposal/id
                    :argument/text
                    :proposal/subtext
                    :proposal/cost
                    {:proposal/argumentation (comp/get-query arg/Argumentation)}]
-   :ident         [:proposal :argument/id]
-   :initial-state (fn [arg]
-                    (merge arg
-                      {:proposal/argumentation (comp/initial-state arg/Argumentation arg)}))}
+   :ident         :proposal/id
+   :initial-state (fn [proposal]
+                    (merge proposal
+                      {:proposal/argumentation (comp/initial-state arg/Argumentation (:proposal/argumentation proposal))}))}
   (div :.container-fluid.border
     {:style {:position "relative"}}
     (dom/button :.close
