@@ -67,23 +67,23 @@
   (action [{:keys [state]}]
     (swap! state *add-argument params)))
 
-(defsc NewArgumentForm [this {:argumentation/keys [id current-argument]
+(defsc NewArgumentForm [this {:argumentation/keys [current-argument]
                               :ui/keys            [open? new-argument new-subtype pro?]}]
-  {:query         [:argumentation/id
+  {:query         [:proposal/id
                    :argumentation/current-argument
                    :ui/open?
                    :ui/new-argument :ui/new-subtype :ui/pro?
                    fs/form-config-join]
-   :ident         :argumentation/id
+   :ident         :proposal/id
    :form-fields   #{:ui/new-argument :ui/new-subtype :ui/pro?}
-   :initial-state (fn [{:keys [argumentation/id pro? open?]
+   :initial-state (fn [{:keys [proposal/id pro? open?]
                         :or   {pro?  true
                                open? false}}]
-                    {:argumentation/id id
-                     :ui/new-argument  ""
-                     :ui/pro?          pro?
-                     :ui/open?         open?
-                     :ui/new-subtype   :undermine})}
+                    {:proposal/id     id
+                     :ui/new-argument ""
+                     :ui/pro?         pro?
+                     :ui/open?        open?
+                     :ui/new-subtype  :undermine})}
   (div :.collapse
     {:classes [(when open? "show")]}
     (form :.container.border.p-4.my-3
@@ -203,14 +203,14 @@
 
 
 (defsc Argumentation [this {:argumentation/keys [upstream current-argument new-argument]}]
-  {:query         [:argument/id
+  {:query         [:proposal/id
                    {:argumentation/upstream (comp/get-query UpstreamItem)}
                    {:argumentation/current-argument (comp/get-query ProCon)}
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
-   :ident         [:argumentation/id :argument/id]
+   :ident         :proposal/id
    :initial-state (fn [{:argument/keys [id] :as root-arg}]
-                    {:argument/id                    id
-                     :argumentation/new-argument     (comp/initial-state NewArgumentForm {:argumentation/id id})
+                    {:proposal/id                    id
+                     :argumentation/new-argument     (comp/initial-state NewArgumentForm {:proposal/id id})
                      :argumentation/upstream         []
                      :argumentation/current-argument (comp/initial-state ProCon root-arg)})}
 
