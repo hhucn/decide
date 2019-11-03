@@ -9,7 +9,7 @@
             [ghostwheel.core :as g :refer [>defn => | ?]]
             [clojure.spec.alpha :as s]
             [com.fulcrologic.fulcro.dom.events :as evt]
-            ["react-icons/io" :refer [IoMdAdd]]
+            ["react-icons/io" :refer [IoMdAdd IoMdClose]]
             [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
             [taoensso.timbre :as log]))
 
@@ -94,6 +94,12 @@
                                                         :type    (if pro? :pro :con)
                                                         :subtype new-subtype
                                                         :parent  current-argument})]))}
+      (dom/button :.close
+        {:style   {:position "relative"
+                   :top      "-20px"
+                   :right    "-18px"}
+         :onClick #(m/toggle! this :ui/open?)}
+        (IoMdClose))
       (div :.form-group
         (label "Dein neues Argument "
           (if pro?
