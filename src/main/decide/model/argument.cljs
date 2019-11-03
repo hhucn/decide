@@ -30,7 +30,7 @@
            {:argument/pros '...}
            {:argument/cons '...}]
    :ident :argument/id}
-  (dom/button :.btn.btn-light.py-3
+  (dom/button :.btn.btn-light.my-1
     {:style
               {:border "1px solid black"
                :borderRadius "10px"
@@ -192,7 +192,7 @@
 (defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [jmp-fn index]}]
   {:query [:argument/id :argument/text :argument/type]
    :ident :argument/id}
-  (dom/button :.argumentation-upstream-item
+  (dom/button :.argumentation-upstream-item.my-1
     {:key index
      :data-type type
      :onClick jmp-fn}
