@@ -138,18 +138,30 @@
 
 (def ui-login (comp/factory Login))
 
-(defsc Main [this {:keys [proposals]}]
-  {:query         [:main/welcome-message {:proposals (prim/get-query proposal/ProposalCard)}]
-   :initial-state (fn [_] {:main/welcome-message "Hi!"
-                           :proposals (for [i (range 10)] (prim/get-initial-state proposal/ProposalCard (inc i)))})
-   :ident         (fn [] [:component/id :main])
-   :route-segment ["main"]
-   :will-enter    #(dr/route-immediate [:component/id :main])}
+(declare Root)
+(defsc ProposalsMain [this {:keys [proposals]}]
+  {:query         [{:proposals (prim/get-query proposal/ProposalCard)}]
+   :initial-state (fn [_] {:proposals (for [i (range 15)] (prim/get-initial-state proposal/ProposalCard (inc i)))})
+   :ident         (fn [] [:component/id :proposals])
+   :route-segment ["proposals"]
+   :will-enter    #(dr/route-immediate [:component/id :proposals])}
   (div :.container
     (div :.card-deck.d-flex.justify-content-center
       (for [proposal proposals]
-        (dom/div :.col-md-6.col-lg-4
+        (dom/div :.col-md-6
           (proposal/ui-proposal-card proposal))))))
+
+(defsc Main [this {:keys [proposal]}]
+  {:query         [{:proposal (prim/get-query proposal/ProposalDetails)}]
+   :ident         (fn [] [:component/id :main])
+   :initial-state (fn [_] {:proposal (comp/initial-state proposal/ProposalDetails
+                                       {:argument/id   1
+                                        :argument/text "Sollten wir einen Wasserspender kaufen?"
+                                        :proposal/cost 5000})})
+   :route-segment ["main"]
+   :will-enter    #(dr/route-immediate [:component/id :main])}
+  (div :.container
+    (proposal/ui-proposal-detail proposal)))
 
 (defsc Settings1 [this props]
   {:query         []
@@ -189,7 +201,7 @@
 
 
 (dr/defrouter TopRouter [this {:keys [current-state pending-path-segment route-factory route-props]}]
-  {:router-targets [Main Signup SignupSuccess Settings]}
+  {:router-targets [Main ProposalsMain Signup SignupSuccess Settings]}
   (case current-state
     :pending (dom/div "Loading a user..."
                (dom/button {:onClick #(dr/change-route this ["settings" "pane2"])} "cancel"))
@@ -273,7 +285,6 @@
 
 (defsc Root [this {:root/keys [top-chrome]}]
   {:query             [{:root/top-chrome (comp/get-query TopChrome)}]
-   :ident             (fn [] [:component/id :ROOT])
    :initial-state     {:root/top-chrome {}}}
   (ui-top-chrome top-chrome))
 

@@ -32,7 +32,6 @@
 
 (defn handle-url-change [e]
   ;; log the event object to console for inspection
-  (js/console.log e)
   ;; and let's see the token
   (js/console.log (str "Navigating: " (get-token) " Nav: "(.-isNavigation e)))
   ;; we are checking if this event is due to user action,

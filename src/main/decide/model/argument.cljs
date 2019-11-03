@@ -110,7 +110,7 @@
             :ui/new-subtype
             {:undermine "Undermine"
              :undercut "Undercut"}
-            (name (or (log/spy :info "New Subtype" new-subtype) "")))))
+            (name (or new-subtype "")))))
 
       (button :.btn.btn-primary
         {:type "submit"}
@@ -210,10 +210,11 @@
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         [:argumentation/id :argument/id]
    :initial-state (fn [{:argument/keys [id] :as root-arg}]
+                    (log/debug root-arg)
                     {:argument/id                    id
                      :argumentation/new-argument     (comp/initial-state NewArgumentForm {:argumentation/id id})
                      :argumentation/upstream         []
-                     :argumentation/current-argument (comp/initial-state ProCon (:argumentation/current-argument root-arg))})}
+                     :argumentation/current-argument (comp/initial-state ProCon root-arg)})}
 
   (div
     (dom/ol :.list-group
