@@ -155,9 +155,10 @@
   {:query         [{:proposal (prim/get-query proposal/ProposalDetails)}]
    :ident         (fn [] [:component/id :main])
    :initial-state (fn [_] {:proposal (comp/initial-state proposal/ProposalDetails
-                                       {:argument/id   1
-                                        :argument/text "Sollten wir einen Wasserspender kaufen?"
-                                        :proposal/cost 5000})})
+                                       #:proposal{:id            1
+                                                  :argument/text "Sollten wir einen Wasserspender kaufen?"
+                                                  :subtext       "Hier steht eine genaue Beschreibung des Vorschlags. Mit seinen Einschränkungen und Bedingungen. \n\nVielleicht auch Anmerkungen von der Moderation. \nVielleicht zusammen, vielleicht alleine stehend.\n\nLorem ipsum dolor sit amet und soweiter und mehr Text, denn man gar nicht lesen braucht, weil er nur den Platz füllen soll. Jetzt solltest du aufhören zu lesen!"
+                                                  :cost          5000})})
    :route-segment ["main"]
    :will-enter    #(dr/route-immediate [:component/id :main])}
   (div :.container
@@ -246,39 +247,39 @@
                    :root/current-session {}}}
   (let [current-tab (some-> (dr/current-route this this) first keyword)]
     (div
-      (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light
-        (dom/div :.container
-          (dom/a :.navbar-brand.d-flex.align-items-center
-            {:href "/"}
-            (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
-            "decide")
-          (dom/button
-            {:type          "button",
-             :data-toggle   "collapse",
-             :data-target   "#navbarSupportedContent",
-             :aria-controls "navbarSupportedContent",
-             :aria-expanded "false",
-             :aria-label    "Toggle navigation",
-             :className     "navbar-toggler"}
-            (dom/span {:className "navbar-toggler-icon"}))
-          (dom/div :#navbarSupportedContent.collapse.navbar-collapse.mr-auto
-            (dom/ul :.navbar-nav
-              (dom/li :.nav-item
-                (dom/a :.nav-link {:classes [(when (= :main current-tab) "active")]
-                                   :href "/main"
-                                   :onClick (fn [e]
-                                              (.preventDefault e)
-                                              (dr/change-route this ["main"]))} "Main"))
-              (dom/li :.nav-item
-                (dom/a :.nav-link {:classes [(when (= :settings current-tab) "active")]
-                                   :href "/settings"
-                                   :onClick (fn [e]
-                                              (.preventDefault e)
-                                              (dr/change-route this ["settings"]))} "Settings")))
-            (dom/hr)
-            (div :.right.menu
-              (ui-login login)))))
-      (div
+      #_(dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light
+          (dom/div :.container
+            (dom/a :.navbar-brand.d-flex.align-items-center
+              {:href "/"}
+              (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
+              "decide")
+            (dom/button
+              {:type          "button",
+               :data-toggle   "collapse",
+               :data-target   "#navbarSupportedContent",
+               :aria-controls "navbarSupportedContent",
+               :aria-expanded "false",
+               :aria-label    "Toggle navigation",
+               :className     "navbar-toggler"}
+              (dom/span {:className "navbar-toggler-icon"}))
+            (dom/div :#navbarSupportedContent.collapse.navbar-collapse.mr-auto
+              (dom/ul :.navbar-nav
+                (dom/li :.nav-item
+                  (dom/a :.nav-link {:classes [(when (= :main current-tab) "active")]
+                                     :href    "/main"
+                                     :onClick (fn [e]
+                                                (.preventDefault e)
+                                                (dr/change-route this ["main"]))} "Main"))
+                (dom/li :.nav-item
+                  (dom/a :.nav-link {:classes [(when (= :settings current-tab) "active")]
+                                     :href    "/settings"
+                                     :onClick (fn [e]
+                                                (.preventDefault e)
+                                                (dr/change-route this ["settings"]))} "Settings")))
+              (dom/hr)
+              (div :.right.menu
+                (ui-login login)))))
+      (div :.py-5
         (ui-top-router router)))))
 
 (def ui-top-chrome (comp/factory TopChrome))

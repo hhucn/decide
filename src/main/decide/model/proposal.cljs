@@ -24,7 +24,7 @@
    :ident         :proposal/id
    :initial-state (fn [proposal]
                     (merge proposal
-                      {:proposal/argumentation (comp/initial-state arg/Argumentation (:proposal/argumentation proposal))}))}
+                      {:proposal/argumentation (comp/initial-state arg/Argumentation proposal)}))}
   (div :.container-fluid.border
     {:style {:position "relative"}}
     (dom/button :.close

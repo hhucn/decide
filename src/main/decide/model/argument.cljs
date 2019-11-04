@@ -208,7 +208,13 @@
 
 (def ui-upstream-item (comp/factory UpstreamItem {:keyfn :argument/id}))
 
-
+(>defn ns?
+  ([ns]
+   [string? => fn?]
+   (fn [map-entry] (ns? ns map-entry)))
+  ([ns map-entry]
+   [string? map-entry? => boolean?]
+   (= ns (namespace (first map-entry)))))
 
 (defsc Argumentation [this {:argumentation/keys [upstream current-argument new-argument]}]
   {:query         [:proposal/id
@@ -216,11 +222,12 @@
                    {:argumentation/current-argument (comp/get-query ProCon)}
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         :proposal/id
-   :initial-state (fn [{:argument/keys [id] :as argument}]
-                    {:proposal/id                    id
-                     :argumentation/new-argument     (comp/initial-state NewArgumentForm {:proposal/id id})
-                     :argumentation/upstream         []
-                     :argumentation/current-argument (comp/initial-state ProCon argument)})}
+   :initial-state (fn [{:proposal/keys [id] :as params}]
+                    (let [argument (log/spy :info (into {:argument/id id} (filter (ns? "argument")) params))]
+                      {:proposal/id                    id
+                       :argumentation/new-argument     (comp/initial-state NewArgumentForm {:proposal/id id})
+                       :argumentation/upstream         []
+                       :argumentation/current-argument (comp/initial-state ProCon argument)}))}
 
   (div
     (dom/ol :.list-group
