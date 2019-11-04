@@ -6,7 +6,7 @@
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
             [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
             [com.fulcrologic.fulcro.algorithms.merge :as mrg]
-            [ghostwheel.core :as g :refer [>defn => | ?]]
+            [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
             [clojure.spec.alpha :as s]
             [com.fulcrologic.fulcro.dom.events :as evt]
             ["react-icons/io" :refer [IoMdAdd IoMdClose]]

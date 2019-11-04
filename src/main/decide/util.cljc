@@ -1,6 +1,6 @@
 (ns decide.util
   #?(:cljs (:refer-clojure :exclude [uuid]))
-  (:require [ghostwheel.core :refer [>defn]]
+  (:require [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
             [clojure.spec.alpha :as s]))
 
 (>defn uuid
