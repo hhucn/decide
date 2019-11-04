@@ -2,7 +2,8 @@
   (:require [com.fulcrologic.fulcro.networking.http-remote :as net]
             [com.fulcrologic.fulcro.application :as app]
             [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
-            [goog.events :as events])
+            [goog.events :as events]
+            [taoensso.timbre :as log])
   (:import [goog.history Html5History EventType]))
 
 (def secured-request-middleware
@@ -33,13 +34,13 @@
 (defn handle-url-change [e]
   ;; log the event object to console for inspection
   ;; and let's see the token
-  (js/console.log (str "Navigating: " (get-token) " Nav: "(.-isNavigation e)))
+  (log/debug (str "Navigating: " (get-token) " Nav: " (.-isNavigation e)))
   ;; we are checking if this event is due to user action,
   ;; such as click a link, a back button, etc.
   ;; as opposed to programmatically setting the URL with the API
   (when-not (.-isNavigation e)
     ;; in this case, we're setting it
-    (js/console.log "Token set programmatically")
+    (log/debug "Token set programmatically")
     ;; let's scroll to the top to simulate a navigation
     (js/window.scrollTo 0 0)))
 
@@ -55,8 +56,8 @@
   (fn [e]
     (.preventDefault e)
     (let [new-path (get-token)]
-      (js/console.log "onpopstate!" e)
-      (js/console.log :new-path new-path)
+      (log/debug "onpopstate!" e)
+      (log/debug :new-path new-path)
       (.setToken history new-path)
       (dr/change-route SPA (rest (clojure.string/split new-path "/"))))))
 

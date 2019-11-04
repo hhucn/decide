@@ -230,21 +230,21 @@
 
 (defsc TopChrome [this {:root/keys [router current-session login]
                         ::dr/keys [id]}]
-  {:query         [{:root/router (comp/get-query TopRouter)}
-                   {:root/current-session (comp/get-query Session)}
-                   [::uism/asm-id ::TopRouter]
-                   [::dr/id '_]
-                   {:root/login (comp/get-query Login)}]
+  {:query              [{:root/router (comp/get-query TopRouter)}
+                        {:root/current-session (comp/get-query Session)}
+                        [::uism/asm-id ::TopRouter]
+                        [::dr/id '_]
+                        {:root/login (comp/get-query Login)}]
    :componentDidUpdate (fn [this _ _]
                          (let [new-token (apply str "/" (interpose "/" (dr/current-route this this)))]
-                           (js/console.log "re-render" new-token)
+                           (log/debug "re-render" new-token)
                            (if (= new-token (.getToken history))
                              (.replaceToken history new-token)
                              (.setToken history new-token))))
-   :ident         (fn [] [:component/id :top-chrome])
-   :initial-state {:root/router          {}
-                   :root/login           {}
-                   :root/current-session {}}}
+   :ident              (fn [] [:component/id :top-chrome])
+   :initial-state      {:root/router          {}
+                        :root/login           {}
+                        :root/current-session {}}}
   (let [current-tab (some-> (dr/current-route this this) first keyword)]
     (div
       #_(dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light

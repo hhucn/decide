@@ -73,8 +73,7 @@
    :ident              :proposal/id
    :form-fields        #{:ui/new-argument :ui/new-subtype :ui/pro?}
    :componentDidUpdate (fn [this _prev-props _prev-state]
-                         (log/info "Component did update")
-                         (let [{:ui/keys [new-subtype pro?]} (log/spy :info "Props" (comp/props this))]
+                         (let [{:ui/keys [new-subtype pro?]} (comp/props this)]
                            (if (= new-subtype :support)
                              (when-not pro?
                                (m/set-value! this :ui/new-subtype :undermine))
@@ -223,7 +222,7 @@
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         :proposal/id
    :initial-state (fn [{:proposal/keys [id] :as params}]
-                    (let [argument (log/spy :info (into {:argument/id id} (filter (ns? "argument")) params))]
+                    (let [argument (into {:argument/id id} (filter (ns? "argument")) params)]
                       {:proposal/id                    id
                        :argumentation/new-argument     (comp/initial-state NewArgumentForm {:proposal/id id})
                        :argumentation/upstream         []
