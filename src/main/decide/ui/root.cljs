@@ -14,7 +14,10 @@
     [com.fulcrologic.fulcro.algorithms.form-state :as fs]
     [decide.application :refer [history]]
     [decide.model.proposal :as proposal]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [com.fulcrologic.fulcro.data-fetch :as df]
+    [decide.model.argument :as argument]
+    [decide.model.proposal :as proposal]))
 
 (defn field [{:keys [label valid? error-message] :as props}]
   (let [input-props (-> props (assoc :name label) (dissoc :label :valid? :error-message))]
@@ -154,13 +157,8 @@
 (defsc Main [this {:keys [proposal]}]
   {:query         [{:proposal (prim/get-query proposal/ProposalDetails)}]
    :ident         (fn [] [:component/id :main])
-   :initial-state (fn [_] {:proposal (comp/initial-state proposal/ProposalDetails
-                                       #:proposal{:id            1
-                                                  :argument/text "Sollten wir einen Wasserspender kaufen?"
-                                                  :subtext       "Hier steht eine genaue Beschreibung des Vorschlags. Mit seinen Einschränkungen und Bedingungen. \n\nVielleicht auch Anmerkungen von der Moderation. \nVielleicht zusammen, vielleicht alleine stehend.\n\nLorem ipsum dolor sit amet und soweiter und mehr Text, denn man gar nicht lesen braucht, weil er nur den Platz füllen soll. Jetzt solltest du aufhören zu lesen!"
-                                                  :cost          5000})})
    :route-segment ["main"]
-   :will-enter    #(dr/route-immediate [:component/id :main])}
+   :will-enter    (fn [_] (dr/route-immediate [:component/id :main]))}
   (div :.container
     (proposal/ui-proposal-detail proposal)))
 
@@ -202,7 +200,7 @@
 
 
 (dr/defrouter TopRouter [this {:keys [current-state pending-path-segment route-factory route-props]}]
-  {:router-targets [Main ProposalsMain Signup SignupSuccess Settings]}
+  {:router-targets [Main ProposalsMain Signup SignupSuccess Settings proposal/ProposalDetails]}
   (case current-state
     :pending (dom/div "Loading a user..."
                (dom/button {:onClick #(dr/change-route this ["settings" "pane2"])} "cancel"))

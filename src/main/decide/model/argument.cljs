@@ -11,7 +11,8 @@
             [com.fulcrologic.fulcro.dom.events :as evt]
             ["react-icons/io" :refer [IoMdAdd IoMdClose]]
             [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [com.fulcrologic.fulcro.data-fetch :as df]))
 
 (s/def :argument/id int?)
 (s/def :argument/text string?)
@@ -61,16 +62,18 @@
     (let [new-argument  (argument id text type subtype)
           parent-target (conj parent (if (= type :pro) :argument/pros :argument/cons))]
       (swap! state mrg/merge-component Argument new-argument
-        :append parent-target))))
+        :append parent-target)))
+  (remote [_] true))
 
 (defsc NewArgumentForm [this {:argumentation/keys [current-argument]
-                              :ui/keys            [open? new-argument new-subtype pro?]}]
+                              :ui/keys            [open? new-argument new-subtype pro?]
+                              :or                 {new-argument ""}}]
   {:query              [:proposal/id
                         :argumentation/current-argument
                         :ui/open?
                         :ui/new-argument :ui/new-subtype :ui/pro?
                         fs/form-config-join]
-   :ident              :proposal/id
+   :ident              [:argumentation/id :proposal/id]
    :form-fields        #{:ui/new-argument :ui/new-subtype :ui/pro?}
    :componentDidUpdate (fn [this _prev-props _prev-state]
                          (let [{:ui/keys [new-subtype pro?]} (comp/props this)]
@@ -138,7 +141,7 @@
 
 
 (defn half-row [& children]
-  (div :.col-sm-6
+  (div :.col-6
     {:style {:display "flex"
              :flexDirection "column"}}
     children))
@@ -215,19 +218,19 @@
    [string? map-entry? => boolean?]
    (= ns (namespace (first map-entry)))))
 
-(defsc Argumentation [this {:argumentation/keys [upstream current-argument new-argument]}]
+(defsc Argumentation [this {:keys               [proposal/id]
+                            :argumentation/keys [upstream current-argument new-argument]}]
   {:query         [:proposal/id
                    {:argumentation/upstream (comp/get-query UpstreamItem)}
                    {:argumentation/current-argument (comp/get-query ProCon)}
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
-   :ident         :proposal/id
+   :ident         [:argumentation/id :proposal/id]
    :initial-state (fn [{:proposal/keys [id] :as params}]
                     (let [argument (into {:argument/id id} (filter (ns? "argument")) params)]
                       {:proposal/id                    id
                        :argumentation/new-argument     (comp/initial-state NewArgumentForm {:proposal/id id})
                        :argumentation/upstream         []
                        :argumentation/current-argument (comp/initial-state ProCon argument)}))}
-
   (div
     (dom/ol :.list-group
       (map-indexed
@@ -236,10 +239,10 @@
             (comp/computed props
               {:jmp-fn #(comp/transact! this [(jump-backwards {:position i})])})))
         (concat upstream [current-argument])))
-    (ui-new-argument new-argument)
+    (ui-new-argument (merge {:proposal/id id} new-argument))
     (ui-procon
       (comp/computed current-argument
         {:argumentation-root this
          :add-argument-fn    (fn add-argument [pro?] (comp/transact! this [(open-add-new-argument {:pro? pro?})]))}))))
 
-(def ui-argumentation (comp/factory Argumentation {:keyfn :argument/id}))
+(def ui-argumentation (comp/factory Argumentation {:keyfn :proposal/id}))

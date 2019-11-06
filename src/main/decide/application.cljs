@@ -3,7 +3,8 @@
             [com.fulcrologic.fulcro.application :as app]
             [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
             [goog.events :as events]
-            [taoensso.timbre :as log])
+            [taoensso.timbre :as log]
+            [clojure.string :refer [split]])
   (:import [goog.history Html5History EventType]))
 
 (def secured-request-middleware
@@ -59,7 +60,7 @@
       (log/debug "onpopstate!" e)
       (log/debug :new-path new-path)
       (.setToken history new-path)
-      (dr/change-route SPA (rest (clojure.string/split new-path "/"))))))
+      (dr/change-route SPA (rest (split new-path "/"))))))
 
 
 (comment

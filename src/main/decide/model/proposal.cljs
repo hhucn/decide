@@ -2,6 +2,7 @@
   (:require [com.fulcrologic.fulcro.dom :as dom :refer [div]]
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
+            [com.fulcrologic.fulcro.algorithms.merge :as mrg]
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
             [clojure.string :refer [split-lines]]
             [decide.model.argument :as arg]
@@ -22,20 +23,19 @@
      (div (str price " " unit))
      (div "von " budget " " unit))))
 
-(defn setup-initial-state [state ident]
-  (-> state
-    (update-in ident assoc-in [:ui/argumentation :argumentation/upstream] [])
-    (update-in ident assoc-in [:ui/argumentation :argumentation/new-argument] ident)))
 
-(defmutation initial-load-proposal [{:keys [id]}]
-  (action [{:keys [app]}]
+(defmutation initial-load [{:keys [id]}]
+  (action [{:keys [state app]}]
+    (swap! state mrg/merge-component arg/Argumentation
+      (comp/initial-state arg/Argumentation {:proposal/id id})
+      :replace [:proposal/id id :ui/argumentation])
+
     (df/load! app [:proposal/id id] ProposalDetails
-      {:post-action
-       (fn [{:keys [state]}]
-         (swap! state setup-initial-state [:proposal/id id])
-         (df/load! app [:argument/id id] argument/ProCon
-           {:target      [:proposal/id id :ui/argumentation :argumentation/current-argument]
-            :post-action #(dr/target-ready! app [:proposal/id id])}))})))
+      {:post-mutation        `dr/target-ready
+       :post-mutation-params {:target [:proposal/id id]}})
+    (df/load! app [:argument/id id] argument/ProCon
+      {:target [:argumentation/id id :argumentation/current-argument]})))
+
 
 (defsc ProposalDetails [this {:keys          [argument/text ui/argumentation]
                               :proposal/keys [subtext cost]}]
@@ -46,12 +46,13 @@
                    {:ui/argumentation (comp/get-query arg/Argumentation)}]
    :ident         :proposal/id
    ;:initial-state (fn [proposal]
-   ;                {:ui/argumentation (comp/initial-state arg/Argumentation {})}
+   ;                 {:ui/argumentation (comp/initial-state arg/Argumentation {})}
    :route-segment ["proposal" :proposal/id]
    :will-enter    (fn [app {id :proposal/id}]
                     (let [id (uuid id)]
                       (dr/route-deferred [:proposal/id id]
-                        #(comp/transact! app [(initial-load-proposal {:id id})]))))}
+                        #(comp/transact! app [(initial-load {:id id})]))))}
+
   (div :.container.border
     {:style {:position "relative"}}
     (dom/button :.close
@@ -62,7 +63,7 @@
       (dom/h2 :.detail-card__header text)
       (big-price-tag cost 1000000000 "$"))
     (dom/p (interpose (dom/br) (split-lines subtext)))
-    (arg/ui-argumentation argumentation)))
+    (arg/ui-argumentation (comp/computed argumentation {:argumentation-root this}))))
 
 (def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :argument/id}))
 
