@@ -83,9 +83,12 @@
       (-> (resp/response (wslive anti-forgery-token))
         (resp/content-type "text/html"))
 
-      :else
+      (not= "/api" uri)
       (-> (resp/response (index anti-forgery-token))
-        (resp/content-type "text/html")))))
+        (resp/content-type "text/html"))
+
+      :else
+      (ring-handler req))))
 
 (defstate middleware
   :start

@@ -8,6 +8,8 @@
     [clojure.core.async :as async]
     [decide.model.account :as acct]
     [decide.model.session :as session]
+    [decide.model.argument :as arg]
+    [decide.model.proposal :as proposal]
     [decide.server-components.config :refer [config]]
     [decide.model.mock-database :as db]))
 
@@ -19,7 +21,8 @@
      (update ::pc/index-resolvers #(into [] (map (fn [[k v]] [k (dissoc v ::pc/resolve)])) %))
      (update ::pc/index-mutations #(into [] (map (fn [[k v]] [k (dissoc v ::pc/mutate)])) %)))})
 
-(def all-resolvers [acct/resolvers session/resolvers index-explorer])
+(def all-resolvers [acct/resolvers session/resolvers index-explorer arg/resolvers proposal/resolvers
+                    (pc/alias-resolver :proposal/id :argument/id)])
 
 (defn preprocess-parser-plugin
   "Helper to create a plugin that can view/modify the env/tx of a top-level request.
