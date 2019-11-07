@@ -9,7 +9,7 @@
             [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
             [clojure.spec.alpha :as s]
             [com.fulcrologic.fulcro.dom.events :as evt]
-            ["react-icons/io" :refer [IoMdAdd IoMdClose]]
+            ["react-icons/io" :refer [IoMdAdd IoMdClose IoMdFunnel]]
             [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
             [taoensso.timbre :as log]
             [com.fulcrologic.fulcro.data-fetch :as df]))
@@ -23,7 +23,7 @@
                     :opt-un [:argument/text :argument/type
                              :argument/pros :argument/cons]))
 
-(defsc Argument [this {:argument/keys [id text]} {:keys [argumentation-root]}]
+(defsc Argument [_ {:argument/keys [id text pros cons]} {:keys [argumentation-root]}]
   {:query [:argument/id
            :argument/text
            :argument/type ; pro, con, position, ...
@@ -33,11 +33,23 @@
    :ident :argument/id}
   (dom/button :.btn.btn-light.my-1
     {:style
-              {:border "1px solid black"
+              {:position     "relative"
+               :border       "1px solid black"
                :borderRadius "10px"
-               :padding "24px"}
+               :padding      "24px"
+               :textAlign    "left"}
      :onClick #(comp/transact! argumentation-root `[(navigate-forward {:argument/id ~id})])}
-    text))
+    text
+    (div :.ml-auto.small
+      {:style {:display  "inline-block"
+               :position "absolute"
+               :bottom   "0px"
+               :right    "0px"
+               :padding  "5px 10px"
+               :width    "auto"}}
+      (span :.text-success.pr-2 (IoMdFunnel) (str (count pros)))
+      (span :.text-danger (IoMdFunnel) (str (count cons))))))
+
 
 (def ui-argument (comp/factory Argument {:keyfn :argument/id}))
 

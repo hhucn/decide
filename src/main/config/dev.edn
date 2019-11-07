@@ -1,4 +1,3 @@
 {:taoensso.timbre/logging-config {:level :debug}
- :db                             {:db/uri      "datahike:file:///tmp/example"
-                                  :db/example? true
-                                  :db/reset?   false}}
+ :db                             {:db/example? true
+                                  :db/reset?   true}}

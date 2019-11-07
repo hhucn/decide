@@ -1,7 +1,7 @@
 (ns decide.model.argument-test
   (:require
     [decide.model.argument :as argument]
-    [nubank.workspaces.core :refer [deftest]]
+    [clojure.test :refer [deftest]]
     [fulcro-spec.core :refer [specification provided behavior assertions]]))
 
 (def =>)
@@ -11,7 +11,7 @@
                   :current-argument current})
 
 
-(deftest navigation-argumentation-stack
+(specification "navigation-argumentation-stack"
   (let [empty-upstream (argumentation [:argument/id 1] [])]
     (behavior "should work for jumping backwards"
       (assertions
