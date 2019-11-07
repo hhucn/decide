@@ -6,12 +6,15 @@
     [com.wsscode.pathom.core :as p]
     [com.wsscode.common.async-clj :refer [let-chan]]
     [clojure.core.async :as async]
+    [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [decide.model.account :as acct]
     [decide.model.session :as session]
     [decide.model.argument :as arg]
     [decide.model.proposal :as proposal]
     [decide.server-components.config :refer [config]]
-    [decide.model.mock-database :as db]))
+    [decide.model.database :as db]
+    [datahike.api :as d]
+    [datahike.core :as dcore]))
 
 (pc/defresolver index-explorer [env _]
   {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
@@ -43,7 +46,8 @@
   (log/debug "Pathom transaction:" (pr-str tx))
   req)
 
-(defn build-parser [db-connection]
+(>defn build-parser [db-connection]
+  [dcore/conn? => any?]
   (let [real-parser (p/parallel-parser
                       {::p/mutate  pc/mutate-async
                        ::p/env     {::p/reader               [p/map-reader pc/parallel-reader
@@ -54,7 +58,7 @@
                                                          ;; Here is where you can dynamically add things to the resolver/mutation
                                                          ;; environment, like the server config, database connections, etc.
                                                          (assoc env
-                                                           :db @db-connection ; real datomic would use (d/db db-connection)
+                                                           :db (d/db db-connection) ; real datomic would use (d/db db-connection)
                                                            :connection db-connection
                                                            :config config)))
                                     (preprocess-parser-plugin log-requests)

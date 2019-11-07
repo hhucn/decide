@@ -1,6 +1,6 @@
 (ns decide.model.proposal
   (:require
-    [datahike.core :as d]
+    [datahike.api :as d]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]

@@ -1,6 +1,6 @@
 (ns decide.model.account
   (:require
-    [decide.model.mock-database :as db]
+    [decide.model.database :as db]
     [datascript.core :as d]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]

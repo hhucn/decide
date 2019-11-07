@@ -1,27 +1,25 @@
 (ns decide.model.argument
   (:require
-    [decide.model.mock-database :as db]
-    [datahike.core :as d]
+    [datahike.api :as d]
+    [datahike.core :refer [squuid]]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
-    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
-    [clojure.spec.alpha :as s]
-    [com.fulcrologic.fulcro.algorithms.tempid :as tempid])
+    [clojure.spec.alpha :as s])
   (:import (java.util UUID)))
 
 (defn pro? [t] (= t :pro))
-(defn str->uuid [s] (UUID/fromString s))
+(>defn str->uuid [s] [string? => uuid?] (UUID/fromString s))
 (>defn str-id->uuid-id
   "Updates :argument/id in map to uuid"
   [m]
-  [(s/keys :req [:argument/id]) => uuid?]
+  [(comp string? :argument/id) => (comp uuid? :argument/id)]
   (update m :argument/id str->uuid))
 
 (defmutation add-argument [{:keys [connection]} {:keys [id text type subtype parent]}]
   {::pc/output [:argument/id]}
-  (let [real-id (UUID/randomUUID)]
-    (log/info "New UUID " (str real-id))
+  (let [real-id (squuid)]
+    (log/debug "New UUID " (str real-id))
     (d/transact! connection [{:db/id            "new-argument"
                               :argument/id      (str real-id)
                               :argument/text    text
