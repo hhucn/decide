@@ -6,7 +6,7 @@
     [clojure.test :refer [deftest is]]
     [fulcro-spec.core :refer [specification provided behavior assertions component provided!]]
     [decide.model.mock-database :as db]
-    [datascript.core :as d]
+    [datahike.api :as d]
     [taoensso.timbre :as log]))
 
 (defn seeded-setup []

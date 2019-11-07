@@ -66,6 +66,12 @@
                                 :argument/cons []}])
   conn)
 
+(defn new-database []
+  (d/create-database default-uri
+    :initial-tx schema
+    :schema-on-read true)
+  (d/connect default-uri))
+
 (defstate conn
   :start
   (let [{{:db/keys [uri example? reset?]
@@ -90,5 +96,3 @@
         (initialize-example! conn))
 
       conn)))
-
-@conn

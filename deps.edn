@@ -15,7 +15,6 @@
            org.clojure/core.async            {:mvn/version "0.4.500"}
 
            ;; To simulate Datomic on the back-end
-           datascript                        {:mvn/version "0.18.7"}
            io.replikativ/datahike            {:mvn/version "0.2.0"}
 
            ring/ring-core                    {:mvn/version "1.7.1"}

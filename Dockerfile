@@ -9,12 +9,13 @@ RUN curl -O https://download.clojure.org/install/linux-install-1.10.1.478.sh &&\
     chmod +x linux-install-1.10.1.478.sh &&\
     ./linux-install-1.10.1.478.sh
 
-COPY package.json scss/
-RUN npm install &&\
-    sass scss/main.scss resources/public/css/main.css --no-source-map --style compressed
+COPY package.json package.json
+RUN npm install
+
 
 COPY . .
-RUN lein uberjar
+RUN sass scss/main.scss resources/public/css/main.css --no-source-map --style compressed &&\
+    lein uberjar
 
 FROM openjdk:11-jre-slim
 COPY src/main/config/prod.edn /config/production.edn

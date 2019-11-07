@@ -15,6 +15,7 @@
 
 (def ^:private not-found-handler
   (fn [req]
+    (log/info "URI not found:" (:uri req))
     {:status  404
      :headers {"Content-Type" "text/plain"}
      :body    "NOPE"}))
