@@ -9,9 +9,8 @@ RUN curl -O https://download.clojure.org/install/linux-install-1.10.1.478.sh &&\
     chmod +x linux-install-1.10.1.478.sh &&\
     ./linux-install-1.10.1.478.sh
 
-COPY package.json package.json
-RUN npm install
-
+COPY package.json project.clj deps.edn ./
+RUN npm install && lein deps
 
 COPY . .
 RUN sass scss/main.scss resources/public/css/main.css --no-source-map --style compressed &&\

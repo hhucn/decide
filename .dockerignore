@@ -4,3 +4,5 @@ node_modules/
 .cpcache/
 .idea/
 target/
+resources/public/js
+resources/public/workspaces/js
