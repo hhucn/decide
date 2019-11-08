@@ -30,8 +30,7 @@
 
 
 (defmutation retract-argument [{:keys [connection]} {:keys [argument/id]}]
-  {::pc/params [:argument/id]
-   ::pc/output []}
+  {::pc/params [:argument/id]}
   (when (uuid? id)
     (d/transact connection [[:db.fn/retractEntity [:argument/id (str id)]]]))
   [])

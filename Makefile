@@ -6,7 +6,7 @@ cljs-tests:
 	npx karma start --single-run
 
 clj-tests:
-	clj -A:dev:clj-tests
+	clojure -A:dev:clj-tests
 
 production:
 	@echo "Compiling SCSS";
