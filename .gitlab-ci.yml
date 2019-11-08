@@ -3,8 +3,11 @@ image: clojure:openjdk-11-tools-deps
 services:
   - docker:stable-dind
 
-variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=/cache/.m2"
+cache:
+  key: ${CI_JOB_NAME}
+  paths:
+    - node_modules/
+    - .m2
 
 stages:
   - build
@@ -16,8 +19,9 @@ stages:
 cljs-test:
   image: circleci/clojure:openjdk-11-tools-deps-node-browsers
   stage: test
-  script:
+  before_script:
     - npm install
+  script:
     - npx shadow-cljs compile ci-tests
     - npx karma start --single-run
   allow_failure: true # While the jar of hasch is broken
@@ -25,4 +29,4 @@ cljs-test:
 clj-test:
   stage: test
   script:
-    - clojure -A:dev:clj-tests
+    - clojure -Sdeps '{:mvn/local-repo ".m2"}' -A:dev:clj-tests
