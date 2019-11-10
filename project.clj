@@ -5,7 +5,7 @@
   :lein-tools-deps/config {:config-files [:install :user :project]}
 
   :main decide.server-main
-  :clean-targets ^{:protect false} [:target-path "resources/public/js" "resources/public/workspaces/js" "resources/public/css/main.css.map"]
+  :clean-targets ^{:protect false} [:target-path "resources/public/js/" "resources/public/workspaces/js/" "resources/public/css/main.css.map"]
 
   :profiles {:uberjar    {:main           decide.server-main
                           :aot            [decide.server-main]
