@@ -46,3 +46,10 @@
     {::ct.fulcro/root          arg/NewArgumentForm
      ::ct.fulcro/initial-state {:proposal/id 420
                                 :open?       true}}))
+
+(ws/defcard UpstreamItem
+  (ct.fulcro/fulcro-card
+    {::ct.fulcro/root          arg/UpstreamItem
+     ::ct.fulcro/initial-state #(hash-map
+                                  :argument/text "This is an Argument"
+                                  :argument/type :pro)}))
