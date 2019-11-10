@@ -30,3 +30,6 @@ clj-test:
   stage: test
   script:
     - clojure -Sdeps '{:mvn/local-repo ".m2"}' -A:dev:clj-tests
+
+include:
+  template: Dependency-Scanning.gitlab-ci.yml
