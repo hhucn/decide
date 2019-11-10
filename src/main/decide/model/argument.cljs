@@ -278,7 +278,7 @@
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         [:argumentation/id :proposal/id]
    :initial-state (fn [{:proposal/keys [id] :as params}]
-                    (let [argument (into {:argument/id id} (filter (ns? " argument")) params)]
+                    (let [argument (into {:argument/id id} (filter (ns? "argument")) params)]
                       {:proposal/id                    id
                        :argumentation/new-argument     (comp/initial-state NewArgumentForm {:proposal/id id})
                        :argumentation/upstream         []
