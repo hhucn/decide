@@ -91,7 +91,7 @@
       (span :.text-danger (IoMdFunnel) (str (count cons))))))
 
 
-(def ui-argument (comp/factory Argument {:keyfn :argument/id}))
+(def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
 
 (defn select [comp attribute options current-value]
   (dom/select :.form-control
@@ -219,13 +219,13 @@
       (div :.argumentation-header.bg-success
         (dom/h6 " Pro Argumente ")
         (ui-add-argument-button :pro add-argument-fn))
-      (map #(ui-argument (comp/computed % computed)) pros))
+      (map #(ui-argument % computed) pros))
 
     (half-row
       (div :.argumentation-header.bg-danger
         (dom/h6 "Contra Argumente")
         (ui-add-argument-button :con add-argument-fn))
-      (map #(ui-argument (comp/computed % computed)) cons))))
+      (map #(ui-argument % computed) cons))))
 
 (def ui-procon (comp/factory ProCon {:keyfn :argument/id}))
 
@@ -251,16 +251,16 @@
   (action [{:keys [ref state]}]
     (swap! state update-in ref *jump-backwards position)))
 
-(defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [jmp-fn index]}]
+(defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [onClick index]}]
   {:query [:argument/id :argument/text :argument/type]
    :ident :argument/id}
   (dom/button :.argumentation-upstream-item.my-1
-    {:key index
+    {:key       index
      :data-type type
-     :onClick jmp-fn}
+     :onClick   onClick}
     text))
 
-(def ui-upstream-item (comp/factory UpstreamItem {:keyfn :argument/id}))
+(def ui-upstream-item (comp/computed-factory UpstreamItem {:keyfn :argument/id}))
 
 (>defn ns?
   ([ns]
@@ -287,9 +287,8 @@
     (dom/ol :.list-group
       (map-indexed
         (fn [i props]
-          (ui-upstream-item
-            (comp/computed props
-              {:jmp-fn #(comp/transact! this [(jump-backwards {:position i})])})))
+          (ui-upstream-item props
+            {:onClick #(comp/transact! this [(jump-backwards {:position i})])}))
         (concat upstream [current-argument])))
     (ui-new-argument (merge {:proposal/id id} new-argument))
     (ui-procon
