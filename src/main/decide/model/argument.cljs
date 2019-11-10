@@ -217,13 +217,13 @@
                     (merge #:argument{:id id, :pros [], :cons []} argument))}
   (div :.row
     (half-row
-      (div :.argumentation-header.bg-success
+      (div :.argumentation-header.bg-success.px-3.pt-2
         (dom/h6 " Pro Argumente ")
         (ui-add-argument-button :pro add-argument-fn))
       (map #(ui-argument % computed) pros))
 
     (half-row
-      (div :.argumentation-header.bg-danger
+      (div :.argumentation-header.bg-danger.px-3.pt-2
         (dom/h6 "Contra Argumente")
         (ui-add-argument-button :con add-argument-fn))
       (map #(ui-argument % computed) cons))))
