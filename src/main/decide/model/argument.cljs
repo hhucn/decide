@@ -9,7 +9,7 @@
             [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
             [clojure.spec.alpha :as s]
             [com.fulcrologic.fulcro.dom.events :as evt]
-            ["react-icons/io" :refer [IoMdAdd IoMdClose IoMdFunnel IoMdMore]]
+            ["react-icons/io" :refer [IoMdAdd IoMdClose IoMdFunnel IoMdMore IoMdUndo]]
             [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
             [taoensso.timbre :as log]
             [com.fulcrologic.fulcro.data-fetch :as df]
@@ -254,11 +254,15 @@
 (defsc UpstreamItem [_this {:argument/keys [text type]} {:keys [onClick index]}]
   {:query [:argument/id :argument/text :argument/type]
    :ident :argument/id}
-  (dom/button :.argumentation-upstream-item.my-1
+  (button :.argumentation-upstream-item.my-1
     {:key       index
      :data-type type
-     :onClick   onClick}
-    text))
+     :onClick   onClick
+     :title     "Springe zurück zu diesem Argument"}
+    (span :.ml-auto
+      text)
+    (span :.ml-auto.pl-2
+      (IoMdUndo))))
 
 (def ui-upstream-item (comp/computed-factory UpstreamItem {:keyfn :argument/id}))
 
