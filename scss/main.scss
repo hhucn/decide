@@ -23,7 +23,6 @@ $enable-responsive-font-sizes: true;
   display: flex;
   align-items: center;
   text-align: center;
-  border-radius: 10px;
 
   &[data-type=pro] {
     @extend .list-group-item-success;
