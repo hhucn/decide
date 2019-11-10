@@ -227,7 +227,7 @@
         (ui-add-argument-button :con add-argument-fn))
       (map #(ui-argument % computed) cons))))
 
-(def ui-procon (comp/factory ProCon {:keyfn :argument/id}))
+(def ui-procon (comp/computed-factory ProCon {:keyfn :argument/id}))
 
 (defn *navigate-forward [{:argumentation/keys [current-argument] :as argumentation} next-argument]
   (-> argumentation
@@ -291,9 +291,8 @@
             {:onClick #(comp/transact! this [(jump-backwards {:position i})])}))
         (concat upstream [current-argument])))
     (ui-new-argument (merge {:proposal/id id} new-argument))
-    (ui-procon
-      (comp/computed current-argument
-        {:argumentation-root this
-         :add-argument-fn    (fn add-argument [pro?] (comp/transact! this [(open-add-new-argument {:pro? pro?})]))}))))
+    (ui-procon current-argument
+      {:argumentation-root this
+       :add-argument-fn    (fn add-argument [pro?] (comp/transact! this [(open-add-new-argument {:pro? pro?})]))})))
 
 (def ui-argumentation (comp/factory Argumentation {:keyfn :proposal/id}))
