@@ -28,13 +28,15 @@
      ::ct.fulcro/initial-state example-argumentation}))
 
 (ws/defcard argumentation-card
-  {::wsm/card-width 4 ::wsm/card-height 10}
+  {::wsm/card-width 4 ::wsm/card-height 10
+   ::wsm/align      {:flex 1}}
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root          arg/Argumentation
      ::ct.fulcro/initial-state example-argumentation}))
 
 (ws/defcard Argument
-  {::wsm/card-width  2 ::wsm/card-height 5}
+  {::wsm/card-width 2 ::wsm/card-height 5
+   ::wsm/align      {:flex 1}}
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root arg/Argument
      ::ct.fulcro/initial-state
@@ -48,6 +50,7 @@
                                 :open?       true}}))
 
 (ws/defcard UpstreamItem
+  {::wsm/align {:flex 1}}
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root          arg/UpstreamItem
      ::ct.fulcro/initial-state #(hash-map
