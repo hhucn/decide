@@ -118,6 +118,10 @@
         :append parent-target)))
   (remote [_] true))
 
+(defmutation reset-new-argument-form [_]
+  (action [{:keys [state ref]}]
+    (swap! state update-in ref assoc :ui/new-argument "")))
+
 (defsc NewArgumentForm [this {:argumentation/keys [current-argument]
                               :ui/keys            [open? new-argument new-subtype pro?]
                               :or                 {new-argument ""}}]
@@ -160,6 +164,7 @@
                                                         :type    (if pro? :pro :con)
                                                         :subtype new-subtype
                                                         :parent  current-argument})
+                                         (reset-new-argument-form nil)
                                          (m/toggle {:field :ui/open?})]))}
       (div :.form-group
         (label "Dein neues Argument "
