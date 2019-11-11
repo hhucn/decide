@@ -62,9 +62,9 @@
      ::uism/events        {::uism/started  {::uism/handler (fn [env]
                                                              (-> env
                                                                (uism/assoc-aliased :error "")
-                                                               #_(uism/load ::current-session :actor/current-session
-                                                                   {::uism/ok-event    :event/complete
-                                                                    ::uism/error-event :event/failed})))}
+                                                               (uism/load ::current-session :actor/current-session
+                                                                 {::uism/ok-event    :event/complete
+                                                                  ::uism/error-event :event/failed})))}
                            :event/failed   {::uism/target-state :state/logged-out}
                            :event/complete {::uism/target-states #{:state/logged-in :state/logged-out}
                                             ::uism/handler       #(process-session-result % "")}}}

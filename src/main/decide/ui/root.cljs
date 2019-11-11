@@ -21,9 +21,9 @@
 
 (defn field [{:keys [label valid? error-message] :as props}]
   (let [input-props (-> props (assoc :name label) (dissoc :label :valid? :error-message))]
-    (div :.ui.field
+    (div :.form-group
       (dom/label {:htmlFor label} label)
-      (dom/input input-props)
+      (dom/input :.form-control input-props)
       (dom/div :.ui.error.message {:classes [(when valid? "hidden")]}
         error-message))))
 
@@ -88,11 +88,6 @@
   {:query         [:ui/open? :ui/error :account/email
                    {[:component/id :session] (comp/get-query Session)}
                    [::uism/asm-id ::session/session]]
-   :css           [[:.floating-menu {:position "absolute !important"
-                                     :z-index  1000
-                                     :width    "300px"
-                                     :right    "0px"
-                                     :top      "50px"}]]
    :initial-state {:account/email "" :ui/error ""}
    :ident         (fn [] [:component/id :login])}
   (let [current-state (uism/get-active-state this ::session/session)
@@ -100,57 +95,52 @@
         initial?      (= :initial current-state)
         loading?      (= :state/checking-session current-state)
         logged-in?    (= :state/logged-in current-state)
-        {:keys [floating-menu]} (css/get-classnames Login)
         password      (or (comp/get-state this :password) "")] ; c.l. state for security
     (dom/div
       (when-not initial?
-        (dom/div :.right.menu
+        (dom/div
           (if logged-in?
-            (dom/button :.item
+            (dom/button
               {:onClick #(uism/trigger! this ::session/session :event/logout)}
               (dom/span current-user) ent/nbsp "Log out")
-            (dom/div :.item {:style   {:position "relative"}
-                             :onClick #(uism/trigger! this ::session/session :event/toggle-modal)}
-              "Login"
-              (when open?
-                (dom/div :.four.wide.ui.raised.teal.segment {:onClick (fn [e]
-                                                                        ;; Stop bubbling (would trigger the menu toggle)
-                                                                        (evt/stop-propagation! e))
-                                                             :classes [floating-menu]}
-                  (dom/h3 :.ui.header "Login")
-                  (div :.ui.form {:classes [(when (seq error) "error")]}
-                    (field {:label    "Email"
-                            :value    email
-                            :onChange #(m/set-string! this :account/email :event %)})
-                    (field {:label    "Password"
-                            :type     "password"
-                            :value    password
-                            :onChange #(comp/set-state! this {:password (evt/target-value %)})})
-                    (div :.ui.error.message error)
-                    (div :.ui.field
-                      (dom/button :.ui.button
-                        {:onClick (fn [] (uism/trigger! this ::session/session :event/login {:username email
-                                                                                             :password password}))
-                         :classes [(when loading? "loading")]} "Login"))
-                    (div :.ui.message
-                      (dom/p "Don't have an account?")
-                      (dom/a {:onClick (fn []
-                                         (uism/trigger! this ::session/session :event/toggle-modal {})
-                                         (dr/change-route this ["signup"]))}
-                        "Please sign up!"))))))))))))
+            (dom/div :.dropdown
+              (button :.btn.btn-outline-secondary
+                {:onClick #(uism/trigger! this ::session/session :event/toggle-modal)}
+                "Login")
+              (dom/div :.dropdown-menu.dropdown-menu-right
+                {:classes [(when open? "show")]
+                 :style   {:width "300px"}}
+                (dom/form :.px-4.py-3
+                  {:classes  [(when (seq error) "error")]
+                   :onSubmit (fn [e]
+                               (evt/prevent-default! e)
+                               (uism/trigger! this ::session/session :event/login {:username email
+                                                                                   :password password}))}
+                  (dom/h3 "Login")
+                  (field {:label    "Email"
+                          :value    email
+                          :onChange #(m/set-string! this :account/email :event %)})
+                  (field {:label    "Password"
+                          :type     "password"
+                          :value    password
+                          :onChange #(comp/set-state! this {:password (evt/target-value %)})})
+                  (div :.ui.error.message error)
+                  (dom/button :.btn.btn-primary
+                    {:type    "submit"
+                     :classes [(when loading? "loading")]} "Login"))))))))))
 
 (def ui-login (comp/factory Login))
 
 (declare Root)
-(defsc ProposalsMain [this {:keys [proposals]}]
-  {:query         [{:proposals (prim/get-query proposal/ProposalCard)}]
-   :initial-state (fn [_] {:proposals (for [i (range 15)] (prim/get-initial-state proposal/ProposalCard (inc i)))})
+(defsc ProposalsMain [this {:keys [all-proposals]}]
+  {:query         [{:all-proposals (prim/get-query proposal/ProposalCard)}]
+   :initial-state (fn [_] {:all-proposals (for [i (range 15)] (prim/get-initial-state proposal/ProposalCard (inc i)))})
    :ident         (fn [] [:component/id :proposals])
    :route-segment ["proposals"]
    :will-enter    #(dr/route-immediate [:component/id :proposals])}
   (div :.container
     (div :.card-deck.d-flex.justify-content-center
-      (for [proposal proposals]
+      (for [proposal all-proposals]
         (dom/div :.col-md-6
           (proposal/ui-proposal-card proposal))))))
 
@@ -200,7 +190,7 @@
 
 
 (dr/defrouter TopRouter [this {:keys [current-state pending-path-segment route-factory route-props]}]
-  {:router-targets [Main ProposalsMain Signup SignupSuccess Settings proposal/ProposalDetails]}
+  {:router-targets [Main proposal/ProposalCollection Signup SignupSuccess Settings proposal/ProposalDetails]}
   (case current-state
     :pending (dom/div "Loading a user..."
                (dom/button {:onClick #(dr/change-route this ["settings" "pane2"])} "cancel"))
@@ -245,23 +235,23 @@
                         :root/current-session {}}}
   (let [current-tab (some-> (dr/current-route this this) first keyword)]
     (div
-      #_(dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light
-          (dom/div :.container
-            (dom/a :.navbar-brand.d-flex.align-items-center
-              {:href "/"}
-              (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
-              "decide")
-            (dom/button
-              {:type          "button",
-               :data-toggle   "collapse",
-               :data-target   "#navbarSupportedContent",
-               :aria-controls "navbarSupportedContent",
-               :aria-expanded "false",
-               :aria-label    "Toggle navigation",
-               :className     "navbar-toggler"}
-              (dom/span {:className "navbar-toggler-icon"}))
-            (dom/div :#navbarSupportedContent.collapse.navbar-collapse.mr-auto
-              (dom/ul :.navbar-nav
+      (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light
+        (dom/div :.container
+          (dom/a :.navbar-brand.d-flex.align-items-center
+            {:href "/"}
+            (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
+            "decide")
+          (dom/button
+            {:type          "button",
+             :data-toggle   "collapse",
+             :data-target   "#navbarSupportedContent",
+             :aria-controls "navbarSupportedContent",
+             :aria-expanded "false",
+             :aria-label    "Toggle navigation",
+             :className     "navbar-toggler"}
+            (dom/span {:className "navbar-toggler-icon"}))
+          (dom/div :#navbarSupportedContent.collapse.navbar-collapse.mr-auto
+            #_(dom/ul :.navbar-nav
                 (dom/li :.nav-item
                   (dom/a :.nav-link {:classes [(when (= :main current-tab) "active")]
                                      :href    "/main"
@@ -274,9 +264,9 @@
                                      :onClick (fn [e]
                                                 (.preventDefault e)
                                                 (dr/change-route this ["settings"]))} "Settings")))
-              (dom/hr)
-              (div :.right.menu
-                (ui-login login)))))
+            (dom/hr)
+            (div :.right.menu
+              (ui-login login)))))
       (div :.py-5
         (ui-top-router router)))))
 
