@@ -159,7 +159,8 @@
                                                         :text    new-argument
                                                         :type    (if pro? :pro :con)
                                                         :subtype new-subtype
-                                                        :parent  current-argument})]))}
+                                                        :parent  current-argument})
+                                         (m/toggle {:field :ui/open?})]))}
       (div :.form-group
         (label "Dein neues Argument "
           (if pro?
