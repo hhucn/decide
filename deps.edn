@@ -16,6 +16,7 @@
 
            ;; To simulate Datomic on the back-end
            io.replikativ/datahike            {:mvn/version "0.2.0"}
+           io.replikativ/hasch               {:mvn/version "0.3.7"}
 
            ring/ring-core                    {:mvn/version "1.7.1"}
            ring/ring-defaults                {:mvn/version "0.3.2"}}
