@@ -82,12 +82,12 @@
              (comp/transact! this [(retract-argument {:argument/id id})]))}
           "Löschen")))
     (div :.ml-auto.small
-      {:style {:display  "inline-block "
-               :position "absolute "
+      {:style {:display  "inline-block"
+               :position "absolute"
                :bottom   "0"
                :right    "0"
                :padding  "5px 10px"
-               :width    " auto"}}
+               :width    "auto"}}
       (span :.text-success.pr-2 (MdSubdirectoryArrowRight) (str (count pros)))
       (span :.text-danger (MdSubdirectoryArrowRight) (str (count cons))))))
 
@@ -120,7 +120,7 @@
 
 (defsc NewArgumentForm [this {:argumentation/keys [current-argument]
                               :ui/keys            [open? new-argument new-subtype pro?]
-                              :or                 {new-argument " "}}]
+                              :or                 {new-argument ""}}]
   {:query              [:proposal/id
                         :argumentation/current-argument
                         :ui/open?
@@ -144,12 +144,12 @@
                           :ui/open?        open?
                           :ui/new-subtype  :undermine})}
   (div :.collapse.container.border.p-4.my-3
-    {:classes [(when open? " show")]}
+    {:classes [(when open? "show")]}
     (dom/button :.close
-      {:type    " button"
-       :style   {:position " relative"
-                 :top      " -1.2rem"
-                 :right    " -1.2rem"}
+      {:type    "button"
+       :style   {:position "relative"
+                 :top      "-1.2rem"
+                 :right    "-1.2rem"}
        :onClick #(m/toggle! this :ui/open?)}
       (IoMdClose))
     (form
@@ -161,11 +161,11 @@
                                                         :subtype new-subtype
                                                         :parent  current-argument})]))}
       (div :.form-group
-        (label " Dein neues Argument "
+        (label "Dein neues Argument "
           (if pro?
-            (a :.text-success {:onClick #(m/toggle! this :ui/pro?)} " dafür")
-            (a :.text-danger {:onClick #(m/toggle! this :ui/pro?)} " dagegen"))
-          " :")
+            (a :.text-success {:onClick #(m/toggle! this :ui/pro?)} "dafür")
+            (a :.text-danger {:onClick #(m/toggle! this :ui/pro?)} "dagegen"))
+          ":")
         (input :.form-control
           {:type     " text" :value new-argument
            :onChange #(m/set-string! this :ui/new-argument :event %)}))
@@ -175,13 +175,13 @@
           (label " Wieso nennst du dieses Argument?")
           (select this
             :ui/new-subtype
-            {:undermine " Undermine"
-             :undercut  " Undercut"}
-            (name (or new-subtype " ")))))
+            {:undermine "Undermine"
+             :undercut  "Undercut"}
+            (name (or new-subtype "")))))
 
       (button :.btn.btn-primary
-        {:type "submit "}
-        "Submit "))))
+        {:type "submit"}
+        "Submit"))))
 
 (def ui-new-argument (comp/factory NewArgumentForm))
 
@@ -195,13 +195,13 @@
 
 (defn half-row [& children]
   (div :.col-6
-    {:style {:display       "flex "
-             :flexDirection "column "}}
+    {:style {:display       "flex"
+             :flexDirection "column"}}
     children))
 
 (defn ui-add-argument-button [type add-argument-fn]
   (button :.btn
-    {:classes [(if (= type :pro) "btn-success " "btn-danger ")]
+    {:classes [(if (= type :pro) "btn-success" "btn-danger")]
      :onClick #(add-argument-fn (= type :pro))}
     "Argument hinzufügen"))
 
@@ -218,7 +218,7 @@
   (div :.row
     (half-row
       (div :.argumentation-header.bg-success.px-3.pt-2
-        (dom/h6 " Pro Argumente ")
+        (dom/h6 "Pro Argumente")
         (ui-add-argument-button :pro add-argument-fn))
       (map #(ui-argument % computed) pros))
 
