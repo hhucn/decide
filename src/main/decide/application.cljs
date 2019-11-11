@@ -18,9 +18,10 @@
 (defonce SPA (app/fulcro-app
                {;; This ensures your client can talk to a CSRF-protected server.
                 ;; See middleware.clj to see how the token is embedded into the HTML
-                :remotes {:remote (net/fulcro-http-remote
-                                    {:url                "/api"
-                                     :request-middleware secured-request-middleware})}}))
+                :client-did-mount #(dr/change-route SPA ["proposals"])
+                :remotes          {:remote (net/fulcro-http-remote
+                                             {:url                "/api"
+                                              :request-middleware secured-request-middleware})}}))
 
 (defn make-history []
   (doto (Html5History.)

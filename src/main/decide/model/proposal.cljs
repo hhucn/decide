@@ -67,10 +67,10 @@
 
 (def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :argument/id}))
 
-(defsc ProposalCard [this {:proposal/keys [subtitle price]
+(defsc ProposalCard [this {:proposal/keys [subtitle cost]
                            :argument/keys [text]}]
-  {:query [:argument/id :argument/text :proposal/subtitle :proposal/price]
-   :ident :argument/id
+  {:query         [:argument/id :argument/text :proposal/subtitle :proposal/cost]
+   :ident         :argument/id
    :initial-state (fn [_] {:ui/modal-open? false})}
   (div :.proposal
     (div :.proposal-buttons
@@ -98,7 +98,7 @@
                  :justifyContent "space-between"}}
         (div :.proposal-subtitle subtitle)
         (div :.proposal-price
-          (dom/span :.proposal-price__text (str (+ 1000000000 price) " €")))))))
+          (dom/span :.proposal-price__text (str cost) " €"))))))
 
 (def ui-proposal-card (comp/factory ProposalCard))
 
@@ -119,3 +119,18 @@
                            :account/password-again ""}))
    :form-fields #{:account/email :account/password :account/password-again}})
 
+(defsc ProposalCollection [this {:keys [all-proposals]}]
+  {:query         [{[:all-proposals '_] (comp/get-query ProposalCard)}]
+   :initial-state {:all-proposals []}
+   :ident         (fn [] [:component/id :proposals])
+   :route-segment ["proposals"]
+   :will-enter    (fn [app _]
+                    (dr/route-deferred [:component/id :proposals]
+                      #(df/load! app :all-proposals ProposalCard
+                         {:post-mutation        `dr/target-ready
+                          :post-mutation-params {:target [:component/id :proposals]}})))}
+  (div :.container
+    (div :.card-deck.d-flex.justify-content-center
+      (for [proposal all-proposals]
+        (dom/div :.col-lg-6.p-3
+          (ui-proposal-card proposal))))))

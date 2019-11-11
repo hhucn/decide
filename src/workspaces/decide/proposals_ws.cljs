@@ -44,4 +44,9 @@
   (ct.react/react-card
     (proposal/big-price-tag 1000 1000000 "$")))
 
+(ws/defcard proposal-collection
+  {::wsm/align {:flex 1}}
+  (ct.fulcro/fulcro-card
+    {::ct.fulcro/root proposal/ProposalCollection}))
+
 

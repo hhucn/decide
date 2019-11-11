@@ -60,7 +60,6 @@
    {:initial
     {::uism/target-states #{:state/logged-in :state/logged-out}
      ::uism/events        {::uism/started  {::uism/handler (fn [env]
-                                                             (dr/change-route SPA ["proposal" "a0f0c97d-e088-3275-ae89-96250e509f1b"])
                                                              (-> env
                                                                (uism/assoc-aliased :error "")
                                                                #_(uism/load ::current-session :actor/current-session
