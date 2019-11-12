@@ -1,4 +1,4 @@
-(ns decide.model.database
+(ns decide.server-components.database
   (:require
     [decide.server-components.config :refer [config]]
     [datahike.api :as d]

@@ -12,7 +12,7 @@
     [decide.model.argument :as arg]
     [decide.model.proposal :as proposal]
     [decide.server-components.config :refer [config]]
-    [decide.model.database :as db]
+    [decide.server-components.database :as db]
     [datahike.api :as d]
     [datahike.core :as dcore]))
 

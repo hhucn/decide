@@ -1,6 +1,6 @@
 (ns decide.model.session
   (:require
-    [decide.model.database :as db]
+    [decide.server-components.database :as db]
     [datahike.api :as d]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
