@@ -6,7 +6,8 @@
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
     [clojure.spec.alpha :as s]
-    [com.fulcrologic.fulcro.server.api-middleware :as fmw]))
+    [com.fulcrologic.fulcro.server.api-middleware :as fmw]
+    [decide.server-components.ldap :as ldap]))
 
 (defonce account-database (atom {}))
 
@@ -32,15 +33,13 @@
 (defmutation login [env {:keys [username password]}]
   {::pc/output [:session/valid? :account/name]}
   (log/info "Authenticating" username)
-  (let [{expected-email    :email
-         expected-password :password} (get @account-database username)]
-    (if (and (= username expected-email) (= password expected-password))
-      (response-updating-session env
-        {:session/valid? true
-         :account/name   username})
-      (do
-        (log/error "Invalid credentials supplied for" username)
-        (throw (ex-info "Invalid credentials" {:username username}))))))
+  (if-some [{:keys [uid]} (ldap/login username password)]
+    (response-updating-session env
+      {:session/valid? true
+       :account/name   uid})
+    (do
+      (log/error "Invalid credentials supplied for" username)
+      (throw (ex-info "Invalid credentials" {:username username})))))
 
 (defmutation logout [env params]
   {::pc/output [:session/valid?]}
