@@ -15,11 +15,12 @@
 (defn start
   "Start the web server"
   [] (mount/start-with {#'decide.server-components.ldap/ldap-resolve
-                        (fn ldap-resolver [uid _]
-                          {:givenName      uid
-                           :sn             "Example"
-                           :sAMAccountName uid
-                           :mail           (str uid "@example.org")})}))
+                        (fn ldap-resolver [uid password]
+                          (when (= uid password)
+                            {:givenName      uid
+                             :sn             "Example"
+                             :sAMAccountName uid
+                             :mail           (str uid "@example.org")}))}))
 
 (defn stop
   "Stop the web server"

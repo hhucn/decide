@@ -20,7 +20,7 @@
   (format "(sAMAccountName=%s)" uid))
 
 (>defn create-ldap-resolver [ldap-pool]
-  [any? => [::uid string? => ::ldap-result]]
+  [any? => [::uid string? => (? ::ldap-result)]]
   (fn ldap-resolver [uid password]
     (let [conn (ldap/get-connection ldap-pool)
           {:ldap/keys [base domain]} (get config :ldap)]
