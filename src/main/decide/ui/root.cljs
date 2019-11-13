@@ -100,9 +100,13 @@
       (when-not initial?
         (dom/div
           (if logged-in?
-            (dom/button
-              {:onClick #(uism/trigger! this ::session/session :event/logout)}
-              (dom/span current-user) ent/nbsp "Log out")
+            (div :.btn-group
+              (dom/button :.btn.btn-dark
+                {:disabled true}
+                (dom/span current-user))
+              (dom/button :.btn.btn-light.border
+                {:onClick #(uism/trigger! this ::session/session :event/logout)}
+                "Log out"))
             (dom/div :.dropdown
               (button :.btn.btn-outline-secondary
                 {:onClick #(uism/trigger! this ::session/session :event/toggle-modal)}
