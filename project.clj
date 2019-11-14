@@ -14,6 +14,6 @@
                           :prep-tasks     ["clean" ["clean"]
                                            "compile" ["with-profile" "cljs" "run" "-m" "shadow.cljs.devtools.cli" "release" "main"]]}
              :cljs       {:source-paths ["src/main"]
-                          :dependencies [[com.google.javascript/closure-compiler-unshaded "v20191027"]
+                          :dependencies [[com.google.javascript/closure-compiler-unshaded "v20190325"]
                                          [org.clojure/google-closure-library "0.0-20190213-2033d5d9"]
-                                         [thheller/shadow-cljs "2.8.69"]]}})
+                                         [thheller/shadow-cljs       "2.8.64"]]}})
