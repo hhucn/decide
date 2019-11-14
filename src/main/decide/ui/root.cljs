@@ -101,14 +101,14 @@
         (dom/div
           (if logged-in?
             (div :.btn-group
-              (dom/button :.btn.btn-dark
+              (dom/button :.btn.btn-outline-dark
                 {:disabled true}
                 (dom/span current-user))
-              (dom/button :.btn.btn-light.border
+              (dom/button :.btn.btn-outline-dark
                 {:onClick #(uism/trigger! this ::session/session :event/logout)}
                 "Log out"))
             (dom/div :.dropdown
-              (button :.btn.btn-outline-secondary
+              (button :.btn.btn-outline-primary
                 {:onClick #(uism/trigger! this ::session/session :event/toggle-modal)}
                 "Login")
               (dom/div :.dropdown-menu.dropdown-menu-right
