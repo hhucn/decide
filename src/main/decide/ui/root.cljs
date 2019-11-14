@@ -136,8 +136,9 @@
 (def ui-login (comp/factory Login))
 
 (declare Root)
-(defsc ProposalsMain [this {:keys [all-proposals]}]
-  {:query         [{:all-proposals (prim/get-query proposal/ProposalCard)}]
+(defsc ProposalsMain [this {:keys [all-proposals detailed-proposals]}]
+  {:query         [{:all-proposals (prim/get-query proposal/ProposalCard)}
+                   {:detailed-proposals (comp/get-query proposal/ProposalDetails)}]
    :initial-state (fn [_] {:all-proposals (for [i (range 15)] (prim/get-initial-state proposal/ProposalCard (inc i)))})
    :ident         (fn [] [:component/id :proposals])
    :route-segment ["proposals"]
@@ -146,7 +147,7 @@
     (div :.card-deck.d-flex.justify-content-center
       (for [proposal all-proposals]
         (dom/div :.col-md-6
-          (proposal/ui-proposal-card proposal))))))
+          (proposal/ui-proposal-card proposal (proposal/ui-proposal-detail detailed-proposals)))))))
 
 (defsc Main [this {:keys [proposal]}]
   {:query         [{:proposal (prim/get-query proposal/ProposalDetails)}]
@@ -154,7 +155,7 @@
    :route-segment ["main"]
    :will-enter    (fn [_] (dr/route-immediate [:component/id :main]))}
   (div :.container
-    (proposal/ui-proposal-detail proposal)))
+    #_(proposal/ui-proposal-detail proposal)))
 
 (defsc Settings1 [this props]
   {:query         []

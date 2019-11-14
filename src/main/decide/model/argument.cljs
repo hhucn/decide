@@ -279,11 +279,11 @@
    [string? map-entry? => boolean?]
    (= ns (namespace (first map-entry)))))
 
-(defsc Argumentation [this {:keys               [proposal/id]
-                            :argumentation/keys [upstream current-argument new-argument]}]
+(defsc Argumentation [this {:keys               [proposal/id >/current-argument]
+                            :argumentation/keys [upstream new-argument]}]
   {:query         [:proposal/id
                    {:argumentation/upstream (comp/get-query UpstreamItem)}
-                   {:argumentation/current-argument (comp/get-query ProCon)}
+                   {:>/current-argument (comp/get-query ProCon)}
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         [:argumentation/id :proposal/id]
    :initial-state (fn [{:proposal/keys [id] :as params}]

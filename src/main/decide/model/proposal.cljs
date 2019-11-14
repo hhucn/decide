@@ -33,17 +33,17 @@
     (df/load! app [:proposal/id id] ProposalDetails
       {:post-mutation        `dr/target-ready
        :post-mutation-params {:target [:proposal/id id]}})
-    (df/load! app [:argument/id id] argument/ProCon
-      {:target [:argumentation/id id :argumentation/current-argument]})))
+    #_(df/load! app [:argument/id id] argument/ProCon
+        {:target [:argumentation/id id :argumentation/current-argument]})))
 
 
-(defsc ProposalDetails [this {:keys          [argument/text ui/argumentation]
+(defsc ProposalDetails [this {:keys          [argument/text >/argumentation]
                               :proposal/keys [subtext cost]}]
   {:query         [:proposal/id
                    :argument/text
                    :proposal/subtext
                    :proposal/cost
-                   {:ui/argumentation (comp/get-query arg/Argumentation)}]
+                   {:>/argumentation (comp/get-query arg/Argumentation)}]
    :ident         :proposal/id
    ;:initial-state (fn [proposal]
    ;                 {:ui/argumentation (comp/initial-state arg/Argumentation {})}
@@ -57,8 +57,9 @@
     {:style {:position "relative"}}
     (dom/button :.close
       {:style {:position "absolute"
-               :top ".5rem"
-               :right ".5rem"}} (IoMdClose))
+               :top      ".5rem"
+               :right    ".5rem"}
+       :data-dismiss "modal"} (IoMdClose))
     (div :.row.justify-content-between.m-4
       (dom/h2 :.detail-card__header text)
       (big-price-tag cost 1000000000 "$"))
@@ -67,38 +68,51 @@
 
 (def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :argument/id}))
 
-(defsc ProposalCard [this {:proposal/keys [subtitle cost]
+(defsc ProposalCard [this {:keys          [>/details]
+                           :proposal/keys [id subtitle cost]
                            :argument/keys [text]}]
-  {:query         [:argument/id :argument/text :proposal/subtitle :proposal/cost]
-   :ident         :argument/id
-   :initial-state (fn [_] {:ui/modal-open? false})}
-  (div :.proposal
-    (div :.proposal-buttons
-      (dom/button :.btn.btn-outline-success
-        (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
-      (dom/div :.spacer)
-      (dom/button :.btn.btn-outline-danger
-        (IoIosCloseCircleOutline #js {:size "3rem"})))
 
-    (div :.proposal-content
-      (div
-        {:style {:display "flex"
-                 :padding "10px 5px 10px 10px"
-                 :justifyContent "space-between"}}
-        (dom/h2 :.proposal-title text)
-        (dom/button :.btn
-          {:style {:position "absolute"
-                   :right "0px"
-                   :top "0px"
-                   :padding "0.2rem 0"}}
-          (IoMdMore #js {:size "24px"})))
-      (div
-        {:style {:display "flex"
-                 :padding "10px"
-                 :justifyContent "space-between"}}
-        (div :.proposal-subtitle subtitle)
-        (div :.proposal-price
-          (dom/span :.proposal-price__text (str cost) " €"))))))
+  {:query         [:proposal/id :argument/text :proposal/subtitle :proposal/cost
+                   {:>/details (comp/get-query ProposalDetails)}]
+   :ident         :proposal/id
+   :initial-state (fn [_] {:ui/modal-open? false})}
+  [(div :.proposal
+     (div :.proposal-buttons
+       (dom/button :.btn.btn-outline-success
+         (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
+       (dom/div :.spacer)
+       (dom/button :.btn.btn-outline-danger
+         (IoIosCloseCircleOutline #js {:size "3rem"})))
+
+     (div :.proposal-content.btn-light
+       {:style       {:cursor "pointer"}
+        :data-toggle "modal"
+        :data-target (str "#modal-" id)}
+       (div
+         {:style {:display        "flex"
+                  :padding        "10px 5px 10px 10px"
+                  :justifyContent "space-between"}}
+         (dom/h4 :.proposal-title text)
+         (dom/button :.btn
+           {:style {:position "absolute"
+                    :right    "0px"
+                    :top      "0px"
+                    :padding  "0.2rem 0"}}
+           (IoMdMore #js {:size "24px"})))
+       (div
+         {:style {:display        "flex"
+                  :padding        "10px"
+                  :justifyContent "space-between"}}
+         (div :.proposal-subtitle subtitle)
+         (div :.proposal-price
+           (dom/span :.proposal-price__text (str cost) " €")))))
+   (div :.modal.fade
+     {:id (str "modal-" id)}
+     (div :.modal-dialog.modal-xl
+       (div :.modal-content
+         (div :.modal-body
+           (div {:style {:width "auto"}}
+             (ui-proposal-detail details))))))])
 
 (def ui-proposal-card (comp/factory ProposalCard))
 
