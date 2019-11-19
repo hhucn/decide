@@ -7,8 +7,8 @@
 (def =>)
 
 (defn argumentation [current upstream]
-  #:argumentation{:upstream         upstream
-                  :current-argument current})
+  {:argumentation/upstream upstream
+   :>/current-argument     current})
 
 
 (specification "navigation-argumentation-stack"

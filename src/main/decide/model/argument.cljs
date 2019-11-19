@@ -43,6 +43,14 @@
       #(into {} (map (fn [[k v]] [k (retract-argument-from-arguments v [:argument/id id])])) %)))
   (remote [_] true))
 
+(defn *navigate-forward [{:>/keys [current-argument] :as argumentation} next-argument]
+  (-> argumentation
+    (assoc :>/current-argument next-argument)
+    (update :argumentation/upstream conj current-argument)))
+
+(defmutation navigate-forward [{id :argument/id}]
+  (action [{:keys [ref state]}]
+    (swap! state update-in ref *navigate-forward [:argument/id id])))
 
 (defsc Argument [this {:argument/keys [id text pros cons]} {:keys [argumentation-root]}]
   {:query [:argument/id
@@ -59,7 +67,7 @@
                :borderRadius "10px"
                :padding      "24px"
                :textAlign    "left"}
-     :onClick #(comp/transact! argumentation-root `[(navigate-forward {:argument/id ~id})])}
+     :onClick #(comp/transact! argumentation-root [(navigate-forward {:argument/id id})])}
     text
     (div :.btn-group
       {:style {:position "absolute" :top "0px" :right "0px"
@@ -236,21 +244,12 @@
 
 (def ui-procon (comp/computed-factory ProCon {:keyfn :argument/id}))
 
-(defn *navigate-forward [{:argumentation/keys [current-argument] :as argumentation} next-argument]
-  (-> argumentation
-    (assoc :argumentation/current-argument next-argument)
-    (update :argumentation/upstream conj current-argument)))
-
-(defmutation navigate-forward [{id :argument/id}]
-  (action [{:keys [ref state]}]
-    (swap! state update-in ref *navigate-forward [:argument/id id])))
-
 (defn *jump-backwards
   [{:argumentation/keys [upstream] :as argumentation}
    position]
   (if (contains? upstream position)
     (-> argumentation
-      (assoc :argumentation/current-argument (nth upstream position))
+      (assoc :>/current-argument (nth upstream position))
       (update :argumentation/upstream subvec 0 position))
     argumentation))
 
@@ -286,6 +285,11 @@
                    {:>/current-argument (comp/get-query ProCon)}
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         [:argumentation/id :proposal/id]
+   :pre-merge     (fn [{:keys [current-normalized data-tree]}]
+                    (merge
+                      {:argumentation/upstream []}
+                      current-normalized
+                      data-tree))
    :initial-state (fn [{:proposal/keys [id] :as params}]
                     (let [argument (into {:argument/id id} (filter (ns? "argument")) params)]
                       {:proposal/id                    id
