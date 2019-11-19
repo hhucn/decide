@@ -45,18 +45,18 @@
 
 (def schema (into [] cat [argument-schema proposal-schema]))
 
-(>defn str-uuid [s]
+(>defn named-uuid [s]
   [string? => uuid?]
   (UUID/nameUUIDFromBytes (.getBytes s)))
 
 (defn initialize-example! [conn]
   [datahike/conn? => datahike/conn?]
   (d/transact! conn [#:argument{:db/id   "my-new-argument"
-                                :id      (str (str-uuid "example-pro"))
+                                :id      (str (named-uuid "example-pro"))
                                 :type    :pro
                                 :subtype :support
                                 :text    "Die Umweltspur reduziert die Feinstaubbelastung."}
-                     #:argument{:id            (str (str-uuid "example-position"))
+                     #:argument{:id            (str (named-uuid "example-position"))
                                 :text          "Die Umweltspur in Düsseldorf sollte beibehalten werden"
                                 :type          :position
                                 :proposal/subtext

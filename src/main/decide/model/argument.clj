@@ -5,16 +5,10 @@
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
-    [clojure.spec.alpha :as s])
-  (:import (java.util UUID)))
+    [clojure.spec.alpha :as s]
+    [decide.util :as util]))
 
 (defn pro? [t] (= t :pro))
-(>defn str->uuid [s] [string? => uuid?] (UUID/fromString s))
-(>defn str-id->uuid-id
-  "Updates :argument/id in map to uuid"
-  [m]
-  [(comp string? :argument/id) => (comp uuid? :argument/id)]
-  (update m :argument/id str->uuid))
 
 (defmutation add-argument [{:keys [connection]} {:keys [id text type subtype parent]}]
   {::pc/output [:argument/id]}
@@ -51,8 +45,8 @@
               {:argument/pros [:argument/id]}
               {:argument/cons [:argument/id]}]
       [:argument/id (str id)])
-    str-id->uuid-id
-    (update :argument/pros (partial map str-id->uuid-id))
-    (update :argument/cons (partial map str-id->uuid-id))))
+    util/str-id->uuid-id
+    (update :argument/pros (partial map util/str-id->uuid-id))
+    (update :argument/cons (partial map util/str-id->uuid-id))))
 
 (def resolvers [add-argument resolve-argument retract-argument])

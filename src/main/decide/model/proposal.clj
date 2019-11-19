@@ -4,8 +4,8 @@
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
-    [clojure.spec.alpha :as s])
-  (:import (java.util UUID)))
+    [clojure.spec.alpha :as s]
+    [decide.util :as util]))
 
 
 (defresolver resolve-proposal [{:keys [db]} {:keys [proposal/id]}]
@@ -16,7 +16,7 @@
              :proposal/subtext
              :proposal/cost]
       [:argument/id (str id)])
-    (update :argument/id #(UUID/fromString %))))
+    util/str-id->uuid-id))
 
 (defresolver resolve-all-proposals [{:keys [db]} _]
   {::pc/input  #{}
@@ -27,6 +27,6 @@
                             [?e :argument/id ?id]]
                        db)]
     {:all-proposals (for [[id] query-result]
-                      {:proposal/id id})}))
+                      {:proposal/id (util/str->uuid id)})}))
 
 (def resolvers [resolve-proposal resolve-all-proposals])
