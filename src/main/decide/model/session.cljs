@@ -50,11 +50,11 @@
    #{:actor/login-form :actor/current-session}
 
    ::uism/aliases
-   {:username       [:actor/login-form :account/email]
+   {:username       [:actor/login-form :account/id]
     :error          [:actor/login-form :ui/error]
     :modal-open?    [:actor/login-form :ui/open?]
     :session-valid? [:actor/current-session :session/valid?]
-    :current-user   [:actor/current-session :account/name]}
+    :current-user   [:actor/current-session :account/display-name]}
 
    ::uism/states
    {:initial
@@ -97,7 +97,7 @@
   [state-map]
   (-> state-map
     (assoc-in signup-ident
-      {:account/email          ""
+      {:account/id             ""
        :account/password       ""
        :account/password-again ""})
     (fs/add-form-config* (signup-class) signup-ident)))
@@ -116,7 +116,7 @@
   (ok-action [{:keys [app state]}]
     (dr/change-route app ["signup-success"]))
   (remote [{:keys [state] :as env}]
-    (let [{:account/keys [email password password-again]} (get-in @state signup-ident)]
-      (boolean (and (valid-email? email) (valid-password? password)
+    (let [{:account/keys [id password password-again]} (get-in @state signup-ident)]
+      (boolean (and (valid-email? id) (valid-password? password)
                  (= password password-again))))))
 

@@ -1,5 +1,6 @@
 (ns decide.model.session
   (:require
+    [clojure.string :refer [split]]
     [decide.server-components.database :as db]
     [datahike.api :as d]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
@@ -12,12 +13,12 @@
 (defonce account-database (atom {}))
 
 (defresolver current-session-resolver [env input]
-  {::pc/output [{::current-session [:session/valid? :account/name]}]}
+  {::pc/output [{::current-session [:session/valid? :account/display-name]}]}
   (let [{:keys [account/name session/valid?]} (get-in env [:ring/request :session])]
     (if valid?
       (do
         (log/info name "already logged in!")
-        {::current-session {:session/valid? true :account/name name}})
+        {::current-session {:session/valid? true :account/display-name name}})
       {::current-session {:session/valid? false}})))
 
 (defn response-updating-session
@@ -30,20 +31,28 @@
         (let [new-session (merge existing-session mutation-response)]
           (assoc resp :session new-session))))))
 
-(defmutation login [env {:keys [username password]}]
-  {::pc/output [:session/valid? :account/name]}
+(>defn default-display-name [{:keys [firstname]}]
+  [(s/keys :req-un [::ldap/firstname]) => string?]
+  (first (split firstname #"\s")))
+
+(defmutation login [{:keys [connection] :as env} {:keys [username password]}]
+  {::pc/output [:session/valid? :account/id :account/display-name :account/firstname :account/lastname :account/mail]}
   (log/info "Authenticating" username)
-  (if-some [{:keys [uid]} (ldap/login username password)]
+  (if-some [{:keys [uid firstname lastname mail] :as account} (ldap/login username password)]
     (response-updating-session env
-      {:session/valid? true
-       :account/name   uid})
+      {:session/valid?       true
+       :account/id           uid
+       :account/display-name (default-display-name account)
+       :account/firstname    firstname
+       :account/lastname     lastname
+       :account/mail         mail})
     (do
       (log/error "Invalid credentials supplied for" username)
       (throw (ex-info "Invalid credentials" {:username username})))))
 
 (defmutation logout [env params]
   {::pc/output [:session/valid?]}
-  (response-updating-session env {:session/valid? false :account/name ""}))
+  (response-updating-session env {:session/valid? false :account/id ""}))
 
 (defmutation signup! [env {:keys [email password]}]
   {::pc/output [:signup/result]}

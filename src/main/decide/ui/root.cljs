@@ -37,14 +37,14 @@
     (dom/h3 "Signup Complete!")
     (dom/p "You can now log in!")))
 
-(defsc Signup [this {:account/keys [email password password-again] :as props}]
-  {:query             [:account/email :account/password :account/password-again fs/form-config-join]
+(defsc Signup [this {:account/keys [id password password-again] :as props}]
+  {:query             [:account/id :account/password :account/password-again fs/form-config-join]
    :initial-state     (fn [_]
                         (fs/add-form-config Signup
-                          {:account/email          ""
+                          {:account/id             ""
                            :account/password       ""
                            :account/password-again ""}))
-   :form-fields       #{:account/email :account/password :account/password-again}
+   :form-fields       #{:account/id :account/password :account/password-again}
    :ident             (fn [] session/signup-ident)
    :route-segment     ["signup"]
    :componentDidMount (fn [this]
@@ -52,19 +52,19 @@
    :will-enter        (fn [app _] (dr/route-immediate [:component/id :signup]))}
   (let [submit!  (fn [evt]
                    (when (or (identical? true evt) (evt/enter-key? evt))
-                     (comp/transact! this [(session/signup! {:email email :password password})])
+                     (comp/transact! this [(session/signup! {:email id :password password})])
                      (log/info "Sign up")))
         checked? (log/spy :info (fs/checked? props))]
     (div
       (dom/h3 "Signup")
       (div :.ui.form {:classes [(when checked? "error")]}
         (field {:label         "Email"
-                :value         (or email "")
-                :valid?        (session/valid-email? email)
+                :value         (or id "")
+                :valid?        (session/valid-email? id)
                 :error-message "Must be an email address"
                 :autoComplete  "off"
                 :onKeyDown     submit!
-                :onChange      #(m/set-string! this :account/email :event %)})
+                :onChange      #(m/set-string! this :account/id :event %)})
         (field {:label         "Password"
                 :type          "password"
                 :value         (or password "")
@@ -83,15 +83,15 @@
 
 (declare Session)
 
-(defsc Login [this {:account/keys [email]
+(defsc Login [this {:account/keys [id]
                     :ui/keys      [error open?] :as props}]
-  {:query         [:ui/open? :ui/error :account/email
+  {:query         [:ui/open? :ui/error :account/id
                    {[:component/id :session] (comp/get-query Session)}
                    [::uism/asm-id ::session/session]]
-   :initial-state {:account/email "" :ui/error ""}
+   :initial-state {:account/id "" :ui/error ""}
    :ident         (fn [] [:component/id :login])}
   (let [current-state (uism/get-active-state this ::session/session)
-        {current-user :account/name} (get props [:component/id :session])
+        {current-user :account/display-name} (get props [:component/id :session])
         initial?      (= :initial current-state)
         loading?      (= :state/checking-session current-state)
         logged-in?    (= :state/logged-in current-state)
@@ -118,13 +118,13 @@
                   {:classes  [(when (seq error) "error")]
                    :onSubmit (fn [e]
                                (evt/prevent-default! e)
-                               (uism/trigger! this ::session/session :event/login {:username email
+                               (uism/trigger! this ::session/session :event/login {:username id
                                                                                    :password password}))}
                   (dom/h3 "Login")
-                  (field {:label    "Email"
-                          :value    email
-                          :onChange #(m/set-string! this :account/email :event %)})
-                  (field {:label    "Password"
+                  (field {:label    "Uni-Kennung"
+                          :value    id
+                          :onChange #(m/set-string! this :account/id :event %)})
+                  (field {:label    "Passwort"
                           :type     "password"
                           :value    password
                           :onChange #(comp/set-state! this {:password (evt/target-value %)})})
@@ -195,9 +195,9 @@
 
 
 (dr/defrouter TopRouter [this {:keys [current-state pending-path-segment route-factory route-props]}]
-  {:router-targets [Main proposal/ProposalCollection Signup SignupSuccess Settings proposal/ProposalDetails]}
+  {:router-targets [Main proposal/ProposalCollection Settings proposal/ProposalDetails]}
   (case current-state
-    :pending (dom/div "Loading a user..."
+    :pending (dom/div "Loading..."
                (dom/button {:onClick #(dr/change-route this ["settings" "pane2"])} "cancel"))
     :failed (dom/div
               (dom/div "Ooops!")
@@ -208,13 +208,13 @@
 
 (defsc Session
   "Session representation. Used primarily for server queries. On-screen representation happens in Login component."
-  [this {:keys [:session/valid? :account/name] :as props}]
-  {:query         [:session/valid? :account/name]
+  [this {:keys [:session/valid? :account/display-name] :as props}]
+  {:query         [:session/valid? :account/display-name]
    :ident         (fn [] [:component/id :session])
    :pre-merge     (fn [{:keys [data-tree]}]
-                    (merge {:session/valid? false :account/name ""}
+                    (merge {:session/valid? false :account/display-name ""}
                       data-tree))
-   :initial-state {:session/valid? false :account/name ""}})
+   :initial-state {:session/valid? false :account/display-name ""}})
 
 (def ui-session (prim/factory Session))
 
@@ -247,7 +247,6 @@
       (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light
         (dom/div :.container
           (dom/a :.navbar-brand.d-flex.align-items-center
-            {:href "/"}
             (dom/picture :.mr-2 dbas-logo)
             "decide")
           (dom/button

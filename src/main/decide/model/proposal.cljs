@@ -125,13 +125,13 @@
         error-message))))
 
 (defsc EnterProposal [this props]
-  {:query       [:account/email :account/password :account/password-again fs/form-config-join]
-   :initial-state     (fn [_]
-                        (fs/add-form-config EnterProposal
-                          {:account/email          ""
-                           :account/password       ""
-                           :account/password-again ""}))
-   :form-fields #{:account/email :account/password :account/password-again}})
+  {:query         [:account/id :account/password :account/password-again fs/form-config-join]
+   :initial-state (fn [_]
+                    (fs/add-form-config EnterProposal
+                      {:account/id             ""
+                       :account/password       ""
+                       :account/password-again ""}))
+   :form-fields   #{:account/id :account/password :account/password-again}})
 
 (defsc ProposalCollection [this {:keys [all-proposals]}]
   {:query         [{[:all-proposals '_] (comp/get-query ProposalCard)}]
