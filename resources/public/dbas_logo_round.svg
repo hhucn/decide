@@ -1,40 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" id="svg2" version="1.1" viewBox="-100 -100 200 200">
-    <defs>
-        <mask id="holes">
-            <rect x="-100" y="-100" width="200" height="200" fill="white"/>
-            <g>
-                <title>separated</title>
-                <ellipse cx="-61" rx="15" ry="15" cy="-42" fill="black" origin="0 0" transform-origin="0 0"/>
-            </g>
-            <ellipse cx="0" cy="0" rx="24.5" ry="24.5" fill="black" origin="0 0" transform-origin="0 0">
-                <title>center</title>
-            </ellipse>
-            <g>
-                <title>top_right</title>
-                <ellipse cx="65" cy="-50" rx="24.5" ry="24.5" fill="black" origin="0 0" transform-origin="0 0"/>
-                <line style="paint-order: stroke; stroke: black; stroke-width: 13;" x1="0" y1="0" x2="65" y2="-50"/>
-            </g>
-            <g>
-                <g>
-                    <title>bottom_left</title>
-                    <ellipse cx="-50" cy="75" rx="24.5" ry="24.5" fill="black" origin="0 0" transform-origin="0 0"/>
-                    <line style="paint-order: stroke; stroke: black; stroke-width: 13;" x1="0" y1="0" x2="-50" y2="75"/>
-                </g>
-                <g xmlns="http://www.w3.org/2000/svg">
-                    <title>top</title>
-                    <ellipse cy="-100" rx="24.5" ry="24.5" fill="black" origin="0 0" transform-origin="0 0"/>
-                    <line style="paint-order: stroke; stroke: black; stroke-width: 13; fill: black" x1="0" y1="0" x2="0"
-                          y2="-100"/>
-                </g>
-            </g>
-            <g>
-                <title>bottom_right</title>
-                <ellipse cx="75" cy="75" rx="24.5" ry="24.5" fill="black" origin="0 0" transform-origin="0 0"/>
-                <line style="paint-order: stroke; stroke: black; stroke-width: 13;" x1="0" y1="0" x2="75" y2="75"/>
-            </g>
-
-        </mask>
-    </defs>
-    <ellipse class="dbas-logo" cx="0" cy="0" rx="100" ry="100" mask="url(#holes)"/>
+<svg viewBox="-100 -100 200 200" fill="currentColor" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M 100 0 C 100 19.316 94.523 37.354 85.037 52.644 C 81.974 51.266 78.577 50.5 75 50.5 C 70.595 50.5 66.461 51.663 62.89 53.698 L 21.302 12.11 C 23.337 8.539 24.5 4.405 24.5 0 C 24.5 -3.275 23.858 -6.399 22.692 -9.255 L 50.239 -30.445 C 54.344 -27.341 59.457 -25.5 65 -25.5 C 76.986 -25.5 86.962 -34.108 89.084 -45.479 C 96.063 -31.835 100 -16.377 100 0 Z M -24.5 0 C -24.5 6.139 -22.242 11.75 -18.512 16.05 L -42.301 51.734 C -44.722 50.933 -47.311 50.5 -50 50.5 C -61.05 50.5 -70.391 57.815 -73.445 67.866 C -89.928 50.038 -100 26.195 -100 0 C -100 -46.84 -67.795 -86.159 -24.321 -97.022 C -23.115 -87.074 -15.949 -78.965 -6.5 -76.372 L -6.5 -23.628 C -16.876 -20.78 -24.5 -11.281 -24.5 0 Z M 0 24.5 C 4.405 24.5 8.539 23.337 12.11 21.302 L 53.698 62.89 C 51.663 66.461 50.5 70.595 50.5 75 C 50.5 78.577 51.266 81.974 52.644 85.037 C 37.354 94.523 19.316 100 0 100 C -12.098 100 -23.694 97.852 -34.428 93.916 C -28.976 89.422 -25.5 82.617 -25.5 75 C -25.5 68.861 -27.758 63.25 -31.488 58.95 L -7.699 23.266 C -5.278 24.067 -2.689 24.5 0 24.5 Z M 24.321 -97.022 C 40.357 -93.015 54.859 -85.136 66.778 -74.436 C 66.191 -74.479 65.598 -74.5 65 -74.5 C 51.469 -74.5 40.5 -63.531 40.5 -50 C 40.5 -46.725 41.142 -43.601 42.308 -40.745 L 14.762 -19.555 C 12.323 -21.399 9.529 -22.797 6.5 -23.628 L 6.5 -76.372 C 15.949 -78.965 23.115 -87.074 24.321 -97.022 Z M -61 -57 C -69.284 -57 -76 -50.284 -76 -42 C -76 -33.716 -69.284 -27 -61 -27 C -52.716 -27 -46 -33.716 -46 -42 C -46 -50.284 -52.716 -57 -61 -57 Z"/>
 </svg>

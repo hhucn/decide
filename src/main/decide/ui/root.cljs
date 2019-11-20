@@ -221,6 +221,10 @@
 (defn nav-link [label href]
   (dom/li :.nav-item (dom/a :.btn.btn-light {:href href} label)))
 
+(def dbas-logo
+  (dom/svg {:fill "currentColor" :stroke "currentColor" :viewBox "-100 -100 200 200" :width "2em" :height "2em"}
+    (dom/path {:d "M100 0c0 19-5 37-15 53a24 24 0 00-22 1L21 12a24 24 0 002-21l27-21a25 25 0 0039-15c7 13 11 29 11 45zM-24 0c0 6 2 12 5 16l-23 36a24 24 0 00-31 16A100 100 0 01-24-97c1 10 8 18 18 21v52c-11 3-18 13-18 24zM0 25c4 0 9-2 12-4l42 42a24 24 0 00-1 22 100 100 0 01-87 9 24 24 0 003-35l23-36 8 2zM24-97c16 4 31 12 43 23h-2a24 24 0 00-23 33L15-20l-8-4v-52c9-3 16-11 17-21zm-85 40a15 15 0 100 30 15 15 0 000-30z"})))
+
 (defsc TopChrome [this {:root/keys [router current-session login]
                         ::dr/keys [id]}]
   {:query              [{:root/router (comp/get-query TopRouter)}
@@ -244,7 +248,7 @@
         (dom/div :.container
           (dom/a :.navbar-brand.d-flex.align-items-center
             {:href "/"}
-            (dom/img :.mr-2 {:src "/dbas_logo_round.svg" :style {:height "2rem"}})
+            (dom/picture :.mr-2 dbas-logo)
             "decide")
           (dom/button
             {:type          "button",

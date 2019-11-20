@@ -292,10 +292,10 @@
                       data-tree))
    :initial-state (fn [{:proposal/keys [id] :as params}]
                     (let [argument (into {:argument/id id} (filter (ns? "argument")) params)]
-                      {:proposal/id                    id
-                       :argumentation/new-argument     (comp/initial-state NewArgumentForm {:proposal/id id})
-                       :argumentation/upstream         []
-                       :argumentation/current-argument (comp/initial-state ProCon argument)}))}
+                      {:proposal/id                id
+                       :argumentation/new-argument (comp/initial-state NewArgumentForm {:proposal/id id})
+                       :argumentation/upstream     []
+                       :>/current-argument         (comp/initial-state ProCon argument)}))}
   (div
     (dom/ol :.list-group
       (map-indexed
