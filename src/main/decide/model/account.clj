@@ -50,13 +50,13 @@
             :display-name (default-display-name firstname)
             :firstname    firstname
             :lastname     lastname
-            :mail         mail})
+            :email        mail})
 
 
 (defresolver account-resolver [{:keys [db] :as env} {:account/keys [id]}]
   {::pc/input  #{:account/id}
-   ::pc/output [:account/display-name :account/firstname :account/lastname :account/mail]}
+   ::pc/output [:account/display-name :account/firstname :account/lastname :account/email :account/active?]}
   (when (account-exists? db id)
-    (get-account db id [:account/display-name :account/firstname :account/lastname :account/mail])))
+    (get-account db id [:account/display-name :account/firstname :account/lastname :account/email :account/active?])))
 
 (def resolvers [account-resolver])

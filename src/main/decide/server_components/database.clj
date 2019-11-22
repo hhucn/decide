@@ -56,7 +56,7 @@
                      #:db{:ident       :account/lastname
                           :valueType   :db.type/string
                           :cardinality :db.cardinality/one}
-                     #:db{:ident       :account/mail
+                     #:db{:ident       :account/email
                           :valueType   :db.type/string
                           :cardinality :db.cardinality/one}
                      #:db{:ident       :account/active?

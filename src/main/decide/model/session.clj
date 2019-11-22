@@ -34,7 +34,7 @@
           (assoc resp :session new-session))))))
 
 (defmutation login [{:keys [connection] :as env} {:keys [username password]}]
-  {::pc/output [:session/valid? :account/id :account/display-name :account/firstname :account/lastname :account/mail]}
+  {::pc/output [:session/valid? :account/id :account/display-name :account/firstname :account/lastname :account/email]}
   (log/info "Authenticating" username)
   (if-some [ldap-entry (ldap/login username password)]
     (let [{:keys [account/id] :as account} (account/ldap->account ldap-entry)]
