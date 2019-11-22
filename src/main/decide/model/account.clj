@@ -1,7 +1,6 @@
 (ns decide.model.account
   (:require
     [clojure.string :refer [split]]
-    [decide.server-components.database :as db]
     [decide.server-components.ldap :as ldap]
     [datahike.api :as d]
     [datahike.core :refer [conn? db?]]

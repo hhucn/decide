@@ -1,7 +1,6 @@
 (ns decide.model.session
   (:require
     [clojure.string :refer [split]]
-    [decide.server-components.database :as db]
     [datahike.api :as d]
     [datahike.core :refer [conn? db?]]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
