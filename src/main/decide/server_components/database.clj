@@ -43,10 +43,26 @@
                        :db/cardinality :db.cardinality/one
                        :db/valueType   :db.type/long}])
 
-(def account-schema [{:db/ident       :account/id
-                      :db/cardinality :db.cardinality/one
-                      :db/valueType   :db.type/string
-                      :db/unique      :db.unique/identity}])
+(def account-schema [#:db{:ident       :account/id
+                          :valueType   :db.type/string
+                          :cardinality :db.cardinality/one
+                          :unique      :db.unique/identity}
+                     #:db{:ident       :account/display-name
+                          :valueType   :db.type/string
+                          :cardinality :db.cardinality/one}
+                     #:db{:ident       :account/firstname
+                          :valueType   :db.type/string
+                          :cardinality :db.cardinality/one}
+                     #:db{:ident       :account/lastname
+                          :valueType   :db.type/string
+                          :cardinality :db.cardinality/one}
+                     #:db{:ident       :account/mail
+                          :valueType   :db.type/string
+                          :cardinality :db.cardinality/one}
+                     #:db{:ident       :account/active?
+                          :valueType   :db.type/boolean
+                          :cardinality :db.cardinality/one}])
+
 
 
 (def schema (into [] cat [argument-schema
@@ -67,6 +83,7 @@
                      #:argument{:id            (str (named-uuid "example-position"))
                                 :text          "Die Umweltspur in Düsseldorf sollte beibehalten werden"
                                 :type          :position
+                                :subtype       :position
                                 :proposal/subtext
                                                "Hier steht eine genaue Beschreibung des Vorschlags. Mit seinen Einschränkungen und Bedingungen. \n\nVielleicht auch Anmerkungen von der Moderation. \nVielleicht zusammen, vielleicht alleine stehend.\n\nLorem ipsum dolor sit amet und soweiter und mehr Text, denn man gar nicht lesen braucht, weil er nur den Platz füllen soll. Jetzt solltest du aufhören zu lesen!"
                                 :proposal/cost 10000
