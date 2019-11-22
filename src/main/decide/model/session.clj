@@ -15,39 +15,45 @@
 (defonce account-database (atom {}))
 
 (defresolver current-session-resolver [env input]
-  {::pc/output [{::current-session [:session/valid? :account/display-name]}]}
-  (let [{:keys [account/name session/valid?]} (get-in env [:ring/request :session])]
+  {::pc/output [{::current-session [:session/valid? :account/id]}]}
+  (let [{:keys [account/id session/valid?] :as session} (get-in env [:ring/request :session])]
+    (log/info session)
     (if valid?
       (do
-        (log/info name "already logged in!")
-        {::current-session {:session/valid? true :account/display-name name}})
+        (log/info id "already logged in!")
+        {::current-session {:session/valid? true :account/id id}})
       {::current-session {:session/valid? false}})))
 
 (defn response-updating-session
   "Uses `mutation-response` as the actual return value for a mutation, but also stores the data into the (cookie-based) session."
-  [mutation-env mutation-response]
+  [mutation-env mutation-response upsert-session]
   (let [existing-session (some-> mutation-env :ring/request :session)]
     (fmw/augment-response
       mutation-response
       (fn [resp]
-        (let [new-session (merge existing-session mutation-response)]
+        (let [new-session (merge existing-session upsert-session)]
           (assoc resp :session new-session))))))
 
 (defmutation login [{:keys [connection] :as env} {:keys [username password]}]
   {::pc/output [:session/valid? :account/id :account/display-name :account/firstname :account/lastname :account/mail]}
   (log/info "Authenticating" username)
   (if-some [ldap-entry (ldap/login username password)]
-    (response-updating-session env
-      (merge
-        {:session/valid? true}
-        (account/ldap->account ldap-entry)))
+    (let [{:keys [account/id] :as account} (account/ldap->account ldap-entry)]
+      (do
+        (d/transact! connection [account])
+        (response-updating-session env
+          (merge
+            {:session/valid? true}
+            account)
+          {:session/valid? true
+           :account/id     id})))
     (do
       (log/error "Invalid credentials supplied for" username)
       (throw (ex-info "Invalid credentials" {:username username})))))
 
 (defmutation logout [env params]
   {::pc/output [:session/valid?]}
-  (response-updating-session env {:session/valid? false :account/id ""}))
+  (response-updating-session env {:session/valid? false} {:session/valid? false :account/id ""}))
 
 (defmutation signup! [env {:keys [email password]}]
   {::pc/output [:signup/result]}
@@ -55,4 +61,4 @@
                                        :password password})
   {:signup/result "OK"})
 
-(def resolvers [current-session-resolver login logout signup!])
+(def resolvers [current-session-resolver login logout])
