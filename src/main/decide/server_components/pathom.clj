@@ -21,8 +21,12 @@
    ::pc/output [:com.wsscode.pathom.viz.index-explorer/index]}
   {:com.wsscode.pathom.viz.index-explorer/index
    (-> (get env ::pc/indexes)
-     (update ::pc/index-resolvers #(into [] (map (fn [[k v]] [k (dissoc v ::pc/resolve)])) %))
-     (update ::pc/index-mutations #(into [] (map (fn [[k v]] [k (dissoc v ::pc/mutate)])) %)))})
+     ; this is necessary for now, because the index contains functions which can not be serialized by transit.
+     (update ::pc/index-resolvers #(into {} (map (fn [[k v]] [k (dissoc v ::pc/resolve)])) %))
+     (update ::pc/index-mutations #(into {} (map (fn [[k v]] [k (dissoc v ::pc/mutate)])) %))
+     ; to minimize clutter in the Index Explorer
+     #_(update ::pc/index-resolvers (fn [rs] (apply dissoc rs (filter #(clojure.string/starts-with? (namespace %) "com.wsscode.pathom") (keys rs)))))
+     #_(update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(clojure.string/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
 
 (def all-resolvers [acct/resolvers session/resolvers index-explorer arg/resolvers proposal/resolvers
                     (pc/alias-resolver :proposal/id :argument/id)])
