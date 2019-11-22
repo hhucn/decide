@@ -19,14 +19,13 @@
     util/str-id->uuid-id))
 
 (defresolver resolve-all-proposals [{:keys [db]} _]
-  {::pc/input  #{}
-   ::pc/output [{:all-proposals [:proposal/id]}]}
-  (let [query-result (d/q '[:find ?id
+  {::pc/output [{:all-proposals [:proposal/id]}]}
+  (let [query-result (d/q '[:find [?id ...]
                             :where
                             [?e :argument/type :position]
                             [?e :argument/id ?id]]
                        db)]
-    {:all-proposals (for [[id] query-result]
+    {:all-proposals (for [id query-result]
                       {:proposal/id (util/str->uuid id)})}))
 
 (def resolvers [resolve-proposal resolve-all-proposals])
