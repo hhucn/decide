@@ -3,8 +3,10 @@
     [decide.server-components.config :refer [config]]
     [datahike.api :as d]
     [datahike.core :as datahike]
+    [datahike.db :as datahike-db]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [mount.core :refer [defstate args]]
+    [clojure.spec.alpha :as s]
     [taoensso.timbre :as log])
   (:import (java.util UUID)))
 
@@ -41,9 +43,15 @@
                        :db/cardinality :db.cardinality/one
                        :db/valueType   :db.type/long}])
 
+(def account-schema [{:db/ident       :account/id
+                      :db/cardinality :db.cardinality/one
+                      :db/valueType   :db.type/string
+                      :db/unique      :db.unique/identity}])
 
 
-(def schema (into [] cat [argument-schema proposal-schema]))
+(def schema (into [] cat [argument-schema
+                          proposal-schema
+                          account-schema]))
 
 (>defn named-uuid [s]
   [string? => uuid?]

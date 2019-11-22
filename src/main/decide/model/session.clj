@@ -3,12 +3,14 @@
     [clojure.string :refer [split]]
     [decide.server-components.database :as db]
     [datahike.api :as d]
+    [datahike.core :refer [conn? db?]]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
     [clojure.spec.alpha :as s]
     [com.fulcrologic.fulcro.server.api-middleware :as fmw]
-    [decide.server-components.ldap :as ldap]))
+    [decide.server-components.ldap :as ldap]
+    [decide.model.account :as account]))
 
 (defonce account-database (atom {}))
 
@@ -31,21 +33,14 @@
         (let [new-session (merge existing-session mutation-response)]
           (assoc resp :session new-session))))))
 
-(>defn default-display-name [{:keys [firstname]}]
-  [(s/keys :req-un [::ldap/firstname]) => string?]
-  (first (split firstname #"\s")))
-
 (defmutation login [{:keys [connection] :as env} {:keys [username password]}]
   {::pc/output [:session/valid? :account/id :account/display-name :account/firstname :account/lastname :account/mail]}
   (log/info "Authenticating" username)
-  (if-some [{:keys [uid firstname lastname mail] :as account} (ldap/login username password)]
+  (if-some [ldap-entry (ldap/login username password)]
     (response-updating-session env
-      {:session/valid?       true
-       :account/id           uid
-       :account/display-name (default-display-name account)
-       :account/firstname    firstname
-       :account/lastname     lastname
-       :account/mail         mail})
+      (merge
+        {:session/valid? true}
+        (account/ldap->account ldap-entry)))
     (do
       (log/error "Invalid credentials supplied for" username)
       (throw (ex-info "Invalid credentials" {:username username})))))
