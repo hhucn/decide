@@ -197,8 +197,9 @@
 (dr/defrouter TopRouter [this {:keys [current-state pending-path-segment route-factory route-props]}]
   {:router-targets [Main proposal/ProposalCollection Settings proposal/ProposalDetails]}
   (case current-state
-    :pending (dom/div "Loading..."
-               (dom/button {:onClick #(dr/change-route this ["settings" "pane2"])} "cancel"))
+    :pending (dom/div :.d-flex.justify-content-center
+               (dom/div :.spinner-border.ml-auto {:role "status"}
+                 (dom/span :.sr-only "Loading...")))
     :failed (dom/div
               (dom/div "Ooops!")
               (dom/button {:onClick #(dr/change-route this ["settings"])} "Go to settings"))
