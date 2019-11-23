@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="clsj REPl" type="ClojureREPL" factoryName="Remote" activateToolWindowBeforeRun="false">
+  <configuration default="false" name="cljs REPl" type="ClojureREPL" factoryName="Remote" activateToolWindowBeforeRun="false">
     <module name="decide" />
     <setting name="host" value="localhost" />
     <setting name="port" value="9000" />
