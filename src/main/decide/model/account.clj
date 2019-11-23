@@ -1,6 +1,6 @@
 (ns decide.model.account
   (:require
-    [clojure.string :refer [split]]
+    [clojure.string :refer [split blank?]]
     [decide.server-components.ldap :as ldap]
     [datahike.api :as d]
     [datahike.core :refer [conn? db?]]
@@ -9,7 +9,16 @@
     [taoensso.timbre :as log]
     [clojure.spec.alpha :as s]))
 
-(s/def ::id string?)
+(s/def :account/id string?)
+(s/def :account/display-name (s/and string? (complement blank?)))
+(s/def :account/firstname string?)
+(s/def :account/lastname string?)
+(s/def :account/email string?)
+(s/def :account/active? boolean?)
+(s/def ::account (s/keys :req [:account/id
+                               :account/firstname :account/lastname
+                               :account/display-name
+                               :account/email]))
 
 (>defn all-account-ids
   "Returns a sequence of UUIDs for all of the active accounts in the system"
@@ -22,15 +31,18 @@
     db))
 
 (defresolver all-users-resolver [{:keys [db]} input]
-  {;;GIVEN nothing (e.g. this is usable as a root query)
-   ;; I can output all accounts. NOTE: only ID is needed...other resolvers resolve the rest
-   ::pc/output [{:all-accounts [:account/id]}]}
+  {::pc/output [{:all-accounts [:account/id]}]}
   {:all-accounts (mapv
                    (fn [id] {:account/id id})
                    (all-account-ids db))})
 
+(>defn upsert-account!
+  [conn account]
+  [conn? ::account => future?]
+  (d/transact! conn [account]))
+
 (>defn get-account [db id subquery]
-  [db? ::id vector? => (? map?)]
+  [db? ::id vector? => ::account]
   (d/pull db subquery [:account/id id]))
 
 (>defn default-display-name [firstname]
@@ -45,7 +57,7 @@
                  db id))))
 
 (>defn ldap->account [{:keys [uid firstname lastname mail]}]
-  [::ldap/ldap-entity => map?]
+  [::ldap/ldap-entity => ::account]
   #:account{:id           uid
             :display-name (default-display-name firstname)
             :firstname    firstname

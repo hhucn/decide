@@ -39,7 +39,7 @@
   (if-some [ldap-entry (ldap/login username password)]
     (let [{:keys [account/id] :as account} (account/ldap->account ldap-entry)]
       (do
-        (d/transact! connection [account])
+        (account/upsert-account! connection account)
         (response-updating-session env
           (merge
             {:session/valid? true}
