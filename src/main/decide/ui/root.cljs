@@ -114,7 +114,7 @@
                    :onMouseEnter #(df/load! this [:account/id current-user] Account)}
                   (dom/span display-name))
                 (let [possible-display-names (into #{current-user} (display-name-permutations firstname))]
-                  (div :.dropdown-menu.dropdown-menu-right
+                  (div :.dropdown-menu.dropdown-menu-right.shadow
                     (dom/h6 :.dropdown-header "Alternative Anzeigenamen")
                     (for [name possible-display-names]
                       (dom/a :.dropdown-item name)))))
