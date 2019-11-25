@@ -83,6 +83,10 @@
 
 (declare Session Account)
 
+(defn display-name-permutations [firstname]
+  (let [names (str/split firstname \space)]
+    (map #(take (inc %) names) (range (count names)))))
+
 (defsc Login [this {:account/keys [id]
                     :ui/keys      [error open?] :as props}]
   {:query         [:ui/open? :ui/error :account/id
@@ -109,8 +113,9 @@
                    :data-toggle  "dropdown"
                    :onMouseEnter #(df/load! this [:account/id current-user] Account)}
                   (dom/span display-name))
-                (let [possible-display-names #{firstname current-user}]
-                  (div :.dropdown-menu
+                (let [possible-display-names (into #{current-user} (display-name-permutations firstname))]
+                  (div :.dropdown-menu.dropdown-menu-right
+                    (dom/h6 :.dropdown-header "Alternative Anzeigenamen")
                     (for [name possible-display-names]
                       (dom/a :.dropdown-item name)))))
               (dom/button :.btn.btn-outline-dark
