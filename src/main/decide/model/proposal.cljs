@@ -1,17 +1,19 @@
 (ns decide.model.proposal
-  (:require [com.fulcrologic.fulcro.dom :as dom :refer [div]]
+  (:require [com.fulcrologic.fulcro.dom :as dom :refer [div form p button input label]]
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
             [com.fulcrologic.fulcro.algorithms.merge :as mrg]
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-            [clojure.string :refer [split-lines]]
+            [clojure.string :refer [split-lines blank? split]]
+            [clojure.edn :as edn]
             [decide.model.argument :as arg]
             ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline IoMdClose]]
             [taoensso.timbre :as log]
             [com.fulcrologic.fulcro.algorithms.merge :as merge]
             [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
             [com.fulcrologic.fulcro.data-fetch :as df]
-            [decide.model.argument :as argument]))
+            [decide.model.argument :as argument]
+            [com.fulcrologic.fulcro.dom.events :as evt]))
 
 (declare ProposalDetails)
 
@@ -68,44 +70,73 @@
 
 (def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :argument/id}))
 
+(defn proposal-card [comp {:proposal/keys [id subtitle cost]
+                           :argument/keys [text]}]
+  (div :.proposal
+    (div :.proposal-buttons
+      (dom/button :.btn.btn-outline-success
+        (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
+      (dom/div :.spacer)
+      (dom/button :.btn.btn-outline-danger
+        (IoIosCloseCircleOutline #js {:size "3rem"})))
+
+    (div :.proposal-content.btn-light
+      {:style       {:cursor "pointer"}
+       :data-toggle "modal"
+       :data-target (str "#modal-" id)}
+      (div
+        {:style {:display        "flex"
+                 :padding        "10px 5px 10px 10px"
+                 :justifyContent "space-between"}}
+        (dom/h4 :.proposal-title text)
+        (dom/button :.btn
+          {:style {:position "absolute"
+                   :right    "0px"
+                   :top      "0px"
+                   :padding  "0.2rem 0"}}
+          (IoMdMore #js {:size "24px"})))
+      (div
+        {:style {:display        "flex"
+                 :padding        "10px"
+                 :justifyContent "space-between"}}
+        (div :.proposal-subtitle subtitle)
+        (div :.proposal-price
+          (dom/span :.proposal-price__text (str cost) " €"))))))
+
+(defn form-dummy-proposal-card [{:proposal/keys [subtitle cost]
+                                 :argument/keys [text]}]
+  (div :.proposal.mx-auto
+    (div :.proposal-buttons
+      (dom/button :.btn.btn-outline-success
+        {:disabled true}
+        (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
+      (dom/div :.spacer)
+      (dom/button :.btn.btn-outline-danger
+        {:disabled true}
+        (IoIosCloseCircleOutline #js {:size "3rem"})))
+
+    (div :.proposal-content
+      (div
+        {:style {:display        "flex"
+                 :padding        "10px 5px 10px 10px"
+                 :justifyContent "space-between"}}
+        (dom/h4 :.proposal-title text))
+      (div
+        {:style {:display        "flex"
+                 :padding        "10px"
+                 :justifyContent "space-between"}}
+        (dom/small :.proposal-subtitle subtitle)
+        (div :.proposal-price
+          (dom/span :.proposal-price__text (str cost) " €"))))))
+
 (defsc ProposalCard [this {:keys          [>/details]
                            :proposal/keys [id subtitle cost]
-                           :argument/keys [text]}]
-
+                           :argument/keys [text] :as props}]
   {:query         [:proposal/id :argument/text :proposal/subtitle :proposal/cost
                    {:>/details (comp/get-query ProposalDetails)}]
    :ident         :proposal/id
    :initial-state (fn [_] {:ui/modal-open? false})}
-  [(div :.proposal
-     (div :.proposal-buttons
-       (dom/button :.btn.btn-outline-success
-         (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
-       (dom/div :.spacer)
-       (dom/button :.btn.btn-outline-danger
-         (IoIosCloseCircleOutline #js {:size "3rem"})))
-
-     (div :.proposal-content.btn-light
-       {:style       {:cursor "pointer"}
-        :data-toggle "modal"
-        :data-target (str "#modal-" id)}
-       (div
-         {:style {:display        "flex"
-                  :padding        "10px 5px 10px 10px"
-                  :justifyContent "space-between"}}
-         (dom/h4 :.proposal-title text)
-         (dom/button :.btn
-           {:style {:position "absolute"
-                    :right    "0px"
-                    :top      "0px"
-                    :padding  "0.2rem 0"}}
-           (IoMdMore #js {:size "24px"})))
-       (div
-         {:style {:display        "flex"
-                  :padding        "10px"
-                  :justifyContent "space-between"}}
-         (div :.proposal-subtitle subtitle)
-         (div :.proposal-price
-           (dom/span :.proposal-price__text (str cost) " €")))))
+  [(proposal-card this props)
    (div :.modal.fade
      {:id (str "modal-" id)}
      (div :.modal-dialog.modal-xl
@@ -124,18 +155,81 @@
       (dom/div :.ui.error.message {:classes [(when valid? "hidden")]}
         error-message))))
 
-(defsc EnterProposal [this props]
-  {:query         [:account/id :account/password :account/password-again fs/form-config-join]
+(defn- with-placeholder [value placeholder]
+  (if (blank? value)
+    placeholder
+    value))
+
+(defsc EnterProposal [this {:keys [title cost summary]}]
+  {:query         [:title :cost :summary fs/form-config-join]
    :initial-state (fn [_]
                     (fs/add-form-config EnterProposal
-                      {:account/id             ""
-                       :account/password       ""
-                       :account/password-again ""}))
-   :form-fields   #{:account/id :account/password :account/password-again}})
+                      {:title   ""
+                       :cost    ""
+                       :summary ""}))
+   :ident         (fn [] [:component/id :new-proposal])
+   :form-fields   #{:title :cost :summary}}
+  (let [title-max-length    120
+        title-warn-length   (- title-max-length 10)
+        summary-max-length  500
+        summary-warn-length (- summary-max-length 20)
 
-(defsc ProposalCollection [this {:keys [all-proposals]}]
-  {:query         [{[:all-proposals '_] (comp/get-query ProposalCard)}]
-   :initial-state {:all-proposals []}
+        short-summary       (first (split summary #"\n\s*\n"))]
+    (div
+      (form-dummy-proposal-card {:argument/text     (with-placeholder title "Es sollte ein Wasserspender im Flur aufgestellt werden.")
+                                 :proposal/cost     (with-placeholder cost "0")
+                                 :proposal/subtitle (with-placeholder short-summary "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben.")})
+      (form :.p-5
+        {:onSubmit evt/prevent-default!}
+
+        (let [chars-on-limit? (> (count title) title-warn-length)
+              chars-exceeded? (> (count title) title-max-length)]
+          (div :.form-group
+            (label "Vorschlag")
+            (input :.form-control
+              {:placeholder "Es sollte ein Wasserspender im Flur aufgestellt werden."
+               :value       title
+               :required    true
+               :onChange    #(m/set-string! this :title :event %)})
+            (dom/small :.form-text
+              {:style   {:display (when-not chars-on-limit? "none")}
+               :classes [(when chars-exceeded? "text-danger")]}
+              (str (count title) "/" title-max-length " Buchstaben")
+              (when chars-exceeded? ". Bitte beschränken Sie sich auf das Limit!"))))
+
+        (div :.form-group
+          (label "Geschätzte Kosten")
+          (input :.form-control
+            {:type        "number"
+             :value       cost
+             :placeholder "1000"
+             :min         "0"
+             :step        "1"
+             :required    true
+             :onChange    #(m/set-string! this :cost :event %)}))
+
+        (let [chars-on-limit? (> (count title) summary-warn-length)
+              chars-exceeded? (> (count title) summary-max-length)]
+          (div :.form-group
+            (label "Details zum Vorschlag")
+            (dom/textarea :.form-control
+              {:placeholder "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben."
+               :onChange    #(m/set-string! this :summary :event %)})
+            (dom/small :.form-text
+              {:style   {:display (when-not chars-on-limit? "none")}
+               :classes [(when chars-exceeded? "text-danger")]}
+              (str (count title) "/" title-max-length " Buchstaben")
+              (when chars-exceeded? ". Bitte beschränken Sie sich auf das Limit!"))))
+
+        (button :.btn.btn-primary "Submit")))))
+
+(def ui-new-proposal-form (comp/factory EnterProposal))
+
+(defsc ProposalCollection [this {:keys [all-proposals new-proposal-form]}]
+  {:query         [{[:all-proposals '_] (comp/get-query ProposalCard)}
+                   {:new-proposal-form (comp/get-query EnterProposal)}]
+   :initial-state (fn [_] {:all-proposals     []
+                           :new-proposal-form (comp/initial-state EnterProposal nil)})
    :ident         (fn [] [:component/id :proposals])
    :route-segment ["proposals"]
    :will-enter    (fn [app _]
@@ -144,6 +238,9 @@
                          {:post-mutation        `dr/target-ready
                           :post-mutation-params {:target [:component/id :proposals]}})))}
   (div :.container
+    (button :.btn.btn-outline-primary "Neuen Vorschlag hinzufügen")
+    (div :.collapse.show.p-3.border
+      (ui-new-proposal-form new-proposal-form))
     (div :.card-deck.d-flex.justify-content-center
       (for [proposal all-proposals]
         (dom/div :.col-lg-6.p-3
