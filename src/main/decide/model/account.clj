@@ -54,7 +54,7 @@
   (d/transact! conn [account]))
 
 (>defn get-account [db id subquery]
-  [db? ::id (s/coll-of keyword? :kind vector?) => (subset-of ::account)]
+  [db? :account/id (s/coll-of keyword? :kind vector?) => (subset-of ::account)]
   (d/pull db subquery [:account/id id]))
 
 (>defn default-display-name [firstname]
@@ -62,7 +62,7 @@
   (first (split firstname #"\s")))
 
 (>defn account-exists? [db id]
-  [db? ::id => boolean?]
+  [db? :account/id => boolean?]
   (not (empty? (d/q '[:find ?e
                       :in $ ?id
                       :where [?e :account/id ?id]]
@@ -80,12 +80,10 @@
 (defresolver account-resolver [{:keys [db] :as env} {:account/keys [id]}]
   {::pc/input  #{:account/id}
    ::pc/output [:account/display-name :account/firstname :account/lastname :account/email :account/active?]}
-  (do
-    (log/info env)
-    (when (account-exists? db id)
-      (let [{req-id :account/id valid? :session/valid?} (get-in env [:ring/request :session])
-            allowed? (and (= req-id id) valid?)]
-        (cond-> (get-account db id [:account/display-name :account/firstname :account/lastname :account/email :account/active?])
-          (not allowed?) (redact :account/firstname :account/lastname :account/email :account/active?))))))
+  (when (account-exists? db id)
+    (let [{req-id :account/id valid? :session/valid?} (get-in env [:ring/request :session])
+          allowed? (and (= req-id id) valid?)]
+      (cond-> (get-account db id [:account/display-name :account/firstname :account/lastname :account/email :account/active?])
+        (not allowed?) (redact :account/firstname :account/lastname :account/email :account/active?)))))
 
 (def resolvers [account-resolver])
