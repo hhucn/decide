@@ -28,6 +28,10 @@
        :opt-un ~(vec (concat opt-un req-un))
        :gen ~gen)))
 
+(>defn redact [m & ks]
+  [map? (s/* any?) => map?]
+  (merge m (apply hash-map (interleave ks (repeat :auth/REDACTED)))))
+
 (>defn all-account-ids
   "Returns a sequence of UUIDs for all of the active accounts in the system"
   [db]
@@ -76,10 +80,12 @@
 (defresolver account-resolver [{:keys [db] :as env} {:account/keys [id]}]
   {::pc/input  #{:account/id}
    ::pc/output [:account/display-name :account/firstname :account/lastname :account/email :account/active?]}
-  (when (account-exists? db id)
-    (let [{req-id :account/id valid? :session/valid?} (get-in env [:ring/request :session])]
-      (if (and (= req-id id) valid?)
-        (get-account db id [:account/display-name :account/firstname :account/lastname :account/email :account/active?])
-        (get-account db id [:account/display-name])))))
+  (do
+    (log/info env)
+    (when (account-exists? db id)
+      (let [{req-id :account/id valid? :session/valid?} (get-in env [:ring/request :session])
+            allowed? (and (= req-id id) valid?)]
+        (cond-> (get-account db id [:account/display-name :account/firstname :account/lastname :account/email :account/active?])
+          (not allowed?) (redact :account/firstname :account/lastname :account/email :account/active?))))))
 
 (def resolvers [account-resolver])
