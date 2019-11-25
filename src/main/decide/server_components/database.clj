@@ -28,6 +28,12 @@
                       {:db/ident       :argument/text
                        :db/cardinality :db.cardinality/one
                        :db/valueType   :db.type/string}
+                      {:db/ident       :argument/author
+                       :db/cardinality :db.cardinality/one
+                       :db/valueType   :db.type/ref}
+                      {:db/ident       :argument/created-when
+                       :db/cardinality :db.cardinality/one
+                       :db/valueType   :db.type/instant}
 
                       {:db/ident       :argument/pros
                        :db/cardinality :db.cardinality/many
