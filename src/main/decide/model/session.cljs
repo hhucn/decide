@@ -54,7 +54,7 @@
     :error          [:actor/login-form :ui/error]
     :modal-open?    [:actor/login-form :ui/open?]
     :session-valid? [:actor/current-session :session/valid?]
-    :current-user   [:actor/current-session :account/display-name]}
+    :current-user   [:actor/current-session :>/current-user]}
 
    ::uism/states
    {:initial
@@ -64,7 +64,8 @@
                                                                (uism/assoc-aliased :error "")
                                                                (uism/load ::current-session :actor/current-session
                                                                  {::uism/ok-event    :event/complete
-                                                                  ::uism/error-event :event/failed})))}
+                                                                  ::uism/error-event :event/failed
+                                                                  :focus             [:session/valid? {:>/current-user [:account/id :account/display-name]}]})))}
                            :event/failed   {::uism/target-state :state/logged-out}
                            :event/complete {::uism/target-states #{:state/logged-in :state/logged-out}
                                             ::uism/handler       #(process-session-result % "")}}}
