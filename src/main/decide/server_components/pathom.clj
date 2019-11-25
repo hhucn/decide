@@ -11,6 +11,7 @@
     [decide.model.session :as session]
     [decide.model.argument :as arg]
     [decide.model.proposal :as proposal]
+    [decide.model.process :as process]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :as db]
     [datahike.api :as d]
@@ -29,6 +30,7 @@
      #_(update ::pc/index-mutations (fn [rs] (apply dissoc rs (filter #(clojure.string/starts-with? (namespace %) "com.wsscode.pathom") (keys rs))))))})
 
 (def all-resolvers [acct/resolvers session/resolvers index-explorer arg/resolvers proposal/resolvers
+                    process/resolvers
                     (pc/alias-resolver :proposal/id :argument/id)])
 
 (defn preprocess-parser-plugin
