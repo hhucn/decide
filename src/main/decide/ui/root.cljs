@@ -81,7 +81,7 @@
         (dom/button :.ui.primary.button {:onClick #(submit! true)}
           "Sign Up")))))
 
-(declare Session)
+(declare Session Account)
 
 (defsc Login [this {:account/keys [id]
                     :ui/keys      [error open?] :as props}]
@@ -91,7 +91,9 @@
    :initial-state {:account/id "" :ui/error ""}
    :ident         (fn [] [:component/id :login])}
   (let [current-state (uism/get-active-state this ::session/session)
-        {current-user :account/display-name} (get props [:component/id :session])
+        {current-user :account/id
+         display-name :account/display-name
+         firstname    :account/firstname} (get-in props [[:component/id :session] :>/current-user])
         initial?      (= :initial current-state)
         loading?      (= :state/checking-session current-state)
         logged-in?    (= :state/logged-in current-state)
@@ -101,9 +103,16 @@
         (dom/div
           (if logged-in?
             (div :.btn-group
-              (dom/button :.btn.btn-outline-dark
-                {:disabled true}
-                (dom/span current-user))
+              (div :.btn-group
+                (dom/button :.btn.btn-outline-dark.dropdown-toggle
+                  {:disabled     false
+                   :data-toggle  "dropdown"
+                   :onMouseEnter #(df/load! this [:account/id current-user] Account)}
+                  (dom/span display-name))
+                (let [possible-display-names #{firstname current-user}]
+                  (div :.dropdown-menu
+                    (for [name possible-display-names]
+                      (dom/a :.dropdown-item name)))))
               (dom/button :.btn.btn-outline-dark
                 {:onClick #(uism/trigger! this ::session/session :event/logout)}
                 "Log out"))
@@ -207,17 +216,20 @@
 
 (def ui-top-router (comp/factory TopRouter))
 
+(defsc Account [_ _]
+  {:query [:account/id :account/display-name :account/firstname :account/lastname :account/email]
+   :ident :account/id})
+
 (defsc Session
   "Session representation. Used primarily for server queries. On-screen representation happens in Login component."
-  [this {:keys [:session/valid? :account/display-name] :as props}]
-  {:query         [:session/valid? :account/display-name]
+  [this {:keys [:session/valid?] :as props}]
+  {:query         [:session/valid?
+                   {:>/current-user (comp/get-query Account)}]
    :ident         (fn [] [:component/id :session])
    :pre-merge     (fn [{:keys [data-tree]}]
-                    (merge {:session/valid? false :account/display-name ""}
+                    (merge {:session/valid? false :>/current-user {:account/id "" :account/display-name ""}}
                       data-tree))
-   :initial-state {:session/valid? false :account/display-name ""}})
-
-(def ui-session (prim/factory Session))
+   :initial-state {:session/valid? false :>/current-user {:account/id "" :account/display-name ""}}})
 
 (defn nav-link [label href]
   (dom/li :.nav-item (dom/a :.btn.btn-light {:href href} label)))
