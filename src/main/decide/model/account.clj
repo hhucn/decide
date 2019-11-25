@@ -20,6 +20,14 @@
                                :account/display-name
                                :account/email]))
 
+(defmacro subset-of
+  "Returns a spec that makes all required keys in a map optional. Leaves `gen` as it is"
+  [spec]
+  (let [[_ & {:keys [req req-un opt opt-un gen]}] (s/form spec)]
+    `(s/keys :opt ~(vec (concat req opt))
+       :opt-un ~(vec (concat opt-un req-un))
+       :gen ~gen)))
+
 (>defn all-account-ids
   "Returns a sequence of UUIDs for all of the active accounts in the system"
   [db]
@@ -42,7 +50,7 @@
   (d/transact! conn [account]))
 
 (>defn get-account [db id subquery]
-  [db? ::id vector? => ::account]
+  [db? ::id (s/coll-of keyword? :kind vector?) => (subset-of ::account)]
   (d/pull db subquery [:account/id id]))
 
 (>defn default-display-name [firstname]
@@ -69,6 +77,9 @@
   {::pc/input  #{:account/id}
    ::pc/output [:account/display-name :account/firstname :account/lastname :account/email :account/active?]}
   (when (account-exists? db id)
-    (get-account db id [:account/display-name :account/firstname :account/lastname :account/email :account/active?])))
+    (let [{req-id :account/id valid? :session/valid?} (get-in env [:ring/request :session])]
+      (if (and (= req-id id) valid?)
+        (get-account db id [:account/display-name :account/firstname :account/lastname :account/email :account/active?])
+        (get-account db id [:account/display-name])))))
 
 (def resolvers [account-resolver])
