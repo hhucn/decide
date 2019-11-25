@@ -17,7 +17,8 @@
     [clojure.string :as str]
     [com.fulcrologic.fulcro.data-fetch :as df]
     [decide.model.argument :as argument]
-    [decide.model.proposal :as proposal]))
+    [decide.model.proposal :as proposal]
+    [decide.model.account :as account]))
 
 (defn field [{:keys [label valid? error-message] :as props}]
   (let [input-props (-> props (assoc :name label) (dissoc :label :valid? :error-message))]
@@ -109,15 +110,17 @@
             (div :.btn-group
               (div :.btn-group
                 (dom/button :.btn.btn-outline-dark.dropdown-toggle
-                  {:disabled     false
-                   :data-toggle  "dropdown"
+                  {:data-toggle  "dropdown"
                    :onMouseEnter #(df/load! this [:account/id current-user] Account)}
                   (dom/span display-name))
                 (let [possible-display-names (into #{current-user} (display-name-permutations firstname))]
                   (div :.dropdown-menu.dropdown-menu-right.shadow
                     (dom/h6 :.dropdown-header "Alternative Anzeigenamen")
                     (for [name possible-display-names]
-                      (dom/a :.dropdown-item name)))))
+                      (dom/a :.dropdown-item
+                        {:onClick #(comp/transact! this [(account/update-display-name #:account{:id           current-user
+                                                                                                :display-name name})])}
+                        name)))))
               (dom/button :.btn.btn-outline-dark
                 {:onClick #(uism/trigger! this ::session/session :event/logout)}
                 "Log out"))

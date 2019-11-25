@@ -15,20 +15,7 @@
   [state-map {:keys [:account/id] :as user}]
   (assoc-in state-map (user-path id) user))
 
-(defmutation upsert-user
-  "Client Mutation: Upsert a user (full-stack. see CLJ version for server-side)."
-  [{:keys [:account/id :account/name] :as params}]
+(defmutation update-display-name [params]
   (action [{:keys [state]}]
-    (log/info "Upsert user action")
-    (swap! state (fn [s]
-                   (-> s
-                     (insert-user* params)
-                     (merge/integrate-ident* [:account/id id] :append [:all-accounts])))))
-  (ok-action [env]
-    (log/info "OK action"))
-  (error-action [env]
-    (log/info "Error action"))
-  (remote [env]
-    (-> env
-      (m/returning 'decide.ui.root/User)
-      (m/with-target (targeting/append-to [:all-accounts])))))
+    (swap! state insert-user* params))
+  (remote [_] true))

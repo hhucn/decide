@@ -76,14 +76,27 @@
             :lastname     lastname
             :email        mail})
 
+(defn own-account? [env id]
+  (let [{req-id :account/id valid? :session/valid?} (get-in env [:ring/request :session])]
+    (and (= req-id id) valid?)))
+
+(defmutation update-display-name [{:keys [db connection] :as env} {:account/keys [id display-name] :as account}]
+  {::pc/params #{:account/id :account/display-name}
+   ::pc/output [:account/display-name]}
+  (when (and (account-exists? db id)
+          (own-account? env id))
+    (if (s/valid? (s/keys :req [:account/id :account/display-name]) account)
+      (do (d/transact! connection [{:account/id           id
+                                    :account/display-name display-name}])
+          {:account/display-name display-name}))))
+
 
 (defresolver account-resolver [{:keys [db] :as env} {:account/keys [id]}]
   {::pc/input  #{:account/id}
    ::pc/output [:account/display-name :account/firstname :account/lastname :account/email :account/active?]}
   (when (account-exists? db id)
-    (let [{req-id :account/id valid? :session/valid?} (get-in env [:ring/request :session])
-          allowed? (and (= req-id id) valid?)]
+    (let [allowed? (own-account? env id)]
       (cond-> (get-account db id [:account/display-name :account/firstname :account/lastname :account/email :account/active?])
         (not allowed?) (redact :account/firstname :account/lastname :account/email :account/active?)))))
 
-(def resolvers [account-resolver])
+(def resolvers [account-resolver update-display-name])
