@@ -170,12 +170,12 @@
                        :summary ""}))
    :ident         (fn [] [:component/id :new-proposal])
    :form-fields   #{:title :cost :summary}}
-  (let [title-max-length    120
+  (let [title-max-length    100
         title-warn-length   (- title-max-length 10)
         summary-max-length  500
         summary-warn-length (- summary-max-length 20)
 
-        short-summary       (first (split summary #"\n\s*\n"))]
+        short-summary       (first (split summary #"\n\s*\n" 1))]
     (div
       (form-dummy-proposal-card {:argument/text     (with-placeholder title "Es sollte ein Wasserspender im Flur aufgestellt werden.")
                                  :proposal/cost     (with-placeholder cost "0")
@@ -183,8 +183,8 @@
       (form :.p-5
         {:onSubmit evt/prevent-default!}
 
-        (let [chars-on-limit? (> (count title) title-warn-length)
-              chars-exceeded? (> (count title) title-max-length)]
+        (let [approaching-limit? (> (count title) title-warn-length)
+              chars-exceeded?    (> (count title) title-max-length)]
           (div :.form-group
             (label "Vorschlag")
             (input :.form-control
@@ -193,10 +193,10 @@
                :required    true
                :onChange    #(m/set-string! this :title :event %)})
             (dom/small :.form-text
-              {:style   {:display (when-not chars-on-limit? "none")}
+              {:style   {:display (when-not approaching-limit? "none")}
                :classes [(when chars-exceeded? "text-danger")]}
               (str (count title) "/" title-max-length " Buchstaben")
-              (when chars-exceeded? ". Bitte beschränken Sie sich auf das Limit!"))))
+              (when chars-exceeded? ". Bitte fassen Sie sich kurz!"))))
 
         (div :.form-group
           (label "Geschätzte Kosten")
@@ -209,15 +209,16 @@
              :required    true
              :onChange    #(m/set-string! this :cost :event %)}))
 
-        (let [chars-on-limit? (> (count title) summary-warn-length)
-              chars-exceeded? (> (count title) summary-max-length)]
+        (let [approaching-limit? (> (count title) summary-warn-length)
+              chars-exceeded?    (> (count title) summary-max-length)]
           (div :.form-group
             (label "Details zum Vorschlag")
             (dom/textarea :.form-control
               {:placeholder "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben."
-               :onChange    #(m/set-string! this :summary :event %)})
+               :onChange    #(m/set-string! this :summary :event %)
+               :value       summary})
             (dom/small :.form-text
-              {:style   {:display (when-not chars-on-limit? "none")}
+              {:style   {:display (when-not approaching-limit? "none")}
                :classes [(when chars-exceeded? "text-danger")]}
               (str (count title) "/" title-max-length " Buchstaben")
               (when chars-exceeded? ". Bitte beschränken Sie sich auf das Limit!"))))
