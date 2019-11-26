@@ -13,7 +13,8 @@
             [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
             [com.fulcrologic.fulcro.data-fetch :as df]
             [decide.model.argument :as argument]
-            [com.fulcrologic.fulcro.dom.events :as evt]))
+            [com.fulcrologic.fulcro.dom.events :as evt]
+            ["bootstrap/js/dist/modal"]))
 
 (declare ProposalDetails)
 

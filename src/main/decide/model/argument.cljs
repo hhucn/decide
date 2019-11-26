@@ -14,7 +14,7 @@
             [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
             [taoensso.timbre :as log]
             [com.fulcrologic.fulcro.data-fetch :as df]
-            ["bootstrap"]))
+            ["bootstrap/js/dist/dropdown"]))
 
 
 (s/def :argument/id (some-fn uuid? tempid/tempid?))
