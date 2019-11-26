@@ -65,7 +65,7 @@
                                                          ;; environment, like the server config, database connections, etc.
                                                          (let [{req-id :account/id valid? :session/valid?} (get-in env [:ring/request :session])]
                                                            (assoc env
-                                                             :AUTH.account/id (when valid? req-id)
+                                                             :AUTH/account-id (when valid? req-id)
                                                              :db (d/db db-connection) ; real datomic would use (d/db db-connection)
                                                              :connection db-connection
                                                              :config config))))
