@@ -14,7 +14,8 @@
             [com.fulcrologic.fulcro.data-fetch :as df]
             [decide.model.argument :as argument]
             [com.fulcrologic.fulcro.dom.events :as evt]
-            ["bootstrap/js/dist/modal"]))
+            ["bootstrap/js/dist/modal"]
+            ["bootstrap/js/dist/collapse"]))
 
 (declare ProposalDetails)
 
@@ -104,32 +105,6 @@
         (div :.proposal-price
           (dom/span :.proposal-price__text (str cost) " €"))))))
 
-(defn form-dummy-proposal-card [{:proposal/keys [subtitle cost]
-                                 :argument/keys [text]}]
-  (div :.proposal.mx-auto
-    (div :.proposal-buttons
-      (dom/button :.btn.btn-outline-success
-        {:disabled true}
-        (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
-      (dom/div :.spacer)
-      (dom/button :.btn.btn-outline-danger
-        {:disabled true}
-        (IoIosCloseCircleOutline #js {:size "3rem"})))
-
-    (div :.proposal-content
-      (div
-        {:style {:display        "flex"
-                 :padding        "10px 5px 10px 10px"
-                 :justifyContent "space-between"}}
-        (dom/h4 :.proposal-title text))
-      (div
-        {:style {:display        "flex"
-                 :padding        "10px"
-                 :justifyContent "space-between"}}
-        (dom/small :.proposal-subtitle subtitle)
-        (div :.proposal-price
-          (dom/span :.proposal-price__text (str cost) " €"))))))
-
 (defsc ProposalCard [this {:keys          [>/details]
                            :proposal/keys [id subtitle cost]
                            :argument/keys [text] :as props}]
@@ -160,6 +135,32 @@
   (if (blank? value)
     placeholder
     value))
+
+(defn form-dummy-proposal-card [{:proposal/keys [subtitle cost]
+                                 :argument/keys [text]}]
+  (div :.proposal.mx-auto
+    (div :.proposal-buttons
+      (dom/button :.btn.btn-outline-success
+        {:disabled true}
+        (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
+      (dom/div :.spacer)
+      (dom/button :.btn.btn-outline-danger
+        {:disabled true}
+        (IoIosCloseCircleOutline #js {:size "3rem"})))
+
+    (div :.proposal-content
+      (div
+        {:style {:display        "flex"
+                 :padding        "10px 5px 10px 10px"
+                 :justifyContent "space-between"}}
+        (dom/h4 :.proposal-title text))
+      (div
+        {:style {:display        "flex"
+                 :padding        "10px"
+                 :justifyContent "space-between"}}
+        (dom/small :.proposal-subtitle subtitle)
+        (div :.proposal-price
+          (dom/span :.proposal-price__text (str cost) " €"))))))
 
 (defsc EnterProposal [this {:keys [title cost summary]}]
   {:query         [:title :cost :summary fs/form-config-join]
@@ -240,8 +241,11 @@
                          {:post-mutation        `dr/target-ready
                           :post-mutation-params {:target [:component/id :proposals]}})))}
   (div :.container
-    (button :.btn.btn-outline-primary "Neuen Vorschlag hinzufügen")
-    (div :.collapse.show.p-3.border
+    (button :.btn.btn-outline-primary
+      {:data-toggle "collapse"
+       :data-target "#new-proposal"}
+      "Neuen Vorschlag hinzufügen")
+    (div :.collapse.p-3.border#new-proposal
       (ui-new-proposal-form new-proposal-form))
     (div :.card-deck.d-flex.justify-content-center
       (for [proposal all-proposals]
