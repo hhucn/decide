@@ -53,8 +53,16 @@
             parser (build-parser conn)]
         (assertions
           "Can pull the details of an account"
-          (parser {:ring/request {:session {:account/id "2" :session/valid? true}}}
+          (parser {:AUTH/account-id "2"}
             [{[:account/id "2"] [:account/id :account/email :account/active?]}])
           => {[:account/id "2"] {:account/id      "2"
                                  :account/email   "boo@bah.com"
-                                 :account/active? false}})))))
+                                 :account/active? false}}
+
+          "Can't pull when no session"
+          (parser {}
+            [{[:account/id "2"] [:account/id :account/email :account/active?]}])
+          => {[:account/id "2"] {:account/id      "2"
+                                 :account/email   :auth/REDACTED
+                                 :account/active? :auth/REDACTED}})))))
+
