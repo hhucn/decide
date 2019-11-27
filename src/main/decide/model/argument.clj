@@ -35,6 +35,7 @@
                 :argument/text
                 :argument/type
                 :argument/subtype
+                {:argument/author [:account/id]}
                 {:argument/pros [:argument/id]}
                 {:argument/cons [:argument/id]}]}
   (-> db
@@ -42,6 +43,7 @@
               :argument/text
               :argument/type
               :argument/subtype
+              {:argument/author [:account/id]}
               {:argument/pros [:argument/id]}
               {:argument/cons [:argument/id]}]
       [:argument/id (str id)])
