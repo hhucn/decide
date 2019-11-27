@@ -9,9 +9,9 @@
     [decide.util :as util])
   (:import (java.time Instant)))
 
-(defmutation add-proposal [{:keys [connection AUTH/account-id]} {:proposal/keys [id cost subtext]
+(defmutation add-proposal [{:keys [connection AUTH/account-id]} {:proposal/keys [id cost details]
                                                                  :argument/keys [text]}]
-  {::pc/params #{:proposal/id :argument/text :proposal/cost :proposal/subtext}
+  {::pc/params #{:proposal/id :argument/text :proposal/cost :proposal/details}
    ::pc/output [:proposal/id]}
   (when account-id
     (let [real-id (squuid)]
@@ -20,7 +20,7 @@
                        [#:proposal{:db/id                 "new-proposal"
                                    :argument/id           (str real-id)
                                    :cost                  cost
-                                   :subtext               subtext
+                                   :details               details
                                    :argument/text         text
                                    :argument/type         :position
                                    :argument/subtype      :position
@@ -33,10 +33,10 @@
 
 (defresolver resolve-proposal [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
-   ::pc/output [:proposal/id :proposal/subtext :proposal/cost]}
+   ::pc/output [:proposal/id :proposal/details :proposal/cost]}
   (-> db
     (d/pull [:argument/id
-             :proposal/subtext
+             :proposal/details
              :proposal/cost]
       [:argument/id (str id)])
     util/str-id->uuid-id))

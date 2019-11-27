@@ -3,6 +3,7 @@
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
             [com.fulcrologic.fulcro.algorithms.merge :as mrg]
+            [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
             [clojure.string :refer [split-lines blank? split]]
             [clojure.edn :as edn]
@@ -42,10 +43,10 @@
 
 
 (defsc ProposalDetails [this {:keys          [argument/text >/argumentation]
-                              :proposal/keys [subtext cost]}]
+                              :proposal/keys [details cost]}]
   {:query         [:proposal/id
                    :argument/text
-                   :proposal/subtext
+                   :proposal/details
                    :proposal/cost
                    {:>/argumentation (comp/get-query arg/Argumentation)}]
    :ident         :proposal/id
@@ -67,12 +68,12 @@
     (div :.row.justify-content-between.m-4
       (dom/h2 :.detail-card__header text)
       (big-price-tag cost 1000000000 "$"))
-    (dom/p (interpose (dom/br) (split-lines subtext)))
+    (dom/p (interpose (dom/br) (split-lines details)))
     (arg/ui-argumentation (comp/computed argumentation {:argumentation-root this}))))
 
 (def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :argument/id}))
 
-(defn proposal-card [comp {:proposal/keys [id subtitle cost]
+(defn proposal-card [comp {:proposal/keys [id details cost]
                            :argument/keys [text]}]
   (div :.proposal
     (div :.proposal-buttons
@@ -101,15 +102,14 @@
         {:style {:display        "flex"
                  :padding        "10px"
                  :justifyContent "space-between"}}
-        (div :.proposal-subtitle subtitle)
+        (div :.proposal-details details)
         (div :.proposal-price
           (dom/span :.proposal-price__text (str cost) " €"))))))
 
-(defsc ProposalCard [this {:keys          [>/details]
-                           :proposal/keys [id subtitle cost]
-                           :argument/keys [text] :as props}]
-  {:query         [:proposal/id :argument/text :proposal/subtitle :proposal/cost
-                   {:>/details (comp/get-query ProposalDetails)}]
+(defsc ProposalCard [this {:keys          [>/proposal-details]
+                           :proposal/keys [id] :as props}]
+  {:query         [:proposal/id :argument/text :proposal/details :proposal/cost
+                   {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident         :proposal/id
    :initial-state (fn [_] {:ui/modal-open? false})}
   [(proposal-card this props)
@@ -119,7 +119,7 @@
        (div :.modal-content
          (div :.modal-body
            (div {:style {:width "auto"}}
-             (ui-proposal-detail details))))))])
+             (ui-proposal-detail proposal-details))))))])
 
 (def ui-proposal-card (comp/factory ProposalCard))
 
@@ -136,7 +136,7 @@
     placeholder
     value))
 
-(defn form-dummy-proposal-card [{:proposal/keys [subtitle cost]
+(defn form-dummy-proposal-card [{:proposal/keys [details cost]
                                  :argument/keys [text]}]
   (div :.proposal.mx-auto
     (div :.proposal-buttons
@@ -158,9 +158,13 @@
         {:style {:display        "flex"
                  :padding        "10px"
                  :justifyContent "space-between"}}
-        (dom/small :.proposal-subtitle subtitle)
+        (dom/small :.proposal-details details)
         (div :.proposal-price
           (dom/span :.proposal-price__text (str cost) " €"))))))
+
+(defmutation add-proposal [params]
+  (action [{:keys [state]}]
+    (swap! state merge/merge-component ProposalCard params :append [:all-proposals])))
 
 (defsc EnterProposal [this {:keys [title cost summary]}]
   {:query         [:title :cost :summary fs/form-config-join]
@@ -178,12 +182,16 @@
 
         short-summary       (first (split summary #"\n\s*\n" 1))]
     (div
-      (form-dummy-proposal-card {:argument/text     (with-placeholder title "Es sollte ein Wasserspender im Flur aufgestellt werden.")
-                                 :proposal/cost     (with-placeholder cost "0")
-                                 :proposal/subtitle (with-placeholder short-summary "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben.")})
+      (form-dummy-proposal-card {:argument/text    (with-placeholder title "Es sollte ein Wasserspender im Flur aufgestellt werden.")
+                                 :proposal/cost    (with-placeholder cost "0")
+                                 :proposal/details (with-placeholder short-summary "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben.")})
       (form :.p-5
-        {:onSubmit evt/prevent-default!}
-
+        {:onSubmit (fn [e]
+                     (evt/prevent-default! e)
+                     (comp/transact! this [(add-proposal {:proposal/id      (tempid/tempid)
+                                                          :proposal/cost    cost
+                                                          :proposal/details summary
+                                                          :argument/text    title})]))}
         (let [approaching-limit? (> (count title) title-warn-length)
               chars-exceeded?    (> (count title) title-max-length)]
           (div :.form-group

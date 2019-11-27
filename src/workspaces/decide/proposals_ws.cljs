@@ -12,10 +12,10 @@
   (ct.fulcro/fulcro-card
     {::ct.fulcro/root proposal/ProposalCard
      ::ct.fulcro/initial-state
-                      (fn [] #:proposal{:argument/id 1
+                      (fn [] #:proposal{:argument/id   1
                                         :argument/text "Es sollen Steckerleisten in den Seminarräumen ausliegen."
-                                        :subtitle "In den Seminarräumen wird viel mit Laptops gearbeitet und der Zugang zu Steckdosen ist nur an den Rändern der Tische möglich."
-                                        :price 500})}))
+                                        :details       "In den Seminarräumen wird viel mit Laptops gearbeitet und der Zugang zu Steckdosen ist nur an den Rändern der Tische möglich."
+                                        :price         500})}))
 
 (ws/defcard proposal-details-card
   {::wsm/card-width 7 ::wsm/card-height 14}
@@ -24,7 +24,7 @@
      ::ct.fulcro/initial-state
                       #:proposal{:id            1
                                  :argument/text "Es soll ein 3D-Drucker aufgestellt werden. Und noch etwas text for good measure."
-                                 :subtext       "Hier steht eine genaue Beschreibung des Vorschlags. Mit seinen Einschränkungen und Bedingungen. \n\nVielleicht auch Anmerkungen von der Moderation. \nVielleicht zusammen, vielleicht alleine stehend.\n\nLorem ipsum dolor sit amet und soweiter und mehr Text, denn man gar nicht lesen braucht, weil er nur den Platz füllen soll. Jetzt solltest du aufhören zu lesen!"
+                                 :details       "Hier steht eine genaue Beschreibung des Vorschlags. Mit seinen Einschränkungen und Bedingungen. \n\nVielleicht auch Anmerkungen von der Moderation. \nVielleicht zusammen, vielleicht alleine stehend.\n\nLorem ipsum dolor sit amet und soweiter und mehr Text, denn man gar nicht lesen braucht, weil er nur den Platz füllen soll. Jetzt solltest du aufhören zu lesen!"
                                  :cost          500
                                  :argument/type :position
                                  :pros          [#:argument{:id   42
