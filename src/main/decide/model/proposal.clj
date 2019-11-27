@@ -1,7 +1,7 @@
 (ns decide.model.proposal
   (:require
     [datahike.api :as d]
-    [datahike.core :refer [squuid]]
+    [datahike.core :refer [squuid db? conn?]]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
@@ -9,25 +9,39 @@
     [decide.util :as util])
   (:import (java.time Instant)))
 
-(defmutation add-proposal [{:keys [connection AUTH/account-id]} {:proposal/keys [id cost details]
+(s/def ::process-ident (s/tuple #{:process/slug} string?))
+
+(>defn add-proposal! [conn process-ident {:proposal/keys [id cost details]
+                                          :argument/keys [text author created-when]}]
+  [conn? ::process-ident any? => map?]
+  (d/transact conn
+    [(merge
+       #:proposal{:db/id       "new-proposal"
+                  :argument/id (str id)
+                  :cost        cost
+                  :details     details}
+       #:argument{:text         text
+                  :type         :position
+                  :subtype      :position
+                  :author       author
+                  :created-when (str created-when)})
+     [:db/add process-ident :process/proposals "new-proposal"]]))
+
+(defmutation new-proposal [{:keys [connection AUTH/account-id]} {:proposal/keys [id cost details]
                                                                  :argument/keys [text]}]
   {::pc/params #{:proposal/id :argument/text :proposal/cost :proposal/details}
    ::pc/output [:proposal/id]}
   (when account-id
     (let [real-id (squuid)]
-      (log/debug "New UUID for proposal" (str real-id))
-      (log/spy :info (d/transact connection
-                       [#:proposal{:db/id                 "new-proposal"
-                                   :argument/id           (str real-id)
-                                   :cost                  cost
-                                   :details               details
-                                   :argument/text         text
-                                   :argument/type         :position
-                                   :argument/subtype      :position
-                                   :argument/author       [:account/id account-id]
-                                   :argument/created-when (str (Instant/now))}
-
-                        [:db/add [:process/slug "example"] :process/proposals "new-proposal"]])) ;; TODO FIX
+      (log/debug "New UUID for proposal" real-id)
+      (add-proposal! connection
+        [:process/slug "example"]
+        {:proposal/id           real-id
+         :proposal/cost         cost
+         :proposal/details      details
+         :argument/text         text
+         :argument/author       [:account/id account-id]
+         :argument/created-when (Instant/now)})
       {:proposal/id real-id
        :tempids     {id real-id}})))
 
@@ -51,4 +65,4 @@
     {:all-proposals (for [id query-result]
                       {:proposal/id (util/str->uuid id)})}))
 
-(def resolvers [resolve-proposal resolve-all-proposals add-proposal])
+(def resolvers [resolve-proposal resolve-all-proposals new-proposal])
