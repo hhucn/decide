@@ -1,7 +1,8 @@
 (ns decide.util
   #?(:cljs (:refer-clojure :exclude [uuid]))
   (:require [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
-            [clojure.spec.alpha :as s])
+            [clojure.spec.alpha :as s]
+            [clojure.set :refer [rename-keys]])
   (:import (java.util UUID)))
 
 (>defn str->uuid [s] [string? => uuid?] (UUID/fromString s))
@@ -10,6 +11,9 @@
   [m]
   [(comp string? :argument/id) => (comp uuid? :argument/id)]
   (update m :argument/id str->uuid))
+
+(defn arg-id->prop-id [proposal]
+  (rename-keys proposal {:argument/id :proposal/id}))
 
 (>defn uuid
   "Generate a UUID the same way via clj/cljs.  Without args gives random UUID. With args, builds UUID based on input (which

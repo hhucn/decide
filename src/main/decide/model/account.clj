@@ -54,7 +54,7 @@
   (d/transact! conn [account]))
 
 (>defn get-account [db id subquery]
-  [db? :account/id (s/coll-of keyword? :kind vector?) => (subset-of ::account)]
+  [db? :account/id vector? => (subset-of ::account)]
   (d/pull db subquery [:account/id id]))
 
 (>defn default-display-name [firstname]

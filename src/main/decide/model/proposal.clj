@@ -6,14 +6,13 @@
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
     [clojure.spec.alpha :as s]
-    [decide.util :as util])
+    [decide.util :as util]
+    [decide.model.process :as process])
   (:import (java.time Instant)))
-
-(s/def ::process-ident (s/tuple #{:process/slug} string?))
 
 (>defn add-proposal! [conn process-ident {:proposal/keys [id cost details]
                                           :argument/keys [text author created-when]}]
-  [conn? ::process-ident any? => map?]
+  [conn? ::process/process-ident any? => map?]
   (d/transact conn
     [(merge
        #:proposal{:db/id       "new-proposal"

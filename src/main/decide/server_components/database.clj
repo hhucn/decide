@@ -76,7 +76,10 @@
                           :unique      :db.unique/identity}
                      #:db{:ident       :process/proposals
                           :valueType   :db.type/ref
-                          :cardinality :db.cardinality/many}])
+                          :cardinality :db.cardinality/many}
+                     #:db{:ident       :process/budget
+                          :valueType   :db.type/long
+                          :cardinality :db.cardinality/one}])
 
 
 
@@ -107,6 +110,7 @@
                                 :argument/pros ["my-new-argument"]
                                 :argument/cons []}
                      #:process{:slug      "example"
+                               :budget    100000
                                :proposals ["proposal-1"]}])
   conn)
 
