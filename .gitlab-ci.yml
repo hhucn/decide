@@ -3,7 +3,7 @@ image: clojure:openjdk-11-tools-deps
 services:
   - docker:stable-dind
 
-cache:
+cache: &global_cache
   key: ${CI_JOB_NAME}
   paths:
     - node_modules/
@@ -24,10 +24,13 @@ cljs-test:
   script:
     - npx shadow-cljs compile ci-tests
     - npx karma start --single-run
-  allow_failure: true # While the jar of hasch is broken
 
 clj-test:
   stage: test
+  cache:
+    key: ${CI_JOB_NAME}
+    paths:
+      - .m2
   script:
     - clojure -Sdeps '{:mvn/local-repo ".m2"}' -A:dev:clj-tests
 
