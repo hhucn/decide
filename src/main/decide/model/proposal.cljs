@@ -155,9 +155,10 @@
         (div :.proposal-price
           (span :.proposal-price__text (str cost) " €"))))))
 
-(defmutation add-proposal [params]
+(defmutation new-proposal [params]
   (action [{:keys [state]}]
-    (swap! state mrg/merge-component ProposalCard params :append [:all-proposals])))
+    (swap! state mrg/merge-component ProposalCard params :append [:all-proposals]))
+  (remote [_] true))
 
 (defsc EnterProposal [this {:keys [title cost summary]}]
   {:query         [:title :cost :summary fs/form-config-join]
@@ -181,7 +182,7 @@
       (form :.p-5
         {:onSubmit (fn [e]
                      (evt/prevent-default! e)
-                     (comp/transact! this [(add-proposal {:proposal/id      (tempid/tempid)
+                     (comp/transact! this [(new-proposal {:proposal/id      (tempid/tempid)
                                                           :proposal/cost    cost
                                                           :proposal/details summary
                                                           :argument/text    title})]))}

@@ -36,7 +36,7 @@
       (add-proposal! connection
         [:process/slug "example"]
         {:proposal/id           real-id
-         :proposal/cost         cost
+         :proposal/cost         (Long/parseLong cost)
          :proposal/details      details
          :argument/text         text
          :argument/author       [:account/id account-id]
