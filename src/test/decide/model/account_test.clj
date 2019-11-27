@@ -4,7 +4,7 @@
     [decide.model.account :as acct]
     [decide.util :refer [uuid]]
     [clojure.test :refer [deftest is]]
-    [fulcro-spec.core :refer [specification provided behavior assertions component provided!]]
+    [fulcro-spec.core :refer [specification provided behavior assertions component provided! =>]]
     [decide.server-components.database :as db]
     [datahike.api :as d]
     [taoensso.timbre :as log]))
@@ -42,18 +42,19 @@
                              {:account/email "account@example.net"}]})))
 
   (provided! "The database contains the account"
-    (acct/get-account db uuid subquery) => (select-keys
-                                             {:account/id      uuid
-                                              :account/active? false
-                                              :account/cruft   22
-                                              :account/email   "boo@bah.com"} subquery)
+    (acct/get-account db id subquery) => (select-keys
+                                           {:account/id      id
+                                            :account/active? false
+                                            :account/cruft   22
+                                            :account/email   "boo@bah.com"} subquery)
 
     (component "The pathom parser for the server"
       (let [{:keys [conn]} (seeded-setup)
             parser (build-parser conn)]
         (assertions
           "Can pull the details of an account"
-          (parser {} [{[:account/id (str 2)] [:account/id :account/email :account/active?]}])
-          => {[:account/id (str 2)] {:account/id      (str 2)
-                                     :account/email   "boo@bah.com"
-                                     :account/active? false}})))))
+          (parser {:ring/request {:session {:account/id "2" :session/valid? true}}}
+            [{[:account/id "2"] [:account/id :account/email :account/active?]}])
+          => {[:account/id "2"] {:account/id      "2"
+                                 :account/email   "boo@bah.com"
+                                 :account/active? false}})))))

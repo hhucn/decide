@@ -81,7 +81,7 @@
     (and (= req-id id) valid?)))
 
 (defmutation update-display-name [{:keys [db connection] :as env} {:account/keys [id display-name] :as account}]
-  {::pc/params #{:account/id :account/display-name}
+  {::pc/params [:account/id :account/display-name]
    ::pc/output [:account/display-name]}
   (when (and (account-exists? db id)
           (own-account? env id))
