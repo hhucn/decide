@@ -3,6 +3,7 @@
     [datahike.api :as d]
     [datahike.core :refer [squuid db? conn?]]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
+    [com.wsscode.pathom.core :as p]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
     [taoensso.timbre :as log]
     [clojure.spec.alpha :as s]
@@ -26,22 +27,23 @@
                   :created-when (str created-when)})
      [:db/add process-ident :process/proposals "new-proposal"]]))
 
-(defmutation new-proposal [{:keys [connection AUTH/account-id]} {:proposal/keys [id cost details]
-                                                                 :argument/keys [text]}]
+(defmutation new-proposal [{:keys [connection AUTH/account-id] :as env} {:proposal/keys [id cost details]
+                                                                         :argument/keys [text]}]
   {::pc/params [:proposal/id :argument/text :proposal/cost :proposal/details]
    ::pc/output [:proposal/id]}
   (when account-id
-    (let [real-id (squuid)]
+    (let [real-id   (squuid)
+          tx-report (add-proposal! connection
+                      [:process/slug "example"]
+                      {:proposal/id           real-id
+                       :proposal/cost         (Long/parseLong cost)
+                       :proposal/details      details
+                       :argument/text         text
+                       :argument/author       [:account/id account-id]
+                       :argument/created-when (Instant/now)})]
       (log/debug "New UUID for proposal" real-id)
-      (add-proposal! connection
-        [:process/slug "example"]
-        {:proposal/id           real-id
-         :proposal/cost         (Long/parseLong cost)
-         :proposal/details      details
-         :argument/text         text
-         :argument/author       [:account/id account-id]
-         :argument/created-when (Instant/now)})
       {:proposal/id real-id
+       ::p/env      (assoc env :db (:db-after tx-report))
        :tempids     {id real-id}})))
 
 (defresolver resolve-proposal [{:keys [db]} {:keys [proposal/id]}]

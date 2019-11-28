@@ -158,7 +158,8 @@
 (defmutation new-proposal [params]
   (action [{:keys [state]}]
     (swap! state mrg/merge-component ProposalCard params :append [:all-proposals]))
-  (remote [_] true))
+  (remote [env]
+    (m/returning env ProposalCard)))
 
 (defsc EnterProposal [this {:keys [title cost summary]}]
   {:query         [:title :cost :summary fs/form-config-join]

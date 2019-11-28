@@ -15,7 +15,7 @@
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :as db]
     [datahike.api :as d]
-    [datahike.core :as dcore]))
+    [datahike.core :refer [conn? db?]]))
 
 (pc/defresolver index-explorer [env _]
   {::pc/input  #{:com.wsscode.pathom.viz.index-explorer/id}
@@ -53,7 +53,7 @@
   req)
 
 (>defn build-parser [db-connection]
-  [dcore/conn? => any?]
+  [conn? => any?]
   (let [real-parser (p/parallel-parser
                       {::p/mutate  pc/mutate-async
                        ::p/env     {::p/reader               [p/map-reader pc/parallel-reader
@@ -72,7 +72,6 @@
                                                              env))))
                                     (preprocess-parser-plugin log-requests)
                                     p/error-handler-plugin
-                                    p/request-cache-plugin
                                     (p/post-process-parser-plugin p/elide-not-found)
                                     p/trace-plugin]})
         ;; NOTE: Add -Dtrace to the server JVM to enable Fulcro Inspect query performance traces to the network tab.
