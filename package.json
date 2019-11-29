@@ -20,6 +20,7 @@
         "client/clj": "shadow-cljs clj-repl",
         "client/server": "npx shadow-cljs server",
         "client/nodejs": "npx shadow-cljs node-repl",
+        "clj/watch-tests": "clojure -A:dev:clj-tests -J-Dguardrails.enabled=true --watch",
         "server": "clojure -A:dev -J-Dtrace -J-Dguardrails.enabled=true",
         "start": "npx run-p client/server server"
     },

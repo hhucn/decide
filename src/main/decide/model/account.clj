@@ -35,7 +35,7 @@
 (>defn all-account-ids
   "Returns a sequence of UUIDs for all of the active accounts in the system"
   [db]
-  [any? => (s/coll-of uuid? :kind vector?)]
+  [any? => (s/coll-of :account/id :kind vector?)]
   (d/q '[:find [?v ...]
          :where
          [?e :account/active? true]
