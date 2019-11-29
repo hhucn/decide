@@ -10,6 +10,7 @@ $enable-responsive-font-sizes: true;
 //$secondary: $gray-500;
 @import "../node_modules/bootstrap/scss/bootstrap";
 @import "proposal";
+@import "bottom_sheet";
 
 .argumentation-header {
   color: white;

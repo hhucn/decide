@@ -1,0 +1,29 @@
+$sheet-from-top: 20vh;
+
+.modal.bottom-sheet {
+  > .spacer-frame {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: $sheet-from-top;
+    pointer-events: none;
+  }
+
+  .modal-dialog {
+    width: 100vw !important;
+    max-width: none;
+    margin: 0;
+    background: none;
+
+    .modal-content {
+      border-radius: 40px 40px 0 0;
+      min-height: 100vh - $sheet-from-top;
+    }
+  }
+
+  &:not(.show) {
+    .modal-dialog {
+      transform: translate(0, 100vh);
+    }
+  }
+}

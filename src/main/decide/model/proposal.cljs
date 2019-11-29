@@ -50,14 +50,7 @@
                     (let [id (uuid id)]
                       (dr/route-deferred [:proposal/id id]
                         #(comp/transact! app [(initial-load {:id id})]))))}
-
-  (div :.container.border
-    {:style {:position "relative"}}
-    (button :.close
-      {:style {:position "absolute"
-               :top      ".5rem"
-               :right    ".5rem"}
-       :data-dismiss "modal"} (IoMdClose))
+  (div :.container
     (div :.row.justify-content-between.m-4
       (h2 :.detail-card__header text)
       (big-price-tag cost 1000000000 "$"))
@@ -106,12 +99,18 @@
    :ident         :proposal/id
    :initial-state (fn [_] {:ui/modal-open? false})}
   [(proposal-card this props)
-   (div :.modal.fade
+   (div :.modal.fade.bottom-sheet
      {:id (str "modal-" id)}
+     (div :.spacer-frame)
      (div :.modal-dialog.modal-xl
        (div :.modal-content
          (div :.modal-body
            (div {:style {:width "auto"}}
+             (button :.close
+               {:style        {:position "absolute"
+                               :top      "1rem"
+                               :right    "1.8rem"}
+                :data-dismiss "modal"} (IoMdClose))
              (ui-proposal-detail proposal-details))))))])
 
 (def ui-proposal-card (comp/factory ProposalCard))
