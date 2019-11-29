@@ -4,10 +4,8 @@
            bk/ring-gzip                      {:mvn/version "0.3.0"}
            com.taoensso/timbre               {:mvn/version "4.10.0"}
            com.taoensso/tufte                {:mvn/version "2.1.0"}
-           com.wsscode/pathom                {:git/url "https://github.com/wilkerlucio/pathom"
-                                              :sha "f1c8041476f2ca7a1618ed5695ee8b5e900bb364"}
-           ;:mvn/version "2.2.26"}
-           com.fulcrologic/fulcro            {:mvn/version "3.0.10"}
+           com.wsscode/pathom                {:mvn/version "2.2.27"}
+           com.fulcrologic/fulcro            {:mvn/version "3.0.12"}
            com.fulcrologic/fulcro-garden-css {:mvn/version "3.0.7"}
            com.fulcrologic/guardrails        {:mvn/version "0.0.9"}
            garden                            {:mvn/version "1.3.9"}
@@ -33,8 +31,8 @@
            :dev       {:extra-paths ["src/test" "src/dev" "src/workspaces"]
                        :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
                        :extra-deps  {org.clojure/clojurescript   {:mvn/version "1.10.597"}
-                                     thheller/shadow-cljs        {:mvn/version "2.8.74"}
-                                     expound                     {:mvn/version "0.7.2"}
+                                     thheller/shadow-cljs        {:mvn/version "2.8.76"}
+                                     expound                     {:mvn/version "0.8.0"}
                                      fulcrologic/fulcro-spec     {:mvn/version "3.1.4"}
                                      binaryage/devtools          {:mvn/version "0.9.11"}
                                      com.github.awkay/workspaces {:mvn/version "1.0.0-RC2"}
