@@ -62,7 +62,8 @@
 
 (>defn split-details [details]
   [string? => string?]
-  (some-> details (str/split #"\n\s*\n" 2) first))
+  (when (string? details)
+    (some-> details (str/split #"\n\s*\n" 2) first)))
 
 (defn proposal-card [comp {:proposal/keys [id details cost]
                            :argument/keys [text]}]
@@ -75,9 +76,10 @@
         (IoIosCloseCircleOutline #js {:size "3rem"})))
 
     (div :.proposal-content.btn-light
-      {:style       {:cursor "pointer"}
-       :data-toggle "modal"
-       :data-target (str "#modal-" id)}
+      {:style        {:cursor "pointer"}
+       :data-toggle  "modal"
+       :data-target  (str "#modal-" id)
+       :onMouseEnter #(df/load-field! comp :>/proposal-details {})}
       (div
         {:style {:display        "flex"
                  :padding        "10px 5px 10px 10px"
@@ -244,7 +246,8 @@
    :will-enter    (fn [app _]
                     (dr/route-deferred [:component/id :proposals]
                       #(df/load! app :all-proposals ProposalCard
-                         {:post-mutation        `dr/target-ready
+                         {:without              #{:>/proposal-details}
+                          :post-mutation        `dr/target-ready
                           :post-mutation-params {:target [:component/id :proposals]}})))}
   (div :.container
     (button :.btn.btn-outline-primary

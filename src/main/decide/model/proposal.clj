@@ -53,7 +53,7 @@
                            [:proposal/subtext :as :proposal/details]
                            :proposal/cost]
                  [:argument/id (str id)])]
-    (util/str-id->uuid-id result)))
+    (util/str-id->uuid-id result :proposal/id)))
 
 (defresolver resolve-all-proposals [{:keys [db]} _]
   {::pc/output [{:all-proposals [:proposal/id]}]}

@@ -38,17 +38,17 @@
                 {:argument/author [:account/id]}
                 {:argument/pros [:argument/id]}
                 {:argument/cons [:argument/id]}]}
-  (-> db
-    (d/pull '[:argument/id
-              :argument/text
-              :argument/type
-              :argument/subtype
-              {:argument/author [:account/id]}
-              {:argument/pros [:argument/id]}
-              {:argument/cons [:argument/id]}]
-      [:argument/id (str id)])
-    util/str-id->uuid-id
-    (update :argument/pros (partial map util/str-id->uuid-id))
-    (update :argument/cons (partial map util/str-id->uuid-id))))
+  (let [result (d/pull db '[:argument/id
+                            :argument/text
+                            :argument/type
+                            :argument/subtype
+                            {:argument/author [:account/id]}
+                            {:argument/pros [:argument/id]}
+                            {:argument/cons [:argument/id]}]
+                 [:argument/id (str id)])]
+    (-> result
+      util/str-id->uuid-id
+      (update :argument/pros (partial mapv util/str-id->uuid-id))
+      (update :argument/cons (partial mapv util/str-id->uuid-id)))))
 
 (def resolvers [add-argument resolve-argument retract-argument])
