@@ -37,7 +37,7 @@
                       [:process/slug "example"]
                       {:proposal/id           real-id
                        :proposal/cost         (Long/parseLong cost)
-                       :proposal/details      details
+                       :proposal/subtext      details
                        :argument/text         text
                        :argument/author       [:account/id account-id]
                        :argument/created-when (Instant/now)})]
@@ -49,12 +49,11 @@
 (defresolver resolve-proposal [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
    ::pc/output [:proposal/id :proposal/details :proposal/cost]}
-  (-> db
-    (d/pull [:argument/id
-             :proposal/details
-             :proposal/cost]
-      [:argument/id (str id)])
-    util/str-id->uuid-id))
+  (let [result (d/pull db [[:argument/id :as :proposal/id]
+                           [:proposal/subtext :as :proposal/details]
+                           :proposal/cost]
+                 [:argument/id (str id)])]
+    (util/str-id->uuid-id result)))
 
 (defresolver resolve-all-proposals [{:keys [db]} _]
   {::pc/output [{:all-proposals [:proposal/id]}]}
