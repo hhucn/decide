@@ -8,6 +8,7 @@
             [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
             [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
             [com.fulcrologic.fulcro.data-fetch :as df]
+            [com.fulcrologic.guardrails.core :refer [>defn => | ? <-]]
             [clojure.string :as str]
             [taoensso.timbre :as log]
             [decide.model.argument :as arg]
@@ -30,7 +31,7 @@
   (action [{:keys [state app]}]
     (swap! state mrg/merge-component arg/Argumentation
       (comp/initial-state arg/Argumentation {:proposal/id id})
-      :replace [:proposal/id id :ui/argumentation])
+      :replace [:proposal/id id :>/argumentation])
 
     (df/load! app [:proposal/id id] ProposalDetails
       {:post-mutation        `dr/target-ready
@@ -58,6 +59,10 @@
     (arg/ui-argumentation (comp/computed argumentation {:argumentation-root this}))))
 
 (def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :proposal/id}))
+
+(>defn split-details [details]
+  [string? => string?]
+  (some-> details (str/split #"\n\s*\n" 2) first))
 
 (defn proposal-card [comp {:proposal/keys [id details cost]
                            :argument/keys [text]}]
@@ -88,7 +93,7 @@
         {:style {:display        "flex"
                  :padding        "10px"
                  :justifyContent "space-between"}}
-        (div :.proposal-details (-> details (str/split #"\n\s*\n" 2) first str/trim))
+        (div :.proposal-details (split-details details))
         (div :.proposal-price
           (span :.proposal-price__text (str cost) " €"))))))
 
@@ -174,7 +179,7 @@
         summary-max-length  500
         summary-warn-length (- summary-max-length 20)
 
-        short-summary       (-> summary (str/split #"\n\s*\n" 2) first str/trim)]
+        short-summary       (split-details summary)]
     (div
       (form-dummy-proposal-card {:argument/text    (with-placeholder title "Es sollte ein Wasserspender im Flur aufgestellt werden.")
                                  :proposal/cost    (with-placeholder cost "0")
@@ -233,8 +238,7 @@
 (defsc ProposalCollection [this {:keys [all-proposals new-proposal-form]}]
   {:query         [{[:all-proposals '_] (comp/get-query ProposalCard)}
                    {:new-proposal-form (comp/get-query EnterProposal)}]
-   :initial-state (fn [_] {:all-proposals     []
-                           :new-proposal-form (comp/initial-state EnterProposal nil)})
+   :initial-state (fn [_] {:new-proposal-form (comp/initial-state EnterProposal nil)})
    :ident         (fn [] [:component/id :proposals])
    :route-segment ["proposals"]
    :will-enter    (fn [app _]
