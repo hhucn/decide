@@ -130,23 +130,25 @@
   (action [{:keys [state ref]}]
     (swap! state update-in ref assoc :ui/new-argument "")))
 
-(defsc NewArgumentForm [this {:argumentation/keys [current-argument]
-                              :ui/keys            [open? new-argument new-subtype pro?]
-                              :or                 {new-argument ""}}]
+(defsc NewArgumentForm [this {:>/keys  [current-argument]
+                              :ui/keys [open? new-argument new-subtype pro?]
+                              :as      props
+                              :or      {new-argument ""}}]
   {:query              [:proposal/id
-                        :argumentation/current-argument
+                        :>/current-argument
                         :ui/open?
                         :ui/new-argument :ui/new-subtype :ui/pro?
+                        {[:component/id :session] [:>/current-user]}
                         fs/form-config-join]
    :ident              [:argumentation/id :proposal/id]
    :form-fields        #{:ui/new-argument :ui/new-subtype :ui/pro?}
    :componentDidUpdate (fn [this _prev-props _prev-state]
                          (let [{:ui/keys [new-subtype pro?]} (comp/props this)]
-                           (if (= new-subtype :support)
-                             (when-not pro?
-                               (m/set-value! this :ui/new-subtype :undermine))
+                           (if (#{:undermine :undercut} new-subtype) ;; TODO Merge this with the Toggle Button!
                              (when pro?
-                               (m/set-value! this :ui/new-subtype :support)))))
+                               (m/set-value! this :ui/new-subtype :support))
+                             (when-not pro?
+                               (m/set-value! this :ui/new-subtype :undermine)))))
    :initial-state      (fn [{:keys [proposal/id pro? open?]
                              :or   {pro?  true
                                     open? false}}]
@@ -154,7 +156,7 @@
                           :ui/new-argument ""
                           :ui/pro?         pro?
                           :ui/open?        open?
-                          :ui/new-subtype  :undermine})}
+                          :ui/new-subtype  :support})}
   (div :.collapse.container.border.p-4.my-3
     {:classes [(when open? "show")]}
     (dom/button :.close
@@ -171,7 +173,8 @@
                                                         :text    new-argument
                                                         :type    (if pro? :pro :con)
                                                         :subtype new-subtype
-                                                        :parent  current-argument})
+                                                        :parent  current-argument
+                                                        :author  (get-in props [[:component/id :session] :>/current-user])})
                                          (reset-new-argument-form nil)
                                          (m/toggle {:field :ui/open?})]))}
       (div :.form-group
@@ -181,7 +184,8 @@
             (a :.text-danger {:onClick #(m/toggle! this :ui/pro?)} "dagegen"))
           ":")
         (input :.form-control
-          {:type     " text" :value new-argument
+          {:type     "text"
+           :value    new-argument
            :onChange #(m/set-string! this :ui/new-argument :event %)}))
 
       (when-not pro?

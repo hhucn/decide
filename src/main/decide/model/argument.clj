@@ -10,7 +10,7 @@
 
 (defn pro? [t] (= t :pro))
 
-(defmutation add-argument [{:keys [connection]} {:keys [id text type subtype parent]}]
+(defmutation add-argument [{:keys [connection]} {:keys [id text type subtype parent author]}]
   {::pc/output [:argument/id]}
   (let [real-id (squuid)]
     (log/debug "New UUID " (str real-id))
@@ -18,7 +18,8 @@
                              :argument/id      (str real-id)
                              :argument/text    text
                              :argument/type    type
-                             :argument/subtype subtype}
+                             :argument/subtype subtype
+                             :argument/author  author}
                             [:db/add [:argument/id (str (second parent))] (if (pro? type) :argument/pros :argument/cons) "new-argument"]])
     {:tempids {id real-id}}))
 
