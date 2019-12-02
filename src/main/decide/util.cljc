@@ -7,10 +7,13 @@
 
 (>defn str->uuid [s] [string? => uuid?] (UUID/fromString s))
 (>defn str-id->uuid-id
-  "Updates :argument/id in map to uuid"
-  [m]
-  [(comp string? :argument/id) => (comp uuid? :argument/id)]
-  (update m :argument/id str->uuid))
+  "Updates a key in map to uuid"
+  ([m]
+   [(comp string? :argument/id) => (comp uuid? :argument/id)]
+   (str-id->uuid-id m :argument/id))
+  ([m k]
+   [map? keyword? => map?]
+   (update m k str->uuid)))
 
 (defn arg-id->prop-id [proposal]
   (rename-keys proposal {:argument/id :proposal/id}))
