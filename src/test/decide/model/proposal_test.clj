@@ -10,7 +10,7 @@
     [taoensso.timbre :as log]))
 
 (defn seeded-setup []
-  (let [conn (db/new-database)]
+  (let [conn (db/new-database "datahike:mem://test-db")]
     (d/transact conn [#:account{:id "2"}
                       #:process{:slug      "example"
                                 :budget    100000

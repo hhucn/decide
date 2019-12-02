@@ -57,7 +57,7 @@
     (p (interpose (br) (str/split-lines details)))
     (arg/ui-argumentation (comp/computed argumentation {:argumentation-root this}))))
 
-(def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :argument/id}))
+(def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :proposal/id}))
 
 (defn proposal-card [comp {:proposal/keys [id details cost]
                            :argument/keys [text]}]
@@ -113,7 +113,7 @@
                 :data-dismiss "modal"} (IoMdClose))
              (ui-proposal-detail proposal-details))))))])
 
-(def ui-proposal-card (comp/factory ProposalCard))
+(def ui-proposal-card (comp/factory ProposalCard {:keyfn :proposal/id}))
 
 (defn field [{:keys [label valid? error-message] :as props}]
   (let [input-props (-> props (assoc :name label) (dissoc :label :valid? :error-message))]

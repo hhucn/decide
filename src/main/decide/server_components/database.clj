@@ -114,11 +114,10 @@
                                :proposals ["proposal-1"]}])
   conn)
 
-(defn new-database []
-  (d/create-database default-uri
-    :initial-tx schema
-    :schema-on-read true)
-  (d/connect default-uri))
+(defn new-database [uri]
+  (d/create-database uri
+    :initial-tx schema)
+  (d/connect uri))
 
 (defstate conn
   :start
@@ -130,16 +129,19 @@
                      (log/info "Reset database...")
                      (d/delete-database uri))
         db-exists? (d/database-exists? uri)]
+    (log/info "Database exists?" db-exists?)
     (log/info "Create database connection with URI:" uri)
     (log/info "Example requested?" example?)
 
     (when-not db-exists?
       (log/info "Database does not exist! Creating...")
-      (d/create-database uri :initial-tx schema))
+      (d/create-database uri))
 
     (log/info "Database exists. Connecting...")
     (let [conn (d/connect uri)]
-      (when example?
+      (log/info "Transacting schema...")
+      (d/transact conn schema)
+      (when (and (not db-exists?) example?)
         (log/info "Example DB requested. Hydrating...")
         (initialize-example! conn))
 

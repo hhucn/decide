@@ -10,7 +10,7 @@
     [taoensso.timbre :as log]))
 
 (defn seeded-setup []
-  (let [conn (db/new-database)]
+  (let [conn (db/new-database "datahike:mem://test-db")]
     (d/transact conn [{:account/id (str 1) :account/active? false}
                       {:account/id (str 2) :account/active? true :account/email "account@example.net"}
                       {:account/id (str 3) :account/active? true}])

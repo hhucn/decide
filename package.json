@@ -4,10 +4,7 @@
     "description": "",
     "private": true,
     "dependencies": {
-        "highlight.js": "^9.16.2",
-        "react-grid-layout": "^0.17.1",
         "react-icons": "^3.8.0",
-        "reakit": "^0.11.2",
         "bootstrap": "^4.4.1",
         "jquery": "^3.4.1",
         "popper.js": "^1.16.0"
