@@ -238,13 +238,17 @@
       (div :.argumentation-header.bg-success.px-3.pt-2
         (dom/h6 "Pro Argumente")
         (ui-add-argument-button :pro add-argument-fn))
-      (map #(ui-argument % computed) pros))
+      (if (empty? pros)
+        (p :.p-3.text-muted "Es gibt noch keine Pro-Argumente. Füge eins hinzu!")
+        (map #(ui-argument % computed) pros)))
 
     (half-row
       (div :.argumentation-header.bg-danger.px-3.pt-2
         (dom/h6 "Contra Argumente")
         (ui-add-argument-button :con add-argument-fn))
-      (map #(ui-argument % computed) cons))))
+      (if (empty? cons)
+        (p :.p-3.text-muted "Es gibt noch keine Contra-Argumente. Füge eins hinzu!")
+        (map #(ui-argument % computed) cons)))))
 
 (def ui-procon (comp/computed-factory ProCon {:keyfn :argument/id}))
 
