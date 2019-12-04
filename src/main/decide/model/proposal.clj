@@ -19,7 +19,7 @@
        #:proposal{:db/id       "new-proposal"
                   :argument/id (str id)
                   :cost        cost
-                  :details     details}
+                  :subtext     details}
        #:argument{:text         text
                   :type         :position
                   :subtype      :position
