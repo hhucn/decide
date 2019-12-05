@@ -55,10 +55,10 @@
 (defsc Argument [this {:argument/keys [id text pros cons]} {:keys [argumentation-root]}]
   {:query [:argument/id
            :argument/text
-           :argument/type ; pro, con, position, ...
-           :argument/subtype ; undercut, undermine, ...
-           {:argument/pros '...}
-           {:argument/cons '...}]
+           :argument/type                                   ; pro, con, position, ...
+           :argument/subtype                                ; undercut, undermine, ...
+           {:argument/pros 1}
+           {:argument/cons 1}]
    :ident :argument/id}
   (div :.btn.btn-light.my-1
     {:style
