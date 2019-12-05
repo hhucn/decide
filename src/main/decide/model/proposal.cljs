@@ -14,7 +14,8 @@
             [decide.model.argument :as arg]
             ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline IoMdClose]]
             ["bootstrap/js/dist/modal"]
-            ["bootstrap/js/dist/collapse"]))
+            ["bootstrap/js/dist/collapse"]
+            [com.fulcrologic.fulcro-css.css :as css]))
 
 (declare ProposalDetails)
 
@@ -248,15 +249,19 @@
                       #(df/load! app :all-proposals ProposalCard
                          {:without              #{:>/proposal-details}
                           :post-mutation        `dr/target-ready
-                          :post-mutation-params {:target [:component/id :proposals]}})))}
-  (div :.container
-    (button :.btn.btn-outline-primary
-      {:data-toggle "collapse"
-       :data-target "#new-proposal"}
-      "Neuen Vorschlag hinzufügen")
-    (div :.collapse.p-3.border#new-proposal
-      (ui-new-proposal-form new-proposal-form))
-    (div :.card-deck.d-flex.justify-content-center
-      (for [proposal all-proposals]
-        (div :.col-lg-6.p-3
+                          :post-mutation-params {:target [:component/id :proposals]}})))
+   :css           [[:.proposal-deck {:display         "flex"
+                                     :align-items     "center"
+                                     :justify-content "space-evenly"}]]}
+  (let [{:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
+    (div :.container
+      (button :.btn.btn-outline-primary
+        {:data-toggle "collapse"
+         :data-target "#new-proposal"}
+        "Neuen Vorschlag hinzufügen")
+      (div :.collapse.p-3.border#new-proposal
+        (ui-new-proposal-form new-proposal-form))
+      (div
+        {:classes [proposal-deck]}
+        (for [proposal all-proposals]
           (ui-proposal-card proposal))))))
