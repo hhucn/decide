@@ -1,5 +1,5 @@
 (ns decide.model.argument
-  (:require [com.fulcrologic.fulcro.dom :as dom :refer [div button p a form option label input span]]
+  (:require [com.fulcrologic.fulcro.dom :as dom :refer [div button p a form option label input span small]]
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro-css.css :as css]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
@@ -59,45 +59,49 @@
            :argument/subtype                                ; undercut, undermine, ...
            {:argument/pros 1}
            {:argument/cons 1}]
-   :ident :argument/id}
-  (div :.btn.btn-light.my-1
-    {:style
-              {:position     "relative"
-               :border       "1px solid black"
-               :borderRadius "10px"
-               :padding      "24px"
-               :textAlign    "left"}
-     :onClick #(comp/transact! argumentation-root [(navigate-forward {:argument/id id})])}
-    text
-    (div :.btn-group
-      {:style {:position "absolute" :top "0px" :right "0px"
-               :padding  "0"}}
-      (button :.close
-        {:style         {:backgroundColor "transparent"
-                         :border          "0"
-                         :zIndex          "100"}
-         :data-toggle   "dropdown"
-         :aria-expanded "false"
-         :onClick       (fn [e]
-                          (evt/stop-propagation! e)
-                          (log/info "Open Dropdown!"))}
-        (IoMdMore))
-      (div :.dropdown-menu.dropdown-menu-right.border
-        (a :.dropdown-item.bg-danger.text-white
-          {:onClick
-           (fn [e]
-             (evt/stop-propagation! e)
-             (comp/transact! this [(retract-argument {:argument/id id})]))}
-          "Löschen")))
-    (div :.ml-auto.small
-      {:style {:display  "inline-block"
-               :position "absolute"
-               :bottom   "0"
-               :right    "0"
-               :padding  "5px 10px"
-               :width    "auto"}}
-      (span :.text-success.pr-2 (MdSubdirectoryArrowRight) (str (count pros)))
-      (span :.text-danger (MdSubdirectoryArrowRight) (str (count cons))))))
+   :ident :argument/id
+   :css   [[:.argument {:position     "relative"
+                        :border       "1px solid black"
+                        :borderRadius "10px"
+                        :padding      "24px"
+                        :textAlign    "left"
+                        :cursor       "pointer"}]
+           [:.sublayers {:display     "inline-block"
+                         :position    "absolute"
+                         :bottom      "0"
+                         :right       "0"
+                         :padding     "5px 10px"
+                         :width       "auto"
+                         :margin-left "auto"}]]}
+  (let [{:keys [argument sublayers]} (css/get-classnames Argument)]
+    (div :.btn.btn-light.my-1
+      {:classes [argument]
+       :onClick #(comp/transact! argumentation-root [(navigate-forward {:argument/id id})])}
+      text
+      (div :.btn-group
+        {:style {:position "absolute" :top "0px" :right "0px"
+                 :padding  "0"}}
+        (button :.close
+          {:style         {:backgroundColor "transparent"
+                           :border          "0"
+                           :zIndex          "100"}
+           :data-toggle   "dropdown"
+           :aria-expanded "false"
+           :onClick       (fn [e]
+                            (evt/stop-propagation! e)
+                            (log/info "Open Dropdown!"))}
+          (IoMdMore))
+        (div :.dropdown-menu.dropdown-menu-right.border
+          (a :.dropdown-item.bg-danger.text-white
+            {:onClick
+             (fn [e]
+               (evt/stop-propagation! e)
+               (comp/transact! this [(retract-argument {:argument/id id})]))}
+            "Löschen")))
+      (small
+        {:classes [sublayers]}
+        (span :.text-success.pr-2 (MdSubdirectoryArrowRight) (str (count pros)))
+        (span :.text-danger (MdSubdirectoryArrowRight) (str (count cons)))))))
 
 
 (def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
