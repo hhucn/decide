@@ -22,14 +22,14 @@
         "start": "npx run-p client/server server"
     },
     "devDependencies": {
-        "intl-messageformat": "^7.6.1",
+        "intl-messageformat": "^7.7.2",
         "karma": "^4.4.1",
         "karma-chrome-launcher": "^3.1.0",
         "karma-cljs-test": "^0.1.0",
         "npm-run-all": "^4.1.5",
         "react": "^16.12.0",
         "react-dom": "^16.12.0",
-        "shadow-cljs": "^2.8.76",
+        "shadow-cljs": "^2.8.80",
         "showdown": "^1.9.1"
     },
     "author": "Björn Ebbinghaus",
