@@ -75,8 +75,9 @@
                          :margin-left "auto"}]]}
   (let [{:keys [argument sublayers]} (css/get-classnames Argument)]
     (div :.btn.btn-light.my-1
-      {:classes [argument]
-       :onClick #(comp/transact! argumentation-root [(navigate-forward {:argument/id id})])}
+      {:classes      [argument]
+       :onMouseEnter #(df/load! this [:argument/id id] Argument)
+       :onClick      #(comp/transact! argumentation-root [(navigate-forward {:argument/id id})])}
       text
       (div :.btn-group
         {:style {:position "absolute" :top "0px" :right "0px"
