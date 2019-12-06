@@ -23,6 +23,8 @@
     },
     "devDependencies": {
         "intl-messageformat": "^7.7.2",
+        "highlight.js": "9.16.2",
+        "react-grid-layout": "0.16.6",
         "karma": "^4.4.1",
         "karma-chrome-launcher": "^3.1.0",
         "karma-cljs-test": "^0.1.0",
