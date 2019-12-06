@@ -25,7 +25,8 @@
                            {:argument/keys [id text type subtype parent author] :as params}]
   {::pc/params [:argument/id :argument/text :argument/type :argument/subtype
                 :argument/author :argument/parent]
-   ::pc/output [:argument/id]}
+   ::pc/output [:argument/id]
+   ::s/params  ::new-argument}
   (if (and account-id (= account-id (second author)))
     (if (s/valid? ::new-argument params)
       (let [real-id   (squuid)

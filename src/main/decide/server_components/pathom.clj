@@ -14,6 +14,7 @@
     [decide.model.process :as process]
     [decide.server-components.config :refer [config]]
     [decide.server-components.database :as db]
+    [clojure.spec.alpha :as s]
     [datahike.api :as d]
     [datahike.core :refer [conn? db?]]))
 
@@ -48,6 +49,17 @@
            (parser env tx)
            {}))))})
 
+(def spec-plugin
+  {::p/wrap-mutate
+   (fn [mutate]
+     (fn [env sym params]
+       (if-let [spec (get-in env [::pc/indexes ::pc/index-mutations sym ::s/params])]
+         (if (s/valid? spec params)
+           (mutate env sym params)
+           (throw (ex-info "Failed validation!" (s/explain-data spec params))))
+         (mutate env sym params))))})
+
+
 (defn log-requests [{:keys [env tx] :as req}]
   (log/debug "Pathom transaction:" (pr-str tx))
   req)
@@ -70,6 +82,7 @@
                                                               :connection      db-connection
                                                               :config          config}
                                                              env))))
+                                    spec-plugin
                                     (preprocess-parser-plugin log-requests)
                                     p/error-handler-plugin
                                     (p/post-process-parser-plugin p/elide-not-found)
