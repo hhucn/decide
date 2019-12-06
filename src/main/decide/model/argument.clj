@@ -22,28 +22,28 @@
                 :argument/parent]))
 
 (defmutation new-argument [{:keys [connection AUTH/account-id] :as env}
-                           {:argument/keys [id text type subtype parent author] :as params}]
+                           {:argument/keys [id text type subtype parent author]}]
   {::pc/params [:argument/id :argument/text :argument/type :argument/subtype
                 :argument/author :argument/parent]
    ::pc/output [:argument/id]
    ::s/params  ::new-argument}
   (if (and account-id (= account-id (second author)))
-    (if (s/valid? ::new-argument params)
-      (let [real-id   (squuid)
-            _         (log/debug "New UUID " (str real-id))
-            tx-report (d/transact connection
-                        [{:db/id            "new-argument"
-                          :argument/id      (str real-id)
-                          :argument/text    text
-                          :argument/type    type
-                          :argument/subtype subtype
-                          :argument/author  author}
-                         [:db/add [:argument/id (-> parent second str)]
-                          (if (pro? type) :argument/pros :argument/cons) "new-argument"]])]
-        {:tempids     {id real-id}
-         ::p/env      (assoc env :db (:db-after tx-report))
-         :argument/id real-id})
-      (log/spy :error (s/explain ::new-argument params)))))
+    (let [real-id   (squuid)
+          tx-report (d/transact connection
+                      [{:db/id            "new-argument"
+                        :argument/id      (str real-id)
+                        :argument/text    text
+                        :argument/type    type
+                        :argument/subtype subtype
+                        :argument/author  author}
+                       [:db/add [:argument/id (-> parent second str)]
+                        (if (pro? type) :argument/pros :argument/cons) "new-argument"]])]
+      (log/debug "New UUID " (str real-id))
+      {:tempids     {id real-id}
+       ::p/env      (assoc env :db (:db-after tx-report))
+       :argument/id real-id})
+    (throw (ex-info "Authorization failed" {:cause      ::not-logged-in-or-not-matching
+                                            :account/id account-id}))))
 
 
 (defmutation retract-argument [{:keys [connection]} {:keys [argument/id]}]

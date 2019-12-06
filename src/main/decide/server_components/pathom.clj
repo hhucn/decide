@@ -56,7 +56,9 @@
        (if-let [spec (get-in env [::pc/indexes ::pc/index-mutations sym ::s/params])]
          (if (s/valid? spec params)
            (mutate env sym params)
-           (throw (ex-info "Failed validation!" (s/explain-data spec params))))
+           (do
+             (log/warn (s/explain spec params))
+             (throw (ex-info "Failed validation!" (s/explain-data spec params)))))
          (mutate env sym params))))})
 
 
