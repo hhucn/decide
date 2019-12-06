@@ -113,3 +113,6 @@ resources/public/**/js
 package-lock.json
 projectFilesBackup
 decide.iml
+leveldb
+Downloads
+example
