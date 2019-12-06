@@ -11,6 +11,13 @@
     [decide.model.process :as process])
   (:import (java.time Instant)))
 
+(s/def :proposal/id any?)
+(s/def :proposal/cost string?)
+(s/def :proposal/details string?)
+(s/def :argument/text string?)
+(s/def ::new-proposal (s/keys :req [:proposal/id :proposal/cost :proposal/details
+                                    :argument/text]))
+
 (>defn add-proposal! [conn process-ident {:proposal/keys [id cost details]
                                           :argument/keys [text author created-when]}]
   [conn? ::process/process-ident any? => map?]
@@ -28,23 +35,25 @@
      [:db/add process-ident :process/proposals "new-proposal"]]))
 
 (defmutation new-proposal [{:keys [connection AUTH/account-id] :as env} {:proposal/keys [id cost details]
-                                                                         :argument/keys [text]}]
+                                                                         :argument/keys [text] :as params}]
   {::pc/params [:proposal/id :argument/text :proposal/cost :proposal/details]
    ::pc/output [:proposal/id]}
   (when account-id
-    (let [real-id   (squuid)
-          tx-report (add-proposal! connection
-                      [:process/slug "example"]
-                      {:proposal/id           real-id
-                       :proposal/cost         (Long/parseLong cost)
-                       :proposal/subtext      details
-                       :argument/text         text
-                       :argument/author       [:account/id account-id]
-                       :argument/created-when (Instant/now)})]
-      (log/debug "New UUID for proposal" real-id)
-      {:proposal/id real-id
-       ::p/env      (assoc env :db (:db-after tx-report))
-       :tempids     {id real-id}})))
+    (if (s/valid? ::new-proposal params)
+      (let [real-id   (squuid)
+            tx-report (add-proposal! connection
+                        [:process/slug "example"]
+                        {:proposal/id           real-id
+                         :proposal/cost         (Long/parseLong cost)
+                         :proposal/details      details
+                         :argument/text         text
+                         :argument/author       [:account/id account-id]
+                         :argument/created-when (Instant/now)})]
+        (log/debug "New UUID for proposal" real-id)
+        {:proposal/id real-id
+         ::p/env      (assoc env :db (:db-after tx-report))
+         :tempids     {id real-id}})
+      (log/spy :error (s/explain ::new-proposal params)))))
 
 (defresolver resolve-proposal [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}

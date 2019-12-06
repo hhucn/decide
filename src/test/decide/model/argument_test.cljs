@@ -2,9 +2,7 @@
   (:require
     [decide.model.argument :as argument]
     [clojure.test :refer [deftest]]
-    [fulcro-spec.core :refer [specification provided behavior assertions]]))
-
-(def =>)
+    [fulcro-spec.core :refer [specification provided behavior assertions component =>]]))
 
 (defn argumentation [current upstream]
   {:argumentation/upstream upstream

@@ -122,7 +122,7 @@
              :type type
              :subtype subtype})
 
-(defmutation add-argument [{:keys [id text type subtype parent]}]
+(defmutation new-argument [{:argument/keys [id text type subtype parent]}]
   (action [{:keys [state]}]
     (let [new-argument  (argument id text type subtype)
           parent-target (conj parent (if (= type :pro) :argument/pros :argument/cons))]
@@ -173,14 +173,17 @@
     (form
       {:onSubmit (fn submit [e]
                    (evt/prevent-default! e)
-                   (comp/transact! this [(add-argument {:id      (tempid/tempid)
-                                                        :text    new-argument
-                                                        :type    (if pro? :pro :con)
-                                                        :subtype new-subtype
-                                                        :parent  current-argument
-                                                        :author  (get-in props [[:component/id :session] :>/current-user])})
-                                         (reset-new-argument-form nil)
-                                         (m/toggle {:field :ui/open?})]))}
+                   (log/info current-argument)
+                   (comp/transact! this
+                     [(new-argument
+                        #:argument{:id      (tempid/tempid)
+                                   :text    new-argument
+                                   :type    (if pro? :pro :con)
+                                   :subtype new-subtype
+                                   :parent  current-argument
+                                   :author  (get-in props [[:component/id :session] :>/current-user])})
+                      (reset-new-argument-form nil)
+                      (m/toggle {:field :ui/open?})]))}
       (div :.form-group
         (label "Dein neues Argument "
           (if pro?
@@ -221,15 +224,15 @@
              :flexDirection "column"}}
     children))
 
-(defn ui-add-argument-button [type add-argument-fn]
+(defn ui-new-argument-button [type new-argument-fn]
   (button :.btn
     {:classes [(if (= type :pro) "btn-success" "btn-danger")]
-     :onClick #(add-argument-fn (= type :pro))}
+     :onClick #(new-argument-fn (= type :pro))}
     "Argument hinzufügen"))
 
 (defsc ProCon [this {:argument/keys [pros cons]}
-               {:keys [add-argument-fn] :as computed
-                :or   {add-argument-fn #()}}]
+               {:keys [new-argument-fn] :as computed
+                :or   {new-argument-fn #()}}]
   {:query         #(into [:argument/id
                           {:argument/pros (comp/get-query Argument)}
                           {:argument/cons (comp/get-query Argument)}]
@@ -241,7 +244,7 @@
     (half-row
       (div :.argumentation-header.bg-success.px-3.pt-2
         (dom/h6 "Pro Argumente")
-        (ui-add-argument-button :pro add-argument-fn))
+        (ui-new-argument-button :pro new-argument-fn))
       (if (empty? pros)
         (p :.p-3.text-muted "Es gibt noch keine Pro-Argumente. Füge eins hinzu!")
         (map #(ui-argument % computed) pros)))
@@ -249,7 +252,7 @@
     (half-row
       (div :.argumentation-header.bg-danger.px-3.pt-2
         (dom/h6 "Contra Argumente")
-        (ui-add-argument-button :con add-argument-fn))
+        (ui-new-argument-button :con new-argument-fn))
       (if (empty? cons)
         (p :.p-3.text-muted "Es gibt noch keine Contra-Argumente. Füge eins hinzu!")
         (map #(ui-argument % computed) cons)))))
@@ -318,6 +321,6 @@
     (ui-new-argument (merge {:proposal/id id} new-argument))
     (ui-procon current-argument
       {:argumentation-root this
-       :add-argument-fn    (fn add-argument [pro?] (comp/transact! this [(open-add-new-argument {:pro? pro?})]))})))
+       :new-argument-fn    (fn new-argument [pro?] (comp/transact! this [(open-add-new-argument {:pro? pro?})]))})))
 
 (def ui-argumentation (comp/factory Argumentation {:keyfn :proposal/id}))
