@@ -11,6 +11,9 @@
 (s/def ::lastname string?)
 (s/def ::uid string?)
 (s/def ::mail string?)
+(s/def ::givenName string?)
+(s/def ::sn string?)
+(s/def ::sAMAccountName string?)
 (s/def ::ldap-entity (s/keys :req-un [::firstname ::lastname ::uid ::mail]))
 
 (s/def ::ldap-result (s/keys :req-un [::givenName ::sn ::sAMAccountName ::mail]))

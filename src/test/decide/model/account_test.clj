@@ -32,15 +32,6 @@
       entity => {:account/email "account@example.net"})))
 
 (deftest parser-integration-test
-  #_(component "The pathom parser for the server"
-      (let [{:keys [conn]} (seeded-setup)
-            parser (build-parser conn)]
-        (assertions
-          "Pulls details for all active accounts"
-          (parser {} [{:all-accounts [:account/email]}])
-          => {:all-accounts [{}
-                             {:account/email "account@example.net"}]})))
-
   (provided! "The database contains the account"
     (acct/get-account db id subquery) => (select-keys
                                            {:account/id      id
@@ -59,7 +50,7 @@
                                  :account/email   "boo@bah.com"
                                  :account/active? false}}
 
-          "Can't pull when no session"
+          "Can't pull without session"
           (parser {}
             [{[:account/id "2"] [:account/id :account/email :account/active?]}])
           => {[:account/id "2"] {:account/id      "2"

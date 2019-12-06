@@ -2,6 +2,7 @@
   (:require
     [datahike.api :as d]
     [datahike.core :refer [squuid]]
+    [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
     [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
     [com.wsscode.pathom.core :as p]
     [com.wsscode.pathom.connect :as pc :refer [defresolver defmutation]]
@@ -11,12 +12,12 @@
 
 (defn pro? [t] (= t :pro))
 
-(s/def :argument/id (s/or :uuid uuid? :str string?))
+(s/def :argument/id (s/or :uuid uuid? :tempid tempid/tempid?))
 (s/def :argument/text string?)
 (s/def :argument/type #{:pro :con})
 (s/def :argument/subtype #{:support :undercut :undermine})
 (s/def :argument/author (s/tuple #{:account/id} :account/id))
-(s/def :argument/parent (s/tuple any? :argument/id))
+(s/def :argument/parent (s/tuple #{:argument/id} :argument/id))
 (s/def ::new-argument
   (s/keys :req [:argument/id :argument/text :argument/type :argument/subtype :argument/author
                 :argument/parent]))
@@ -38,7 +39,7 @@
                         :argument/author  author}
                        [:db/add [:argument/id (-> parent second str)]
                         (if (pro? type) :argument/pros :argument/cons) "new-argument"]])]
-      (log/debug "New UUID " (str real-id))
+      (log/info "New UUID " (str real-id))
       {:tempids     {id real-id}
        ::p/env      (assoc env :db (:db-after tx-report))
        :argument/id real-id})
@@ -47,7 +48,8 @@
 
 
 (defmutation retract-argument [{:keys [connection]} {:keys [argument/id]}]
-  {::pc/params [:argument/id]}
+  {::pc/params [:argument/id]
+   ::s/params  (s/keys :req [:argument/id])}
   (when (uuid? id)
     (d/transact connection [[:db.fn/retractEntity [:argument/id (str id)]]]))
   [])

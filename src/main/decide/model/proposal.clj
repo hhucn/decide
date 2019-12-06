@@ -37,7 +37,8 @@
 (defmutation new-proposal [{:keys [connection AUTH/account-id] :as env} {:proposal/keys [id cost details]
                                                                          :argument/keys [text] :as params}]
   {::pc/params [:proposal/id :argument/text :proposal/cost :proposal/details]
-   ::pc/output [:proposal/id]}
+   ::pc/output [:proposal/id]
+   ::s/params  ::new-proposal}
   (when account-id
     (if (s/valid? ::new-proposal params)
       (let [real-id   (squuid)

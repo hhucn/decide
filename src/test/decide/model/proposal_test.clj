@@ -23,15 +23,18 @@
     (let [{:keys [conn]} (seeded-setup)
           parser (build-parser conn)]
       (assertions
-        "Can pull the details of an account"
+        "Can add a new proposal with an account"
         (parser {:AUTH/account-id "2"}
           [{'(decide.model.proposal/new-proposal
                {:proposal/id      "c01f9b68-c47b-46df-b74d-161a04e65b7e"
                 :proposal/cost    "1234"
                 :proposal/details "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben."
                 :argument/text    "Es sollte ein Wasserspender im Flur aufgestellt werden."})
-            [:proposal/cost :proposal/details :argument/text]}])
+            [:proposal/cost :proposal/details :argument/text {:argument/author [:account/id]}]}])
         => {'decide.model.proposal/new-proposal
             {:proposal/cost    1234
              :proposal/details "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben."
-             :argument/text    "Es sollte ein Wasserspender im Flur aufgestellt werden."}}))))
+             :argument/text    "Es sollte ein Wasserspender im Flur aufgestellt werden."
+             :argument/author  {:account/id "2"}}}
+
+        ))))
