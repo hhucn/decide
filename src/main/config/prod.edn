@@ -10,4 +10,5 @@
                                   :security {:ssl-redirect false}}
  :db                             {:db/uri      "datahike:file:///tmp/example"
                                   :db/example? true
-                                  :db/reset?   false}}
+                                  :db/reset?   false}
+ :process                        {:budget 100000}}
