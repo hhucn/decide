@@ -39,12 +39,13 @@
        :post-mutation-params {:target [:proposal/id id]}})))
 
 
-(defsc ProposalDetails [this {:keys          [argument/text >/argumentation]
+(defsc ProposalDetails [this {:keys          [argument/text >/argumentation process/budget]
                               :proposal/keys [details cost]}]
   {:query         [:proposal/id
                    :argument/text
                    :proposal/details
                    :proposal/cost
+                   :process/budget
                    {:>/argumentation (comp/get-query arg/Argumentation)}]
    :ident         :proposal/id
    :route-segment ["proposal" :proposal/id]
@@ -55,7 +56,7 @@
   (div :.container
     (div :.row.justify-content-between.m-4
       (h2 :.detail-card__header text)
-      (big-price-tag cost 1000000000 "$"))
+      (big-price-tag cost budget "$"))
     (p (interpose (br) (str/split-lines details)))
     (arg/ui-argumentation (comp/computed argumentation {:argumentation-root this}))))
 

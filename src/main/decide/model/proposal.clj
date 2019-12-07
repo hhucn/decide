@@ -18,9 +18,9 @@
 (s/def ::new-proposal (s/keys :req [:proposal/id :proposal/cost :proposal/details
                                     :argument/text]))
 
-(>defn add-proposal! [conn process-ident {:proposal/keys [id cost details]
-                                          :argument/keys [text author created-when]}]
-  [conn? ::process/process-ident any? => map?]
+(>defn add-proposal! [conn {:proposal/keys [id cost details]
+                            :argument/keys [text author created-when]}]
+  [conn? any? => map?]
   (d/transact conn
     [(merge
        #:proposal{:db/id       "new-proposal"
@@ -31,8 +31,7 @@
                   :type         :position
                   :subtype      :position
                   :author       author
-                  :created-when (str created-when)})
-     [:db/add process-ident :process/proposals "new-proposal"]]))
+                  :created-when (str created-when)})]))
 
 (defmutation new-proposal [{:keys [connection AUTH/account-id] :as env} {:proposal/keys [id cost details]
                                                                          :argument/keys [text] :as params}]
@@ -43,7 +42,6 @@
     (if (s/valid? ::new-proposal params)
       (let [real-id   (squuid)
             tx-report (add-proposal! connection
-                        [:process/slug "example"]
                         {:proposal/id           real-id
                          :proposal/cost         (Long/parseLong cost)
                          :proposal/details      details

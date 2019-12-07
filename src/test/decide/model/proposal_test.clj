@@ -11,10 +11,7 @@
 
 (defn seeded-setup []
   (let [conn (db/new-database "datahike:mem://test-db")]
-    (d/transact conn [#:account{:id "2"}
-                      #:process{:slug      "example"
-                                :budget    100000
-                                :proposals ["proposal-1"]}])
+    (d/transact conn [#:account{:id "2"}])
     {:conn conn
      :db   @conn}))
 
@@ -35,6 +32,4 @@
             {:proposal/cost    1234
              :proposal/details "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben."
              :argument/text    "Es sollte ein Wasserspender im Flur aufgestellt werden."
-             :argument/author  {:account/id "2"}}}
-
-        ))))
+             :argument/author  {:account/id "2"}}}))))

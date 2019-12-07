@@ -86,8 +86,7 @@
 
 (def schema (into [] cat [argument-schema
                           proposal-schema
-                          account-schema
-                          process-schema]))
+                          account-schema]))
 
 (>defn named-uuid [s]
   [string? => uuid?]
@@ -109,10 +108,7 @@
                                                "Hier steht eine genaue Beschreibung des Vorschlags. Mit seinen Einschränkungen und Bedingungen. \n\nVielleicht auch Anmerkungen von der Moderation. \nVielleicht zusammen, vielleicht alleine stehend.\n\nLorem ipsum dolor sit amet und soweiter und mehr Text, denn man gar nicht lesen braucht, weil er nur den Platz füllen soll. Jetzt solltest du aufhören zu lesen!"
                                 :proposal/cost 10000
                                 :argument/pros ["my-new-argument"]
-                                :argument/cons []}
-                     #:process{:slug      "example"
-                               :budget    100000
-                               :proposals ["proposal-1"]}])
+                                :argument/cons []}])
   conn)
 
 (defn new-database [uri]
