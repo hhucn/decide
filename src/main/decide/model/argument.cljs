@@ -1,5 +1,5 @@
 (ns decide.model.argument
-  (:require [com.fulcrologic.fulcro.dom :as dom :refer [div button p a form option label input span small]]
+  (:require [com.fulcrologic.fulcro.dom :as dom :refer [div button p a form option label input span small h6]]
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro-css.css :as css]
             [com.fulcrologic.fulcro.algorithms.form-state :as fs]
@@ -52,20 +52,21 @@
   (action [{:keys [ref state]}]
     (swap! state update-in ref *navigate-forward [:argument/id id])))
 
-(defsc Argument [this {:argument/keys [id text pros cons]} {:keys [argumentation-root]}]
+(defsc Argument [this {:argument/keys [id text pros cons author]} {:keys [argumentation-root]}]
   {:query [:argument/id
            :argument/text
            :argument/type                                   ; pro, con, position, ...
            :argument/subtype                                ; undercut, undermine, ...
+           :argument/author
            {:argument/pros 1}
            {:argument/cons 1}]
    :ident :argument/id
-   :css   [[:.argument {:position     "relative"
-                        :border       "1px solid black"
-                        :borderRadius "10px"
-                        :padding      "24px"
-                        :textAlign    "left"
-                        :cursor       "pointer"}]
+   :css   [[:.argument {:position      "relative"
+                        :border        "1px solid black"
+                        :border-radius "10px"
+                        :padding       "24px"
+                        :text-align    "left"
+                        :cursor        "pointer"}]
            [:.sublayers {:display     "inline-block"
                          :position    "absolute"
                          :bottom      "0"
@@ -93,12 +94,14 @@
                             (log/info "Open Dropdown!"))}
           (IoMdMore))
         (div :.dropdown-menu.dropdown-menu-right.border
-          (a :.dropdown-item.bg-danger.text-white
-            {:onClick
-             (fn [e]
-               (evt/stop-propagation! e)
-               (comp/transact! this [(retract-argument {:argument/id id})]))}
-            "Löschen")))
+          (h6 :.dropdown-header "Aktionen")
+          (when-not author
+            (a :.dropdown-item.text-danger
+              {:onClick
+               (fn [e]
+                 (evt/stop-propagation! e)
+                 (comp/transact! this [(retract-argument {:argument/id id})]))}
+              "Löschen"))))
       (small
         {:classes [sublayers]}
         (span :.text-success.pr-2 (MdSubdirectoryArrowRight) (str (count pros)))
