@@ -18,6 +18,8 @@
 (s/def ::new-proposal (s/keys :req [:proposal/id :proposal/cost :proposal/details
                                     :argument/text]))
 
+(s/def :vote/utility int?)
+
 (>defn add-proposal! [conn {:proposal/keys [id cost details]
                             :argument/keys [text author created-when]}]
   [conn? any? => map?]
@@ -54,6 +56,32 @@
          :tempids     {id real-id}})
       (log/spy :error (s/explain ::new-proposal params)))))
 
+
+(s/def ::upsert-vote (s/keys :req [:proposal/id :account/id :vote/utility]))
+
+(defn upsert-vote [conn {proposal-id :proposal/id
+                         account     :account/id
+                         utility     :vote/utility}]
+  [conn? ::upsert-vote => map?]
+  (d/transact conn
+    [{:db/id                 "vote"
+      :vote/account+proposal (str account "+" proposal-id)
+      :vote/proposal         [:argument/id proposal-id]
+      :vote/utility          utility}
+     [:db/add [:account/id account] :account/votes "vote"]]))
+
+
+(defmutation set-vote [{:keys [connection AUTH/account-id] :as env} {proposal-id :proposal/id
+                                                                     account     :account/id :as params}]
+  {::pc/params [:proposal/id :account/id :account/id]
+   ::pc/output [:proposal/id]
+   ::s/params  ::upsert-vote}
+  (when (and account-id (= account-id account))
+    (let [{:keys [db-after]} (upsert-vote connection params)]
+      {:proposal/id proposal-id
+       ::p/env      (assoc env :db db-after)})))
+
+
 (defresolver resolve-proposal [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
    ::pc/output [:proposal/id :proposal/details :proposal/cost]}
@@ -73,4 +101,4 @@
     {:all-proposals (for [id query-result]
                       {:proposal/id (util/str->uuid id)})}))
 
-(def resolvers [resolve-proposal resolve-all-proposals new-proposal])
+(def resolvers [resolve-proposal resolve-all-proposals new-proposal set-vote])

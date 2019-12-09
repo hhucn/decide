@@ -69,7 +69,24 @@
                           :cardinality :db.cardinality/one}
                      #:db{:ident       :account/active?
                           :valueType   :db.type/boolean
-                          :cardinality :db.cardinality/one}])
+                          :cardinality :db.cardinality/one}
+                     #:db{:ident       :account/votes
+                          :valueType   :db.type/ref
+                          :cardinality :db.cardinality/many
+                          :isComponent true}])
+
+(def vote-schema [#:db{:ident       :vote/account+proposal
+                       :valueType   :db.type/string
+                       ;:valueType   :db.type/tuple
+                       ;:tupleAttrs  [:account/id :argument/id]
+                       :cardinality :db.cardinality/one
+                       :unique      :db.unique/identity}
+                  #:db{:ident       :vote/utility
+                       :valueType   :db.type/long
+                       :cardinality :db.cardinality/one}
+                  #:db{:ident       :vote/proposal
+                       :valueType   :db.type/ref
+                       :cardinality :db.cardinality/one}])
 
 (def process-schema [#:db{:ident       :process/slug
                           :valueType   :db.type/string
@@ -82,11 +99,10 @@
                           :valueType   :db.type/long
                           :cardinality :db.cardinality/one}])
 
-
-
 (def schema (into [] cat [argument-schema
                           proposal-schema
-                          account-schema]))
+                          account-schema
+                          vote-schema]))
 
 (>defn named-uuid [s]
   [string? => uuid?]
