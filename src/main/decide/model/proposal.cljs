@@ -68,13 +68,18 @@
     (some-> details (str/split #"\n\s*\n" 2) first)))
 
 (defn proposal-card [comp {:proposal/keys [id details cost]
-                           :argument/keys [text]}]
+                           :argument/keys [text]
+                           :keys          [vote/utility]}]
   (div :.proposal
-    (div :.proposal-buttons
+    (div :.proposal-buttons.btn-group-toggle
       (button :.btn.btn-outline-success
+        {:type    "radio"
+         :classes [(when (pos? utility) "active")]}
         (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
       (div :.spacer)
       (button :.btn.btn-outline-danger
+        {:type    "radio"
+         :classes [(when (neg? utility) "active")]}
         (IoIosCloseCircleOutline #js {:size "3rem"})))
 
     (div :.proposal-content.btn-light
@@ -104,6 +109,7 @@
 (defsc ProposalCard [this {:keys          [>/proposal-details]
                            :proposal/keys [id] :as props}]
   {:query         [:proposal/id :argument/text :proposal/details :proposal/cost
+                   :vote/utility
                    {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident         :proposal/id
    :initial-state (fn [_] {:ui/modal-open? false})}
