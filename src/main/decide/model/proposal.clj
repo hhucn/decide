@@ -81,6 +81,14 @@
       {:proposal/id proposal-id
        ::p/env      (assoc env :db db-after)})))
 
+(defresolver resolve-votes [{:keys [db AUTH/account-id] :as env} {proposal :proposal/id}]
+  {::pc/input  #{:proposal/id}
+   ::pc/output [:vote/utility]}
+  (if account-id
+    (d/pull db [:vote/utility] [:vote/account+proposal (str account-id "+" proposal)])
+    (throw (ex-info "No Authorization"
+             {:cause      :AUTH/not-logged-in
+              :account/id account-id}))))
 
 (defresolver resolve-proposal [{:keys [db]} {:keys [proposal/id]}]
   {::pc/input  #{:proposal/id}
@@ -101,4 +109,4 @@
     {:all-proposals (for [id query-result]
                       {:proposal/id (util/str->uuid id)})}))
 
-(def resolvers [resolve-proposal resolve-all-proposals new-proposal set-vote])
+(def resolvers [resolve-proposal resolve-all-proposals new-proposal set-vote resolve-votes])
