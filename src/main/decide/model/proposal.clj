@@ -66,7 +66,7 @@
   (d/transact conn
     [{:db/id                 "vote"
       :vote/account+proposal (str account "+" proposal-id)
-      :vote/proposal         [:argument/id proposal-id]
+      :vote/proposal         [:argument/id (str proposal-id)]
       :vote/utility          utility}
      [:db/add [:account/id account] :account/votes "vote"]]))
 

@@ -67,6 +67,16 @@
   (when (string? details)
     (some-> details (str/split #"\n\s*\n" 2) first)))
 
+(defmutation set-vote [{:keys [proposal/id vote/utility]}]
+  (action [{:keys [state]}]
+    (swap! state update-in [:proposal/id id] assoc :vote/utility utility))
+  (remote [{:keys [ast state] :as env}]
+    (let [s      @state
+          params (:params ast)]
+      (m/with-params env
+        (assoc params :account/id
+                      (get-in s [:component/id :session :>/current-user 1]))))))
+
 (defn proposal-card [comp {:proposal/keys [id details cost]
                            :argument/keys [text]
                            :keys          [vote/utility]}]
@@ -74,12 +84,16 @@
     (div :.proposal-buttons.btn-group-toggle
       (button :.btn.btn-outline-success
         {:type    "radio"
-         :classes [(when (pos? utility) "active")]}
+         :classes [(when (pos? utility) "active")]
+         :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
+                                                    :vote/utility (if (pos? utility) 0 1)})])}
         (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
       (div :.spacer)
       (button :.btn.btn-outline-danger
         {:type    "radio"
-         :classes [(when (neg? utility) "active")]}
+         :classes [(when (neg? utility) "active")]
+         :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
+                                                    :vote/utility (if (neg? utility) 0 -1)})])}
         (IoIosCloseCircleOutline #js {:size "3rem"})))
 
     (div :.proposal-content.btn-light
