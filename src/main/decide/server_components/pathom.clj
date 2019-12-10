@@ -57,7 +57,7 @@
          (if (s/valid? spec params)
            (mutate env sym params)
            (do
-             (log/warn (s/explain spec params))
+             (log/warn (s/explain-str spec params))
              (throw (ex-info "Failed validation!" (s/explain-data spec params)))))
          (mutate env sym params))))})
 

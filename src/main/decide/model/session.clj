@@ -16,7 +16,7 @@
 (defresolver current-session-resolver [env input]
   {::pc/output [{::current-session [:session/valid? :account/id]}]}
   (let [{:keys [account/id session/valid?] :as session} (get-in env [:ring/request :session])]
-    (log/info session)
+    (log/debug session)
     (if valid?
       (do
         (log/info id "already logged in!")
