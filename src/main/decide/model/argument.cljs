@@ -191,8 +191,14 @@
       (div :.form-group
         (label "Dein neues Argument "
           (if pro?
-            (a :.text-success {:onClick #(m/toggle! this :ui/pro?)} "dafür")
-            (a :.text-danger {:onClick #(m/toggle! this :ui/pro?)} "dagegen"))
+            (a :.text-success
+              {:style   {:text-decoration "underline"}
+               :href    "#"
+               :onClick #(m/toggle! this :ui/pro?)} "dafür")
+            (a :.text-danger
+              {:style   {:text-decoration "underline"}
+               :href    "#"
+               :onClick #(m/toggle! this :ui/pro?)} "dagegen"))
           ":")
         (input :.form-control
           {:type     "text"
