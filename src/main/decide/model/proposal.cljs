@@ -285,11 +285,18 @@
   (let [{:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
     (div :.container
       (button :.btn.btn-outline-primary
-        {:data-toggle "collapse"
-         :data-target "#new-proposal"}
+        {:data-toggle "modal"
+         :data-target "#modal-new-proposal"}
         "Neuen Vorschlag hinzufügen")
-      (div :.collapse.p-3.border#new-proposal
-        (ui-new-proposal-form new-proposal-form))
+      (div :.modal.fade#modal-new-proposal
+        (div :.modal-dialog.modal-lg
+          (div :.modal-content
+            (div :.modal-header
+              (dom/h5 :.modal-title "Neuer Vorschlag")
+              (button :.close
+                {:data-dismiss "modal"} (IoMdClose)))
+            (div :.modal-body
+              (ui-new-proposal-form new-proposal-form)))))
       (div
         {:classes [proposal-deck]}
         (for [proposal all-proposals]
