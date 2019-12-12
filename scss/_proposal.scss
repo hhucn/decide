@@ -1,5 +1,6 @@
 @import "../node_modules/bootstrap/scss/variables";
 @import "../node_modules/bootstrap/scss/list-group";
+@import "../node_modules/bootstrap/scss/buttons";
 
 .proposal {
   max-width: 655px;
@@ -9,6 +10,12 @@
   display: flex;
   position: relative;
   overflow: hidden;
+
+  .proposal-content {
+    @extend .btn-light;
+    min-width: 355px;
+    cursor: pointer;
+  }
 
   .proposal-buttons {
     height: 100%;
@@ -23,7 +30,6 @@
       height: 100%;
       border: 0;
       border-radius: 0;
-      padding: auto;
     }
 
     .spacer {

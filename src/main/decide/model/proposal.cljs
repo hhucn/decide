@@ -101,9 +101,8 @@
                                                     :vote/utility (if (neg? utility) 0 -1)})])}
         (IoIosCloseCircleOutline #js {:size "3rem"})))
 
-    (div :.proposal-content.btn-light
-      {:style        {:cursor "pointer"}
-       :data-toggle  "modal"
+    (div :.proposal-content
+      {:data-toggle  "modal"
        :data-target  (str "#modal-" id)
        :onMouseEnter #(df/load-field! comp :>/proposal-details {})}
       (div
@@ -278,7 +277,8 @@
                           :post-mutation-params {:target [:component/id :proposals]}})))
    :css           [[:.proposal-deck {:display         "flex"
                                      :align-items     "center"
-                                     :justify-content "space-evenly"}]]}
+                                     :justify-content "space-evenly"
+                                     :flex-wrap       "wrap"}]]}
   (let [{:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
     (div :.container
       (button :.btn.btn-outline-primary
