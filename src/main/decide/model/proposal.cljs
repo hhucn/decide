@@ -67,15 +67,20 @@
   (when (string? details)
     (some-> details (str/split #"\n\s*\n" 2) first)))
 
+(defsc Vote-Non-Join-Mutation-Fix [_ _]
+  {:query [:proposal/id]})
+
 (defmutation set-vote [{:keys [proposal/id vote/utility]}]
   (action [{:keys [state]}]
     (swap! state update-in [:proposal/id id] assoc :vote/utility utility))
   (remote [{:keys [ast state] :as env}]
     (let [s      @state
           params (:params ast)]
-      (m/with-params env
-        (assoc params :account/id
-                      (get-in s [:component/id :session :>/current-user 1]))))))
+      (-> env
+        (m/returning Vote-Non-Join-Mutation-Fix)
+        (m/with-params
+          (assoc params :account/id
+                        (get-in s [:component/id :session :>/current-user 1])))))))
 
 (defn proposal-card [comp {:proposal/keys [id details cost]
                            :argument/keys [text]
