@@ -17,7 +17,7 @@
   [] (mount/start-with {#'decide.server-components.ldap/ldap-resolve
                         (fn ldap-resolver [uid password]
                           (when (= uid password)
-                            {:givenName      uid
+                            {:givenName      (str "Firstname:" uid)
                              :sn             "Example"
                              :sAMAccountName uid
                              :mail           (str uid "@example.org")}))}))

@@ -85,8 +85,8 @@
 (declare Session Account)
 
 (defn display-name-permutations [firstname]
-  (let [names (str/split firstname \space)]
-    (map #(take (inc %) names) (range (count names)))))
+  (let [names (str/split firstname #"\s+")]
+    (map #(apply str (interpose " " (take (inc %) names))) (range (count names)))))
 
 (defsc Login [this {:account/keys [id]
                     :ui/keys      [error open?] :as props}]
@@ -109,11 +109,10 @@
           (if logged-in?
             (div :.btn-group
               (div :.btn-group
-                (dom/button :.btn.btn-outline-dark.dropdown-toggle
-                  {:data-toggle  "dropdown"
-                   :onMouseEnter #(df/load! this [:account/id current-user] Account)}
+                (dom/button :.btn.btn-outline-dark
+                  {:onMouseEnter #(df/load! this [:account/id current-user] Account)}
                   (dom/span display-name))
-                (let [possible-display-names (into #{current-user} cat (display-name-permutations firstname))]
+                (let [possible-display-names (into #{current-user} (display-name-permutations firstname))]
                   (div :.dropdown-menu.dropdown-menu-right.shadow
                     (dom/h6 :.dropdown-header "Alternative Anzeigenamen")
                     (for [name possible-display-names]
