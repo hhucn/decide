@@ -89,6 +89,7 @@
     (div :.proposal-buttons.btn-group-toggle
       (button :.btn.btn-outline-success
         {:type    "radio"
+         :title   "Zustimmen"
          :classes [(when (pos? utility) "active")]
          :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
                                                     :vote/utility (if (pos? utility) 0 1)})])}
@@ -96,6 +97,7 @@
       (div :.spacer)
       (button :.btn.btn-outline-danger
         {:type    "radio"
+         :title   "Ablehnen"
          :classes [(when (neg? utility) "active")]
          :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
                                                     :vote/utility (if (neg? utility) 0 -1)})])}
@@ -111,7 +113,8 @@
                  :justifyContent "space-between"}}
         (h4 :.proposal-title text)
         (button :.btn
-          {:style {:position "absolute"
+          {:title "Optionen"
+           :style {:position "absolute"
                    :right    "0px"
                    :top      "0px"
                    :padding  "0.2rem 0"}}
