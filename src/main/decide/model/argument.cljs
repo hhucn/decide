@@ -44,9 +44,10 @@
   (remote [_] true))
 
 (defn *navigate-forward [{:>/keys [current-argument] :as argumentation} next-argument]
+  (log/info "Navigate forward upstream:" argumentation)
   (-> argumentation
     (assoc :>/current-argument next-argument)
-    (update :argumentation/upstream conj current-argument)))
+    (update :argumentation/upstream (fnil conj []) current-argument)))
 
 (defmutation navigate-forward [{id :argument/id}]
   (action [{:keys [ref state]}]
@@ -175,7 +176,8 @@
                           :ui/open?        open?
                           :ui/new-subtype  :support})}
   (div :.collapse.container.border.p-4.my-3
-    {:classes [(when open? "show")]}
+    {:classes [(when open? "show")]
+     :id      (str "collapse-" id)}
     (dom/button :.close
       {:type    "button"
        :style   {:position "relative"
@@ -309,11 +311,6 @@
                    {:>/current-argument (comp/get-query ProCon)}
                    {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
    :ident         [:argumentation/id :proposal/id]
-   :pre-merge     (fn [{:keys [current-normalized data-tree]}]
-                    (merge
-                      {:argumentation/upstream []}
-                      current-normalized
-                      data-tree))
    :initial-state (fn [{:proposal/keys [id] :as params}]
                     (let [argument (into {:argument/id id} (filter (ns? "argument")) params)]
                       {:proposal/id                id
