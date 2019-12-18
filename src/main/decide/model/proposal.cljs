@@ -39,13 +39,15 @@
        :post-mutation-params {:target [:proposal/id id]}})))
 
 
-(defsc ProposalDetails [this {:keys          [argument/text >/argumentation process/budget]
+(defsc ProposalDetails [this {:keys          [argument/text >/argumentation]
+                              :process/keys  [budget currency]
                               :proposal/keys [details cost]}]
   {:query         [:proposal/id
                    :argument/text
                    :proposal/details
                    :proposal/cost
                    :process/budget
+                   :process/currency
                    {:>/argumentation (comp/get-query arg/Argumentation)}]
    :ident         :proposal/id
    :route-segment ["proposal" :proposal/id]
@@ -56,7 +58,7 @@
   (div :.container
     (div :.row.justify-content-between.m-4
       (h2 :.detail-card__header text)
-      (big-price-tag cost budget "$"))
+      (big-price-tag cost budget currency))
     (p (interpose (br) (str/split-lines details)))
     (arg/ui-argumentation (comp/computed argumentation {:argumentation-root this}))))
 
@@ -85,6 +87,7 @@
 (defn proposal-card [comp]
   (let [{:proposal/keys [id details cost]
          :argument/keys [text]
+         :process/keys  [currency]
          :keys          [vote/utility]} (comp/props comp)]
     (div :.proposal
       (div :.proposal-buttons.btn-group-toggle
@@ -104,7 +107,7 @@
                                                       :vote/utility (if (neg? utility) 0 -1)})])}
           (IoIosCloseCircleOutline #js {:size "3rem"})))
       (div :.proposal-price
-        (span :.proposal-price__text (str cost) " €"))
+        (span :.proposal-price__text (str cost) currency))
       (button :.options.disabled.invisible
         {:title "Optionen"}
         (IoMdMore #js {:size "24px"}))
@@ -117,9 +120,10 @@
 
 
 (defsc ProposalCard [this {:keys          [>/proposal-details]
-                           :proposal/keys [id] :as props}]
+                           :proposal/keys [id]}]
   {:query [:proposal/id :argument/text :proposal/details :proposal/cost
            :vote/utility
+           :process/currency
            {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident :proposal/id}
   [(proposal-card this)
@@ -153,7 +157,8 @@
     value))
 
 (defn form-dummy-proposal-card [{:proposal/keys [details cost]
-                                 :argument/keys [text]}]
+                                 :argument/keys [text]
+                                 :process/keys  [currency]}]
   (div :.proposal.mx-auto
     (div :.proposal-buttons
       (button :.btn.btn-outline-success
@@ -176,7 +181,7 @@
                  :justifyContent "space-between"}}
         (small :.proposal-details details)
         (div :.proposal-price
-          (span :.proposal-price__text (str cost) " €"))))))
+          (span :.proposal-price__text (str cost) currency))))))
 
 (defmutation new-proposal [params]
   (action [{:keys [state]}]

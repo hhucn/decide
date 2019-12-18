@@ -10,8 +10,9 @@
 
 (defresolver resolve-process [{:keys [config]} _]
   {::pc/input  #{}
-   ::pc/output [:process/budget]}
+   ::pc/output [:process/budget :process/currency]}
   (let [{:keys [budget]} (:process config)]
-    #:process{:budget budget}))
+    #:process{:budget   budget
+              :currency "€"}))
 
 (def resolvers [resolve-process])
