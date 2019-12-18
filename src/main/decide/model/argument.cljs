@@ -88,10 +88,8 @@
                            :border          "0"
                            :zIndex          "100"}
            :data-toggle   "dropdown"
-           :aria-expanded "false"
-           :onClick       (fn [e]
-                            (evt/stop-propagation! e)
-                            (log/info "Open Dropdown!"))}
+           :aria-expanded "false"}
+          ;:onClick       (fn [e] (evt/stop-propagation! e))}
           (IoMdMore))
         (div :.dropdown-menu.dropdown-menu-right.border
           (h6 :.dropdown-header "Aktionen")
@@ -138,7 +136,18 @@
   (action [{:keys [state ref]}]
     (swap! state update-in ref assoc :ui/new-argument "")))
 
-(defsc NewArgumentForm [this {:>/keys  [current-argument]
+(defn pro-con-toggle [toggle-fn pro?]
+  (if pro?
+    (a :.text-success
+      {:style   {:text-decoration "underline"}
+       :href    "#"
+       :onClick toggle-fn} "dafür")
+    (a :.text-danger
+      {:style   {:text-decoration "underline"}
+       :href    "#"
+       :onClick toggle-fn} "dagegen")))
+
+(defsc NewArgumentForm [this {:keys    [>/current-argument proposal/id]
                               :ui/keys [open? new-argument new-subtype pro?]
                               :as      props
                               :or      {new-argument ""}}]
@@ -190,15 +199,7 @@
                       (m/toggle {:field :ui/open?})]))}
       (div :.form-group
         (label "Dein neues Argument "
-          (if pro?
-            (a :.text-success
-              {:style   {:text-decoration "underline"}
-               :href    "#"
-               :onClick #(m/toggle! this :ui/pro?)} "dafür")
-            (a :.text-danger
-              {:style   {:text-decoration "underline"}
-               :href    "#"
-               :onClick #(m/toggle! this :ui/pro?)} "dagegen"))
+          (pro-con-toggle #(m/toggle! this :ui/pro?) pro?)
           ":")
         (input :.form-control
           {:type     "text"
