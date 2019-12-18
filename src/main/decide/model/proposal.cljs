@@ -118,6 +118,20 @@
         (h4 :.proposal-title text)
         (div :.proposal-details (split-details details))))))
 
+(defn bottom-sheet [id & children]
+  (div :.modal.fade.bottom-sheet
+    {:id (str "modal-" id)}
+    (div :.spacer-frame)
+    (div :.modal-dialog
+      (div :.modal-content
+        (div :.modal-body
+          (div {:style {:width "auto"}}
+            (button :.close
+              {:style        {:position "absolute"
+                              :top      "1rem"
+                              :right    "1.8rem"}
+               :data-dismiss "modal"} (IoMdClose))
+            children))))))
 
 (defsc ProposalCard [this {:keys          [>/proposal-details]
                            :proposal/keys [id]}]
@@ -126,20 +140,10 @@
            :process/currency
            {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident :proposal/id}
-  [(proposal-card this)
-   (div :.modal.fade.bottom-sheet
-     {:id (str "modal-" id)}
-     (div :.spacer-frame)
-     (div :.modal-dialog.modal-xl
-       (div :.modal-content
-         (div :.modal-body
-           (div {:style {:width "auto"}}
-             (button :.close
-               {:style        {:position "absolute"
-                               :top      "1rem"
-                               :right    "1.8rem"}
-                :data-dismiss "modal"} (IoMdClose))
-             (ui-proposal-detail proposal-details))))))])
+  (dom/div
+    (proposal-card this)
+    (bottom-sheet id
+      (ui-proposal-detail proposal-details))))
 
 (def ui-proposal-card (comp/factory ProposalCard {:keyfn :proposal/id}))
 

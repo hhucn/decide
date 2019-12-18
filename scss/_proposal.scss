@@ -24,7 +24,6 @@
 
 .proposal-content {
   @extend .btn-light;
-  min-width: 355px;
   cursor: pointer;
 }
 
@@ -76,7 +75,7 @@
   }
 
   background-color: $color;
-  border-radius: 20px 0 8px 0;
+  border-top-left-radius: 20px;
 }
 
 //
