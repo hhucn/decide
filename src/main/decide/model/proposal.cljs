@@ -82,59 +82,47 @@
           (assoc params :account/id
                         (get-in s [:component/id :session :>/current-user 1])))))))
 
-(defn proposal-card [comp {:proposal/keys [id details cost]
-                           :argument/keys [text]
-                           :keys          [vote/utility]}]
-  (div :.proposal
-    (div :.proposal-buttons.btn-group-toggle
-      (button :.btn.btn-outline-success
-        {:type    "radio"
-         :title   "Zustimmen"
-         :classes [(when (pos? utility) "active")]
-         :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
-                                                    :vote/utility (if (pos? utility) 0 1)})])}
-        (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
-      (div :.spacer)
-      (button :.btn.btn-outline-danger
-        {:type    "radio"
-         :title   "Ablehnen"
-         :classes [(when (neg? utility) "active")]
-         :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
-                                                    :vote/utility (if (neg? utility) 0 -1)})])}
-        (IoIosCloseCircleOutline #js {:size "3rem"})))
-
-    (div :.proposal-content
-      {:data-toggle  "modal"
-       :data-target  (str "#modal-" id)
-       :onMouseEnter #(df/load-field! comp :>/proposal-details {})}
-      (div
-        {:style {:display        "flex"
-                 :padding        "10px 5px 10px 10px"
-                 :justifyContent "space-between"}}
+(defn proposal-card [comp]
+  (let [{:proposal/keys [id details cost]
+         :argument/keys [text]
+         :keys          [vote/utility]} (comp/props comp)]
+    (div :.proposal
+      (div :.proposal-buttons.btn-group-toggle
+        (button :.btn.btn-outline-success
+          {:type    "radio"
+           :title   "Zustimmen"
+           :classes [(when (pos? utility) "active")]
+           :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
+                                                      :vote/utility (if (pos? utility) 0 1)})])}
+          (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
+        (div :.spacer)
+        (button :.btn.btn-outline-danger
+          {:type    "radio"
+           :title   "Ablehnen"
+           :classes [(when (neg? utility) "active")]
+           :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
+                                                      :vote/utility (if (neg? utility) 0 -1)})])}
+          (IoIosCloseCircleOutline #js {:size "3rem"})))
+      (div :.proposal-price
+        (span :.proposal-price__text (str cost) " €"))
+      (button :.options.disabled.invisible
+        {:title "Optionen"}
+        (IoMdMore #js {:size "24px"}))
+      (div :.proposal-content
+        {:data-toggle  "modal"
+         :data-target  (str "#modal-" id)
+         :onMouseEnter #(df/load-field! comp :>/proposal-details {})}
         (h4 :.proposal-title text)
-        (button :.btn
-          {:title "Optionen"
-           :style {:position "absolute"
-                   :right    "0px"
-                   :top      "0px"
-                   :padding  "0.2rem 0"}}
-          (IoMdMore #js {:size "24px"})))
-      (div
-        {:style {:display        "flex"
-                 :padding        "10px"
-                 :justifyContent "space-between"}}
-        (div :.proposal-details (split-details details))
-        (div :.proposal-price
-          (span :.proposal-price__text (str cost) " €"))))))
+        (div :.proposal-details (split-details details))))))
+
 
 (defsc ProposalCard [this {:keys          [>/proposal-details]
                            :proposal/keys [id] :as props}]
-  {:query         [:proposal/id :argument/text :proposal/details :proposal/cost
-                   :vote/utility
-                   {:>/proposal-details (comp/get-query ProposalDetails)}]
-   :ident         :proposal/id
-   :initial-state (fn [_] {:ui/modal-open? false})}
-  [(proposal-card this props)
+  {:query [:proposal/id :argument/text :proposal/details :proposal/cost
+           :vote/utility
+           {:>/proposal-details (comp/get-query ProposalDetails)}]
+   :ident :proposal/id}
+  [(proposal-card this)
    (div :.modal.fade.bottom-sheet
      {:id (str "modal-" id)}
      (div :.spacer-frame)
@@ -294,7 +282,9 @@
             (div :.modal-header
               (dom/h5 :.modal-title "Neuer Vorschlag")
               (button :.close
-                {:data-dismiss "modal"} (IoMdClose)))
+                {:data-dismiss "modal"
+                 :aria-label   "Close"}
+                (span {:aria-hidden "true"} (IoMdClose))))
             (div :.modal-body
               (ui-new-proposal-form new-proposal-form)))))
       (div
