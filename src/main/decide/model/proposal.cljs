@@ -15,7 +15,9 @@
             ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline IoMdClose]]
             ["bootstrap/js/dist/modal"]
             ["bootstrap/js/dist/collapse"]
-            [com.fulcrologic.fulcro-css.css :as css]))
+            [com.fulcrologic.fulcro-css.css :as css]
+            [goog.object :as gobj]
+            ["jquery" :as $]))
 
 (declare ProposalDetails)
 
@@ -193,7 +195,8 @@
   (remote [env]
     (m/returning env ProposalCard)))
 
-(defsc EnterProposal [this {:keys [title cost summary]}]
+(defsc EnterProposal [this {:keys [title cost summary]}
+                      {:keys [close-modal]}]
   {:query         [:title :cost :summary fs/form-config-join]
    :initial-state (fn [_]
                     (fs/add-form-config EnterProposal
@@ -218,7 +221,8 @@
                      (comp/transact! this [(new-proposal {:proposal/id      (tempid/tempid)
                                                           :proposal/cost    cost
                                                           :proposal/details summary
-                                                          :argument/text    title})]))}
+                                                          :argument/text    title})])
+                     (close-modal))}
         (let [approaching-limit? (> (count title) title-warn-length)
               chars-exceeded?    (> (count title) title-max-length)]
           (div :.form-group
@@ -261,31 +265,42 @@
 
         (button :.btn.btn-primary "Submit")))))
 
-(def ui-new-proposal-form (comp/factory EnterProposal))
+(def ui-new-proposal-form (comp/computed-factory EnterProposal))
 
 (defsc ProposalCollection [this {:keys [all-proposals new-proposal-form]}]
-  {:query         [{[:all-proposals '_] (comp/get-query ProposalCard)}
-                   {:new-proposal-form (comp/get-query EnterProposal)}]
-   :initial-state (fn [_] {:new-proposal-form (comp/initial-state EnterProposal nil)})
-   :ident         (fn [] [:component/id :proposals])
-   :route-segment ["proposals"]
-   :will-enter    (fn [app _]
-                    (dr/route-deferred [:component/id :proposals]
-                      #(df/load! app :all-proposals ProposalCard
-                         {:without              #{:>/proposal-details}
-                          :post-mutation        `dr/target-ready
-                          :post-mutation-params {:target [:component/id :proposals]}})))
-   :css           [[:.proposal-deck {:display         "flex"
-                                     :align-items     "center"
-                                     :justify-content "space-evenly"
-                                     :flex-wrap       "wrap"}]]}
+  {:query              [{[:all-proposals '_] (comp/get-query ProposalCard)}
+                        {:new-proposal-form (comp/get-query EnterProposal)}
+                        :ui/show-new-proposal?]
+   :initial-state      (fn [_] {:new-proposal-form (comp/initial-state EnterProposal nil)})
+   :ident              (fn [] [:component/id :proposals])
+   :route-segment      ["proposals"]
+   :will-enter         (fn [app _]
+                         (dr/route-deferred [:component/id :proposals]
+                           #(df/load! app :all-proposals ProposalCard
+                              {:without              #{:>/proposal-details}
+                               :post-mutation        `dr/target-ready
+                               :post-mutation-params {:target [:component/id :proposals]}})))
+   :initLocalState     (fn [this _]
+                         {:modal-ref (fn [r] (gobj/set this "modal" ($ r)))})
+   :componentDidMount  (fn [this]
+                         (when-let [modal (gobj/get this "modal")]
+                           (.on modal "hide.bs.modal" #(m/set-value! this :ui/show-new-proposal? false))))
+   :componentDidUpdate (fn [this _ _ _]
+                         (when-let [modal (gobj/get this "modal")]
+                           (.modal modal
+                             (if (:ui/show-new-proposal? (comp/props this))
+                               "show" "hide"))))
+   :css                [[:.proposal-deck {:display         "flex"
+                                          :align-items     "center"
+                                          :justify-content "space-evenly"
+                                          :flex-wrap       "wrap"}]]}
   (let [{:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
     (div :.container
       (button :.btn.btn-outline-primary
-        {:data-toggle "modal"
-         :data-target "#modal-new-proposal"}
+        {:onClick #(m/toggle! this :ui/show-new-proposal?)}
         "Neuen Vorschlag hinzufügen")
-      (div :.modal.fade#modal-new-proposal
+      (div :.modal.fade
+        {:ref (comp/get-state this :modal-ref)}
         (div :.modal-dialog.modal-lg
           (div :.modal-content
             (div :.modal-header
@@ -295,7 +310,7 @@
                  :aria-label   "Close"}
                 (span {:aria-hidden "true"} (IoMdClose))))
             (div :.modal-body
-              (ui-new-proposal-form new-proposal-form)))))
+              (ui-new-proposal-form new-proposal-form {:close-modal #(m/toggle! this :ui/show-new-proposal?)})))))
       (div
         {:classes [proposal-deck]}
         (for [proposal all-proposals]
