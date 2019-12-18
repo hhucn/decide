@@ -136,16 +136,16 @@
   (action [{:keys [state ref]}]
     (swap! state update-in ref assoc :ui/new-argument "")))
 
-(defn pro-con-toggle [toggle-fn pro?]
-  (if pro?
+(defn pro-con-toggle [comp]
+  (if (:ui/pro? (comp/props comp))
     (a :.text-success
       {:style   {:text-decoration "underline"}
        :href    "#"
-       :onClick toggle-fn} "dafür")
+       :onClick #(m/toggle! comp :ui/pro?)} "dafür")
     (a :.text-danger
       {:style   {:text-decoration "underline"}
        :href    "#"
-       :onClick toggle-fn} "dagegen")))
+       :onClick #(m/toggle! comp :ui/pro?)} "dagegen")))
 
 (defsc NewArgumentForm [this {:keys    [>/current-argument proposal/id]
                               :ui/keys [open? new-argument new-subtype pro?]
@@ -198,9 +198,7 @@
                       (reset-new-argument-form nil)
                       (m/toggle {:field :ui/open?})]))}
       (div :.form-group
-        (label "Dein neues Argument "
-          (pro-con-toggle #(m/toggle! this :ui/pro?) pro?)
-          ":")
+        (label "Dein neues Argument " (pro-con-toggle this) ":")
         (input :.form-control
           {:type     "text"
            :value    new-argument
