@@ -264,7 +264,7 @@
                         :root/current-session {}}}
   (let [current-tab (some-> (dr/current-route this this) first keyword)]
     (div
-      (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light
+      (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light.border-bottom
         (dom/div :.container
           (dom/a :.navbar-brand.d-flex.align-items-center
             (dom/picture :.mr-2 dbas-logo)

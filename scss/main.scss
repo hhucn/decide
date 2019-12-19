@@ -1,8 +1,7 @@
 $blue: #006AB3;
-
 $dark-gray: #6C6C6C;
 $green: #30B110;
-$yellow: #BDBF09;
+//$yellow: #BDBF09; // looks dirty
 $red: #BE0A26;
 
 $enable-responsive-font-sizes: true;
@@ -11,6 +10,10 @@ $enable-responsive-font-sizes: true;
 @import "../node_modules/bootstrap/scss/bootstrap";
 @import "proposal";
 @import "bottom_sheet";
+
+body {
+  background-color: $white;
+}
 
 .argumentation-header {
   color: white;

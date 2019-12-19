@@ -4,6 +4,7 @@
 @import "../node_modules/bootstrap/scss/buttons";
 
 .proposal {
+  @extend .bg-white;
   max-width: 655px;
   height: 200px;
   border: 2px solid $secondary;
@@ -24,6 +25,7 @@
 
 .proposal-content {
   @extend .btn-light;
+  background-color: $white;
   cursor: pointer;
 }
 
