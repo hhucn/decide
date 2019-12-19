@@ -263,7 +263,7 @@
                         :root/login           {}
                         :root/current-session {}}}
   (let [current-tab (some-> (dr/current-route this this) first keyword)]
-    (div
+    (div :.container.border.mt-3.bg-light.box-shadow
       (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light.border-bottom
         (dom/div :.container
           (dom/a :.navbar-brand.d-flex.align-items-center
@@ -296,7 +296,16 @@
             (div :.right.menu
               (ui-login login)))))
       (div :.py-5
-        (ui-top-router router)))))
+        (ui-top-router router))
+      (div :.border-top
+        (dom/footer :.footer.container
+          (dom/ul :.nav.nav-fill.nav-pills.row
+            (button :.btn.btn-light.col "Bla")
+            (button :.btn.btn-light.col "Bla")
+            (button :.btn.btn-light.col "Bla")
+            (button :.btn.btn-light.col "Bla")
+            (button :.btn.btn-light.col "Bla")
+            (button :.btn.btn-light.col "Bla")))))))
 
 (def ui-top-chrome (comp/factory TopChrome))
 
