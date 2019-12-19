@@ -99,7 +99,7 @@
            :classes [(when (pos? utility) "active")]
            :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
                                                       :vote/utility (if (pos? utility) 0 1)})])}
-          (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
+          (IoIosCheckmarkCircleOutline #js {:size "calc(2rem + 1vw)"}))
         (div :.spacer)
         (button :.btn.btn-outline-danger
           {:type    "radio"
@@ -107,7 +107,7 @@
            :classes [(when (neg? utility) "active")]
            :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
                                                       :vote/utility (if (neg? utility) 0 -1)})])}
-          (IoIosCloseCircleOutline #js {:size "3rem"})))
+          (IoIosCloseCircleOutline #js {:size "calc(2rem + 1vw)"})))
       (div :.proposal-price
         (span :.proposal-price__text (str cost) currency))
       (button :.options.disabled.invisible
@@ -117,7 +117,7 @@
         {:data-toggle  "modal"
          :data-target  (str "#modal-" id)
          :onMouseEnter #(df/load-field! comp :>/proposal-details {})}
-        (h4 :.proposal-title text)
+        (dom/h6 :.proposal-title text)
         (div :.proposal-details (split-details details))))))
 
 (defn bottom-sheet [id & children]
@@ -142,7 +142,7 @@
            :process/currency
            {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident :proposal/id}
-  (dom/div
+  (dom/div :.col
     (proposal-card this)
     (bottom-sheet id
       (ui-proposal-detail proposal-details))))
@@ -311,7 +311,7 @@
                 (span {:aria-hidden "true"} (IoMdClose))))
             (div :.modal-body
               (ui-new-proposal-form new-proposal-form {:close-modal #(m/toggle! this :ui/show-new-proposal?)})))))
-      (div
+      (div :.row.row-cols-1.row-cols-md-2
         {:classes [proposal-deck]}
         (for [proposal all-proposals]
           (ui-proposal-card proposal))))))

@@ -31,7 +31,7 @@
 
 .proposal-buttons {
   height: 100%;
-  width: 70px;
+  max-width: 70px;
   flex: none;
   border-right: 1px solid theme-color("secondary");
 
@@ -62,8 +62,8 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  min-width: 160px;
-  padding: 0.333rem 1.5rem 0.333rem 1.5rem;
+  min-width: calc(100px + .3vw);
+  padding: 0.333rem calc(1rem + .3vw) 0.333rem calc(1rem + .3vw);
 
   display: flex;
   align-items: center;
@@ -72,7 +72,7 @@
   &__text {
     width: 100%;
     color: color-yiq($color);
-    font-size: 1.5rem;
+    font-size: calc(1rem + .3vw);
     line-height: 1.75rem;
   }
 
@@ -86,6 +86,7 @@
 
 .proposal-details {
   padding: 10px;
+  font-size: calc(0.8rem + .3vw);
 }
 
 .price-tag-big {
