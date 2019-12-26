@@ -1,6 +1,7 @@
-{:taoensso.timbre/logging-config {:level :debug}
- :db                             #:db{:uri         "datahike:file:///Users/bjebb/Development/decide/example"
-                                      ;:uri         "datahike:level:///Users/bjebb/Development/decide/leveldb"
-                                      :db/example? true
-                                      :db/reset?   false}
- :process                        {:budget 100000}}
+{:taoensso.timbre/logging-config  {:level :debug}
+ :db                              #:db{:uri         "datahike:mem:///Users/bjebb/Development/decide/example"
+                                       ;:uri         "datahike:level:///Users/bjebb/Development/decide/leveldb"
+                                       :db/example? true
+                                       :db/reset?   false}
+ :ring.middleware/defaults-config {:security {:anti-forgery false}}
+ :process                         {:budget 100000}}
