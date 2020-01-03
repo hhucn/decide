@@ -90,24 +90,28 @@
   (let [{:proposal/keys [id details cost]
          :argument/keys [text]
          :process/keys  [currency]
-         :keys          [vote/utility]} (comp/props comp)]
+         :keys          [vote/utility]
+         :as            props} (comp/props comp)
+        logged-in? (get-in props [[:component/id :session] :session/valid?])]
     (div :.proposal
       (div :.proposal-buttons.btn-group-toggle
         (button :.btn.btn-outline-success
-          {:type    "radio"
-           :title   "Zustimmen"
-           :classes [(when (pos? utility) "active")]
-           :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
-                                                      :vote/utility (if (pos? utility) 0 1)})])}
+          {:type     "radio"
+           :title    "Zustimmen"
+           :classes  [(when (pos? utility) "active")]
+           :disabled (not logged-in?)
+           :onClick  #(comp/transact! comp [(set-vote {:proposal/id  id
+                                                       :vote/utility (if (pos? utility) 0 1)})])}
           (IoIosCheckmarkCircleOutline #js {:size "calc(2rem + 1vw)"}))
         (div :.spacer)
         (button :.btn.btn-outline-danger
-          {:type    "radio"
-           :title   "Ablehnen"
-           :classes [(when (neg? utility) "active")]
-           :onClick #(comp/transact! comp [(set-vote {:proposal/id  id
-                                                      :vote/utility (if (neg? utility) 0 -1)})]
-                       {:refresh [(comp/get-ident ProposalCollection nil)]})}
+          {:type     "radio"
+           :title    "Ablehnen"
+           :classes  [(when (neg? utility) "active")]
+           :disabled (not logged-in?)
+           :onClick  #(comp/transact! comp [(set-vote {:proposal/id  id
+                                                       :vote/utility (if (neg? utility) 0 -1)})]
+                        {:refresh [(comp/get-ident ProposalCollection nil)]})}
           (IoIosCloseCircleOutline #js {:size "calc(2rem + 1vw)"})))
       (div :.proposal-price
         (span :.proposal-price__text (str cost) currency))
@@ -141,11 +145,13 @@
   {:query [:proposal/id :argument/text :proposal/details :proposal/cost
            :vote/utility
            :process/currency
+           {[:component/id :session] [:session/valid?]}
            {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident :proposal/id}
-  [(proposal-card this)
-   (bottom-sheet id
-     (ui-proposal-detail proposal-details))])
+  (div
+    (proposal-card this)
+    (bottom-sheet id
+      (ui-proposal-detail proposal-details))))
 
 (def ui-proposal-card (comp/factory ProposalCard {:keyfn :proposal/id}))
 
@@ -278,7 +284,7 @@
   (let [{:keys [proposal-deck]} (css/get-classnames ProposalList)
         proposals        (comp/children this)
         sorted-proposals (remove hide?-fn proposals)]
-    [(button :.btn.btn-outline-dark.float-right
+    [(button :.btn.btn-secondary.float-right
        {:title   "Bewege abgelehnte Vorschläge an das Ende"
         :onClick #(m/toggle! this :ui/hide-declined?)}
        (if hide-declined?

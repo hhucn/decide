@@ -7,7 +7,8 @@
     [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [com.fulcrologic.fulcro.algorithms.form-state :as fs]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [com.fulcrologic.guardrails.core :refer [>defn => | <-]]))
 
 (defn clear [env]
   (uism/assoc-aliased env :error ""))
@@ -30,7 +31,8 @@
        ::uism/error-event :event/failed})
     (uism/activate :state/checking-session)))
 
-(defn process-session-result [env error-message]
+(>defn process-session-result [env error-message]
+  [::uism/env string? => ::uism/env]
   (let [success? (uism/alias-value env :session-valid?)]
     (when success?
       (dr/change-route SPA ["proposals"]))
@@ -90,6 +92,7 @@
                      {:event/login {::uism/target-states #{:state/checking-session}
                                     ::uism/handler       login}})}}})
 
+; region signup
 (def signup-ident [:component/id :signup])
 (defn signup-class [] (comp/registry-key->class :decide.ui.root/Signup))
 
@@ -120,4 +123,4 @@
     (let [{:account/keys [id password password-again]} (get-in @state signup-ident)]
       (boolean (and (valid-email? id) (valid-password? password)
                  (= password password-again))))))
-
+; endregion
