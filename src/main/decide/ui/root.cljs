@@ -12,7 +12,7 @@
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro-css.css :as css]
     [com.fulcrologic.fulcro.algorithms.form-state :as fs]
-    [decide.application :refer [history]]
+    [decide.routing :refer [history update-url]]
     [decide.model.proposal :as proposal]
     [clojure.string :as str]
     [com.fulcrologic.fulcro.data-fetch :as df]
@@ -255,9 +255,7 @@
    :componentDidUpdate (fn [this _ _]
                          (let [new-token (apply str "/" (interpose "/" (dr/current-route this this)))]
                            (log/debug "re-render" new-token)
-                           (if (= new-token (.getToken history))
-                             (.replaceToken history new-token)
-                             (.setToken history new-token))))
+                           (update-url new-token)))
    :ident              (fn [] [:component/id :top-chrome])
    :initial-state      {:root/router          {}
                         :root/login           {}
@@ -300,9 +298,6 @@
       (div :.border-top
         (dom/footer :.footer.container
           (dom/ul :.nav.nav-fill.nav-pills.row
-            (button :.btn.btn-light.col "Bla")
-            (button :.btn.btn-light.col "Bla")
-            (button :.btn.btn-light.col "Bla")
             (button :.btn.btn-light.col "Bla")
             (button :.btn.btn-light.col "Bla")
             (button :.btn.btn-light.col "Bla")))))))
