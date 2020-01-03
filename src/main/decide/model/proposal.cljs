@@ -12,6 +12,7 @@
             [clojure.string :as str]
             [taoensso.timbre :as log]
             [decide.model.argument :as arg]
+            [decide.util :as util]
             ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline IoMdClose IoMdEye IoMdEyeOff]]
             ["bootstrap/js/dist/modal"]
             ["bootstrap/js/dist/collapse"]
@@ -61,10 +62,11 @@
     (div :.row.justify-content-between.m-4
       (h2 :.detail-card__header text)
       (big-price-tag cost budget currency))
-    (p (interpose (br) (str/split-lines details)))
+    (p (str/split-lines details))
+    #_(p (interpose (br) (str/split-lines details)))
     (arg/ui-argumentation (comp/computed argumentation {:argumentation-root this}))))
 
-(def ui-proposal-detail (comp/factory ProposalDetails {:keyfn :proposal/id}))
+(def ui-proposal-detail (comp/factory ProposalDetails {:keyfn (util/prefixed-keyfn :proposal-detail :proposal/id)}))
 
 (>defn split-details [details]
   [string? => string?]
@@ -141,19 +143,19 @@
             children))))))
 
 (defsc ProposalCard [this {:keys          [>/proposal-details]
-                           :proposal/keys [id]}]
+                           :proposal/keys [id] :as props}]
   {:query [:proposal/id :argument/text :proposal/details :proposal/cost
            :vote/utility
            :process/currency
            {[:component/id :session] [:session/valid?]}
            {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident :proposal/id}
-  (div
+  (div :.col
     (proposal-card this)
     (bottom-sheet id
-      (ui-proposal-detail proposal-details))))
+      (when proposal-details (ui-proposal-detail proposal-details)))))
 
-(def ui-proposal-card (comp/factory ProposalCard {:keyfn :proposal/id}))
+(def ui-proposal-card (comp/factory ProposalCard {:keyfn (util/prefixed-keyfn :proposal-card :proposal/id)}))
 
 (defn field [{:keys [label valid? error-message] :as props}]
   (let [input-props (-> props (assoc :name label) (dissoc :label :valid? :error-message))]
@@ -284,15 +286,16 @@
   (let [{:keys [proposal-deck]} (css/get-classnames ProposalList)
         proposals        (comp/children this)
         sorted-proposals (remove hide?-fn proposals)]
-    [(button :.btn.btn-secondary.float-right
-       {:title   "Bewege abgelehnte Vorschläge an das Ende"
-        :onClick #(m/toggle! this :ui/hide-declined?)}
-       (if hide-declined?
-         (span "Zeige Abgelehnte " (IoMdEyeOff))
-         (span "Verstecke Abgelehnte " (IoMdEye))))
-     (div :.row.row-cols-1.row-cols-md-2
-       {:classes [proposal-deck]}
-       (map #(dom/div :.col %) (if hide-declined? sorted-proposals proposals)))]))
+    (div
+      (button :.btn.btn-secondary.float-right
+        {:title   "Bewege abgelehnte Vorschläge an das Ende"
+         :onClick #(m/toggle! this :ui/hide-declined?)}
+        (if hide-declined?
+          (span "Zeige Abgelehnte " (IoMdEyeOff))
+          (span "Verstecke Abgelehnte " (IoMdEye))))
+      (div :.row.row-cols-1.row-cols-md-2
+        {:classes [proposal-deck]}
+        (if hide-declined? sorted-proposals proposals)))))
 
 
 (def ui-proposal-list (comp/computed-factory ProposalList))
@@ -302,7 +305,8 @@
                         {:new-proposal-form (comp/get-query EnterProposal)}
                         :ui/show-new-proposal?
                         {:ui/proposal-list (comp/get-query ProposalList)}]
-   :initial-state      (fn [_] {:new-proposal-form (comp/initial-state EnterProposal nil)
+   :initial-state      (fn [_] {:all-proposals     []
+                                :new-proposal-form (comp/initial-state EnterProposal nil)
                                 :ui/proposal-list  (comp/initial-state ProposalList nil)})
    :ident              (fn [] [:component/id :proposals])
    :route-segment      ["proposals"]

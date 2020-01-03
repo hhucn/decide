@@ -7,6 +7,7 @@
             [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
             [com.fulcrologic.fulcro.algorithms.merge :as mrg]
             [com.fulcrologic.guardrails.core :as g :refer [>defn => | ?]]
+            [decide.util :as util]
             [clojure.spec.alpha :as s]
             [com.fulcrologic.fulcro.dom.events :as evt]
             ["react-icons/io" :refer [IoMdAdd IoMdClose IoMdMore IoMdUndo]]
@@ -107,7 +108,7 @@
         (span :.text-danger (MdSubdirectoryArrowRight) (str (count cons)))))))
 
 
-(def ui-argument (comp/computed-factory Argument {:keyfn :argument/id}))
+(def ui-argument (comp/computed-factory Argument {:keyfn (util/prefixed-keyfn :argument :argument/id)}))
 
 (defn select [comp attribute options current-value]
   (dom/select :.form-control
@@ -140,11 +141,11 @@
 (defn pro-con-toggle [comp]
   (if (:ui/pro? (comp/props comp))
     (a :.text-success
-      {:style   {:text-decoration "underline"}
+      {:style   {:textDecoration "underline"}
        :href    "#"
        :onClick #(m/toggle! comp :ui/pro?)} "dafür")
     (a :.text-danger
-      {:style   {:text-decoration "underline"}
+      {:style   {:textDecoration "underline"}
        :href    "#"
        :onClick #(m/toggle! comp :ui/pro?)} "dagegen")))
 
@@ -229,19 +230,13 @@
       :ui/open? true)))
 
 
-(defn half-row [& children]
-  (div :.col-6
-    {:style {:display       "flex"
-             :flexDirection "column"}}
-    children))
-
 (defn ui-new-argument-button [type new-argument-fn]
   (button :.btn
     {:classes [(if (= type :pro) "btn-success" "btn-danger")]
      :onClick #(new-argument-fn (= type :pro))}
     "Argument hinzufügen"))
 
-(defsc ProCon [this {:argument/keys [pros cons]}
+(defsc ProCon [_this {:argument/keys [pros cons]}
                {:keys [new-argument-fn] :as computed
                 :or   {new-argument-fn #()}}]
   {:query         #(into [:argument/id
@@ -252,7 +247,9 @@
    :initial-state (fn [{:keys [id] :as argument}]
                     (merge #:argument{:id id, :pros [], :cons []} argument))}
   (div :.row
-    (half-row
+    (div :.col-6
+      {:style {:display       "flex"
+               :flexDirection "column"}}
       (div :.argumentation-header.bg-success.px-3.pt-2
         (dom/h6 "Pro Argumente")
         (ui-new-argument-button :pro new-argument-fn))
@@ -260,7 +257,9 @@
         (p :.p-3.text-muted "Es gibt noch keine Pro-Argumente. Füge eins hinzu!")
         (map #(ui-argument % computed) pros)))
 
-    (half-row
+    (div :.col-6
+      {:style {:display       "flex"
+               :flexDirection "column"}}
       (div :.argumentation-header.bg-danger.px-3.pt-2
         (dom/h6 "Contra Argumente")
         (ui-new-argument-button :con new-argument-fn))
@@ -268,7 +267,7 @@
         (p :.p-3.text-muted "Es gibt noch keine Contra-Argumente. Füge eins hinzu!")
         (map #(ui-argument % computed) cons)))))
 
-(def ui-procon (comp/computed-factory ProCon {:keyfn :argument/id}))
+(def ui-procon (comp/computed-factory ProCon {:keyfn (util/prefixed-keyfn :procon :argument/id)}))
 
 (defn *jump-backwards
   [{:argumentation/keys [upstream] :as argumentation}
@@ -294,7 +293,7 @@
     (span :.ml-auto text)
     (span :.ml-auto.pl-2 (IoMdUndo))))
 
-(def ui-upstream-item (comp/computed-factory UpstreamItem {:keyfn :argument/id}))
+(def ui-upstream-item (comp/computed-factory UpstreamItem {:keyfn (util/prefixed-keyfn :upstream-item :argument/id)}))
 
 (>defn ns?
   ([ns]
@@ -325,8 +324,9 @@
             {:onClick #(comp/transact! this [(jump-backwards {:position i})])}))
         (concat upstream [current-argument])))
     (ui-new-argument (merge {:proposal/id id} new-argument))
-    (ui-procon current-argument
-      {:argumentation-root this
-       :new-argument-fn    (fn new-argument [pro?] (comp/transact! this [(open-add-new-argument {:pro? pro?})]))})))
+    (when current-argument
+      (ui-procon current-argument
+        {:argumentation-root this
+         :new-argument-fn    (fn new-argument [pro?] (comp/transact! this [(open-add-new-argument {:pro? pro?})]))}))))
 
-(def ui-argumentation (comp/factory Argumentation {:keyfn :proposal/id}))
+(def ui-argumentation (comp/factory Argumentation {:keyfn (util/prefixed-keyfn :argumentation :proposal/id)}))
