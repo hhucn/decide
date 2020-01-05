@@ -150,7 +150,7 @@
            {[:component/id :session] [:session/valid?]}
            {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident :proposal/id}
-  (div :.col
+  (div
     (proposal-card this)
     (bottom-sheet id
       (when proposal-details (ui-proposal-detail proposal-details)))))
@@ -279,21 +279,22 @@
   {:query         [:ui/hide-declined?]
    :initial-state {:ui/hide-declined? false}
    :ident         (fn [] [:component/id :proposal-list])
-   :css           [[:.proposal-deck {:display         "flex"
-                                     :align-items     "center"
-                                     :justify-content "space-evenly"
-                                     :flex-wrap       "wrap"}]]}
+   :css           [[:.proposal-deck {:display     "flex"
+                                     :align-items "center"
+                                     :flex-wrap   "wrap"}
+                    [:>* {:padding "5px"}]]]}
   (let [{:keys [proposal-deck]} (css/get-classnames ProposalList)
         proposals        (comp/children this)
         sorted-proposals (remove hide?-fn proposals)]
     (div
-      (button :.btn.btn-secondary.float-right
-        {:title   "Bewege abgelehnte Vorschläge an das Ende"
-         :onClick #(m/toggle! this :ui/hide-declined?)}
-        (if hide-declined?
-          (span "Zeige Abgelehnte " (IoMdEyeOff))
-          (span "Verstecke Abgelehnte " (IoMdEye))))
-      (div :.row.row-cols-1.row-cols-md-2
+      (div :.d-flex.justify-content-end.mb-3.border         ; Like a toolbar.
+        (button :.btn.btn-secondary
+          {:title   "Bewege abgelehnte Vorschläge an das Ende"
+           :onClick #(m/toggle! this :ui/hide-declined?)}
+          (if hide-declined?
+            (span "Zeige Abgelehnte " (IoMdEyeOff))
+            (span "Verstecke Abgelehnte " (IoMdEye)))))
+      (div :.card-deck.row-cols-1.row-cols-lg-2
         {:classes [proposal-deck]}
         (if hide-declined? sorted-proposals proposals)))))
 
@@ -345,4 +346,4 @@
     (ui-proposal-list proposal-list
       {:hide?-fn (fn hide-proposal? [proposal]
                    (-> proposal comp/props :vote/utility neg?))}
-      (map ui-proposal-card all-proposals))))
+      (map ui-proposal-card (take 7 (cycle all-proposals))))))
