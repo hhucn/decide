@@ -275,39 +275,14 @@
 
 (def ui-new-proposal-form (comp/computed-factory EnterProposal))
 
-(defsc ProposalList [this {:keys [ui/hide-declined?]} {:keys [hide?-fn]}]
-  {:query         [:ui/hide-declined?]
-   :initial-state {:ui/hide-declined? false}
-   :ident         (fn [] [:component/id :proposal-list])
-   :css           [[:.proposal-deck [:>* {:padding "5px"}]]]}
-  (let [{:keys [proposal-deck]} (css/get-classnames ProposalList)
-        proposals        (comp/children this)
-        sorted-proposals (remove hide?-fn proposals)]
-    (div
-      (div :.btn-toolbar.justify-content-end.mb-3
-        (div :.btn-group
-          (button :.btn.btn-sm.border-0
-            {:title   "Bewege abgelehnte Vorschläge an das Ende"
-             :style   {:min-width "13em"}
-             :onClick #(m/toggle! this :ui/hide-declined?)
-             :classes [(if hide-declined? :.btn-secondary :.btn-outline-secondary)]}
-            (if hide-declined?
-              (span (IoMdEyeOff) " Zeige Abgelehnte")
-              (span (IoMdEye) " Verstecke Abgelehnte")))))
-      (div :.card-deck.row-cols-1.row-cols-lg-2
-        {:classes [proposal-deck]}
-        (if hide-declined? sorted-proposals proposals)))))
-
-(def ui-proposal-list (comp/computed-factory ProposalList))
-
-(defsc ProposalCollection [this {:keys [all-proposals new-proposal-form ui/proposal-list]}]
+(defsc ProposalCollection [this {:keys [all-proposals new-proposal-form ui/hide-declined?]}]
   {:query              [{[:all-proposals '_] (comp/get-query ProposalCard)}
                         {:new-proposal-form (comp/get-query EnterProposal)}
                         :ui/show-new-proposal?
-                        {:ui/proposal-list (comp/get-query ProposalList)}]
+                        :ui/hide-declined?]
    :initial-state      (fn [_] {:all-proposals     []
                                 :new-proposal-form (comp/initial-state EnterProposal nil)
-                                :ui/proposal-list  (comp/initial-state ProposalList nil)})
+                                :ui/hide-declined? false})
    :ident              (fn [] [:component/id :proposals])
    :route-segment      ["proposals"]
    :will-enter         (fn [app _]
@@ -325,11 +300,25 @@
                          (when-let [modal (gobj/get this "modal")]
                            (.modal modal
                              (if (:ui/show-new-proposal? (comp/props this))
-                               "show" "hide"))))}
+                               "show" "hide"))))
+   :css                [[:.proposal-deck [:>* {:padding "5px"}]]]}
   (div :.container
-    (button :.btn.btn-outline-primary
-      {:onClick #(m/toggle! this :ui/show-new-proposal?)}
-      "Neuen Vorschlag hinzufügen")
+    (div :.btn-toolbar.justify-content-between.mb-3
+      (div :.btn-group
+        (button :.btn.btn-primary
+          {:onClick #(m/toggle! this :ui/show-new-proposal?)}
+          "Neuen Vorschlag hinzufügen"))
+
+      (div :.btn-group
+        (button :.btn.btn-sm.border-0
+          {:title   "Bewege abgelehnte Vorschläge an das Ende"
+           :style   {:min-width "13em"}
+           :onClick #(m/toggle! this :ui/hide-declined?)
+           :classes [(if hide-declined? :.btn-secondary :.btn-outline-secondary)]}
+          (if hide-declined?
+            (span (IoMdEyeOff) " Zeige Abgelehnte")
+            (span (IoMdEye) " Verstecke Abgelehnte")))))
+
     (div :.modal.fade
       {:ref (comp/get-state this :modal-ref)}
       (div :.modal-dialog.modal-lg
@@ -342,7 +331,9 @@
               (span {:aria-hidden "true"} (IoMdClose))))
           (div :.modal-body
             (ui-new-proposal-form new-proposal-form {:close-modal #(m/toggle! this :ui/show-new-proposal?)})))))
-    (ui-proposal-list proposal-list
-      {:hide?-fn (fn hide-proposal? [proposal]
-                   (-> proposal comp/props :vote/utility neg?))}
-      (map ui-proposal-card (take 7 (cycle all-proposals))))))
+
+    (let [{:keys [proposal-deck]} (css/get-classnames ProposalCollection)
+          filtered-proposals (remove (comp neg? :vote/utility) all-proposals)]
+      (div :.card-deck.row-cols-1.row-cols-lg-2
+        {:classes [proposal-deck]}
+        (map ui-proposal-card (if hide-declined? filtered-proposals all-proposals))))))
