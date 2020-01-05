@@ -279,25 +279,24 @@
   {:query         [:ui/hide-declined?]
    :initial-state {:ui/hide-declined? false}
    :ident         (fn [] [:component/id :proposal-list])
-   :css           [[:.proposal-deck {:display     "flex"
-                                     :align-items "center"
-                                     :flex-wrap   "wrap"}
-                    [:>* {:padding "5px"}]]]}
+   :css           [[:.proposal-deck [:>* {:padding "5px"}]]]}
   (let [{:keys [proposal-deck]} (css/get-classnames ProposalList)
         proposals        (comp/children this)
         sorted-proposals (remove hide?-fn proposals)]
     (div
-      (div :.d-flex.justify-content-end.mb-3.border         ; Like a toolbar.
-        (button :.btn.btn-secondary
-          {:title   "Bewege abgelehnte Vorschläge an das Ende"
-           :onClick #(m/toggle! this :ui/hide-declined?)}
-          (if hide-declined?
-            (span "Zeige Abgelehnte " (IoMdEyeOff))
-            (span "Verstecke Abgelehnte " (IoMdEye)))))
+      (div :.btn-toolbar.justify-content-end.mb-3
+        (div :.btn-group
+          (button :.btn.btn-sm.border-0
+            {:title   "Bewege abgelehnte Vorschläge an das Ende"
+             :style   {:min-width "13em"}
+             :onClick #(m/toggle! this :ui/hide-declined?)
+             :classes [(if hide-declined? :.btn-secondary :.btn-outline-secondary)]}
+            (if hide-declined?
+              (span (IoMdEyeOff) " Zeige Abgelehnte")
+              (span (IoMdEye) " Verstecke Abgelehnte")))))
       (div :.card-deck.row-cols-1.row-cols-lg-2
         {:classes [proposal-deck]}
         (if hide-declined? sorted-proposals proposals)))))
-
 
 (def ui-proposal-list (comp/computed-factory ProposalList))
 
