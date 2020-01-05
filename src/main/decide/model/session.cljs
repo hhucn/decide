@@ -10,6 +10,8 @@
     [clojure.string :as str]
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]))
 
+(def session-ident [:component/id :session])
+
 (defn clear [env]
   (uism/assoc-aliased env :error ""))
 

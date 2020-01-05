@@ -12,6 +12,7 @@
             [clojure.string :as str]
             [taoensso.timbre :as log]
             [decide.model.argument :as arg]
+            [decide.model.session :refer [session-ident]]
             [decide.util :as util]
             ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline IoMdClose IoMdEye IoMdEyeOff]]
             ["bootstrap/js/dist/modal"]
@@ -275,11 +276,12 @@
 
 (def ui-new-proposal-form (comp/computed-factory EnterProposal))
 
-(defsc ProposalCollection [this {:keys [all-proposals new-proposal-form ui/hide-declined?]}]
+(defsc ProposalCollection [this {:keys [all-proposals new-proposal-form ui/hide-declined?] :as props}]
   {:query              [{[:all-proposals '_] (comp/get-query ProposalCard)}
                         {:new-proposal-form (comp/get-query EnterProposal)}
                         :ui/show-new-proposal?
-                        :ui/hide-declined?]
+                        :ui/hide-declined?
+                        {session-ident [:session/valid?]}]
    :initial-state      (fn [_] {:all-proposals     []
                                 :new-proposal-form (comp/initial-state EnterProposal nil)
                                 :ui/hide-declined? false})
@@ -302,38 +304,40 @@
                              (if (:ui/show-new-proposal? (comp/props this))
                                "show" "hide"))))
    :css                [[:.proposal-deck [:>* {:padding "5px"}]]]}
-  (div :.container
-    (div :.btn-toolbar.justify-content-between.mb-3
-      (div :.btn-group
-        (button :.btn.btn-primary
-          {:onClick #(m/toggle! this :ui/show-new-proposal?)}
-          "Neuen Vorschlag hinzufügen"))
+  (let [logged-in? (get-in props [session-ident :session/valid?])
+        {:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
+    (div :.container
+      (div :.btn-toolbar.justify-content-between.mb-3
+        {:classes [(when-not logged-in? :.d-none)]}
+        (div :.btn-group
+          (button :.btn.btn-primary
+            {:onClick #(m/toggle! this :ui/show-new-proposal?)}
+            "Neuen Vorschlag hinzufügen"))
 
-      (div :.btn-group
-        (button :.btn.btn-sm.border-0
-          {:title   "Bewege abgelehnte Vorschläge an das Ende"
-           :style   {:min-width "13em"}
-           :onClick #(m/toggle! this :ui/hide-declined?)
-           :classes [(if hide-declined? :.btn-secondary :.btn-outline-secondary)]}
-          (if hide-declined?
-            (span (IoMdEyeOff) " Zeige Abgelehnte")
-            (span (IoMdEye) " Verstecke Abgelehnte")))))
+        (div :.btn-group
+          (button :.btn.btn-sm
+            {:classes [(if hide-declined? :.btn-secondary :.btn-light)]
+             :title   "Bewege abgelehnte Vorschläge an das Ende"
+             :style   {:min-width "13em"}
+             :onClick #(m/toggle! this :ui/hide-declined?)}
+            (if hide-declined?
+              (span (IoMdEyeOff) " Zeige Abgelehnte")
+              (span (IoMdEye) " Verstecke Abgelehnte")))))
 
-    (div :.modal.fade
-      {:ref (comp/get-state this :modal-ref)}
-      (div :.modal-dialog.modal-lg
-        (div :.modal-content
-          (div :.modal-header
-            (dom/h5 :.modal-title "Neuer Vorschlag")
-            (button :.close
-              {:data-dismiss "modal"
-               :aria-label   "Close"}
-              (span {:aria-hidden "true"} (IoMdClose))))
-          (div :.modal-body
-            (ui-new-proposal-form new-proposal-form {:close-modal #(m/toggle! this :ui/show-new-proposal?)})))))
+      (div :.modal.fade
+        {:ref (comp/get-state this :modal-ref)}
+        (div :.modal-dialog.modal-lg
+          (div :.modal-content
+            (div :.modal-header
+              (dom/h5 :.modal-title "Neuer Vorschlag")
+              (button :.close
+                {:data-dismiss "modal"
+                 :aria-label   "Close"}
+                (span {:aria-hidden "true"} (IoMdClose))))
+            (div :.modal-body
+              (ui-new-proposal-form new-proposal-form {:close-modal #(m/toggle! this :ui/show-new-proposal?)})))))
 
-    (let [{:keys [proposal-deck]} (css/get-classnames ProposalCollection)
-          filtered-proposals (remove (comp neg? :vote/utility) all-proposals)]
-      (div :.card-deck.row-cols-1.row-cols-lg-2
-        {:classes [proposal-deck]}
-        (map ui-proposal-card (if hide-declined? filtered-proposals all-proposals))))))
+      (let [filtered-proposals (remove (comp neg? :vote/utility) all-proposals)]
+        (div :.card-deck.row-cols-1.row-cols-lg-2
+          {:classes [proposal-deck]}
+          (map ui-proposal-card (if hide-declined? filtered-proposals all-proposals)))))))
