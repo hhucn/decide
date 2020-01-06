@@ -8,8 +8,7 @@
                                                           wrap-transit-response]]
     [ring.middleware.defaults :refer [wrap-defaults]]
     [ring.middleware.gzip :refer [wrap-gzip]]
-    [ring.util.response :refer [response file-response resource-response]]
-    [ring.util.response :as resp]
+    [ring.util.response :as resp :refer [response file-response resource-response]]
     [hiccup.page :refer [html5 include-css include-js]]
     [taoensso.timbre :as log]))
 

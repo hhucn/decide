@@ -2,22 +2,17 @@
   (:require
     [decide.model.session :as session]
     [com.fulcrologic.fulcro.dom :as dom :refer [div ul li p h3 button]]
-    [com.fulcrologic.fulcro.dom.html-entities :as ent]
     [com.fulcrologic.fulcro.dom.events :as evt]
-    [com.fulcrologic.fulcro.components :as prim :refer [defsc]]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
     [com.fulcrologic.fulcro.ui-state-machines :as uism :refer [defstatemachine]]
-    [com.fulcrologic.fulcro.components :as comp]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
     [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro-css.css :as css]
     [com.fulcrologic.fulcro.algorithms.form-state :as fs]
     [decide.routing :refer [history update-url]]
     [decide.model.proposal :as proposal]
     [clojure.string :as str]
     [com.fulcrologic.fulcro.data-fetch :as df]
-    [decide.model.argument :as argument]
-    [decide.model.proposal :as proposal]
     [decide.model.account :as account]))
 
 (defn field [{:keys [label valid? error-message] :as props}]
@@ -153,9 +148,9 @@
 
 (declare Root)
 (defsc ProposalsMain [this {:keys [all-proposals detailed-proposals]}]
-  {:query         [{:all-proposals (prim/get-query proposal/ProposalCard)}
+  {:query         [{:all-proposals (comp/get-query proposal/ProposalCard)}
                    {:detailed-proposals (comp/get-query proposal/ProposalDetails)}]
-   :initial-state (fn [_] {:all-proposals (for [i (range 15)] (prim/get-initial-state proposal/ProposalCard (inc i)))})
+   :initial-state (fn [_] {:all-proposals (for [i (range 15)] (comp/get-initial-state proposal/ProposalCard (inc i)))})
    :ident         (fn [] [:component/id :proposals])
    :route-segment ["proposals"]
    :will-enter    #(dr/route-immediate [:component/id :proposals])}
@@ -166,7 +161,7 @@
           (proposal/ui-proposal-card proposal (proposal/ui-proposal-detail detailed-proposals)))))))
 
 (defsc Main [this {:keys [proposal]}]
-  {:query         [{:proposal (prim/get-query proposal/ProposalDetails)}]
+  {:query         [{:proposal (comp/get-query proposal/ProposalDetails)}]
    :ident         (fn [] [:component/id :main])
    :route-segment ["main"]
    :will-enter    (fn [_] (dr/route-immediate [:component/id :main]))}
@@ -198,7 +193,7 @@
 (def ui-sub-router (comp/factory SubRouter))
 
 (defsc Settings [this {:keys [account/time-zone account/real-name sub-router] :as props}]
-  {:query         [:account/time-zone :account/real-name {:sub-router (prim/get-query SubRouter)}]
+  {:query         [:account/time-zone :account/real-name {:sub-router (comp/get-query SubRouter)}]
    :ident         (fn [] [:component/id :settings])
    :route-segment ["settings"]
    :will-enter    #(dr/route-immediate [:component/id :settings])

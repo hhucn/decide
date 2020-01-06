@@ -6,3 +6,4 @@ node_modules/
 target/
 resources/public/js
 resources/public/workspaces/js
+.clj-kondo/

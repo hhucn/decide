@@ -38,14 +38,13 @@
   (log/info "Authenticating" username)
   (if-some [ldap-entry (ldap/login username password)]
     (let [{:keys [account/id] :as account} (account/ldap->account ldap-entry)]
-      (do
-        (account/upsert-account! connection account)
-        (response-updating-session env
-          (merge
-            {:session/valid? true}
-            account)
-          {:session/valid? true
-           :account/id     id})))
+      (account/upsert-account! connection account)
+      (response-updating-session env
+        (merge
+          {:session/valid? true}
+          account)
+        {:session/valid? true
+         :account/id     id}))
     (do
       (log/error "Invalid credentials supplied for" username)
       (throw (ex-info "Invalid credentials" {:username username})))))
