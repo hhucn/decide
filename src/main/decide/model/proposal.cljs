@@ -128,7 +128,7 @@
         (dom/h6 :.proposal-title text)
         (div :.proposal-details (split-details details))))))
 
-(defn bottom-sheet [id & children]
+(defn bottomsheet [id & children]
   (div :.modal.fade.bottom-sheet
     {:id (str "modal-" id)}
     (div :.spacer-frame)
@@ -153,7 +153,7 @@
    :ident :proposal/id}
   (div
     (proposal-card this)
-    (bottom-sheet id
+    (bottomsheet id
       (when proposal-details (ui-proposal-detail proposal-details)))))
 
 (def ui-proposal-card (comp/factory ProposalCard {:keyfn (util/prefixed-keyfn :proposal-card :proposal/id)}))
