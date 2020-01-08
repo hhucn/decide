@@ -5,7 +5,8 @@
     [clojure.spec.alpha :as s]
     [mount.core :as mount]
     ;; this is the top-level dependent component...mount will find the rest via ns requires
-    [decide.server-components.http-server :refer [http-server]]))
+    [decide.server-components.http-server :refer [http-server]]
+    [decide.server-components.ldap :as ldap]))
 
 ;; ==================== SERVER ====================
 (set-refresh-dirs "src/main" "src/dev" "src/test")
@@ -14,7 +15,7 @@
 
 (defn start
   "Start the web server"
-  [] (mount/start-with {#'decide.server-components.ldap/ldap-resolve
+  [] (mount/start-with {#'ldap/ldap-resolve
                         (fn ldap-resolver [uid password]
                           (when (= uid password)
                             {:givenName      (str "Firstname:" uid)

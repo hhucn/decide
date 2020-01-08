@@ -306,7 +306,7 @@
    :css                [[:.proposal-deck [:>* {:padding "5px"}]]]}
   (let [logged-in? (get-in props [session-ident :session/valid?])
         {:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
-    (div :.container
+    (div :.container-md
       (div :.btn-toolbar.justify-content-between.mb-3
         {:classes [(when-not logged-in? :.d-none)]}
         (div :.btn-group
@@ -318,7 +318,7 @@
           (button :.btn.btn-sm
             {:classes [(if hide-declined? :.btn-secondary :.btn-light)]
              :title   "Bewege abgelehnte Vorschläge an das Ende"
-             :style   {:min-width "13em"}
+             :style   {:minWidth "13em"}
              :onClick #(m/toggle! this :ui/hide-declined?)}
             (if hide-declined?
               (span (IoMdEyeOff) " Zeige Abgelehnte")

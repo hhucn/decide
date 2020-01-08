@@ -1,9 +1,7 @@
 (ns decide.model.account
   (:require
     [taoensso.timbre :as log]
-    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]
-    [com.fulcrologic.fulcro.algorithms.merge :as merge]
-    [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]))
+    [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]))
 
 (defn user-path
   "Normalized path to a user entity or field in Fulcro state-map"

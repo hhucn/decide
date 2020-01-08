@@ -107,19 +107,19 @@
                 (dom/button :.btn.btn-outline-dark
                   {:onMouseEnter #(df/load! this [:account/id current-user] Account)}
                   (dom/span display-name))
-                (let [possible-display-names (into #{current-user} (display-name-permutations firstname))]
-                  (div :.dropdown-menu.dropdown-menu-right.shadow
-                    (dom/h6 :.dropdown-header "Alternative Anzeigenamen")
-                    (for [name possible-display-names]
-                      (dom/a :.dropdown-item
-                        {:onClick #(comp/transact! this [(account/update-display-name #:account{:id           current-user
-                                                                                                :display-name name})])}
-                        name)))))
+                #_(let [possible-display-names (into #{current-user} (display-name-permutations firstname))]
+                    (div :.dropdown-menu.dropdown-menu-right.shadow
+                      (dom/h6 :.dropdown-header "Alternative Anzeigenamen")
+                      (for [name possible-display-names]
+                        (dom/a :.dropdown-item
+                          {:onClick #(comp/transact! this [(account/update-display-name #:account{:id           current-user
+                                                                                                  :display-name name})])}
+                          name)))))
               (dom/button :.btn.btn-outline-dark
                 {:onClick #(uism/trigger! this ::session/session :event/logout)}
                 "Log out"))
             (dom/div :.dropdown
-              (button :.btn.btn-outline-primary
+              (button :.btn.btn-outline-primary.btn-block
                 {:onClick #(uism/trigger! this ::session/session :event/toggle-modal)}
                 "Login")
               (dom/div :.dropdown-menu.dropdown-menu-right
@@ -256,7 +256,7 @@
                         :root/login           {}
                         :root/current-session {}}}
   (let [current-tab (some-> (dr/current-route this this) first keyword)]
-    (div :.container.border.mt-3.bg-light.box-shadow
+    (div :.container-md.border.mt-md-3.bg-light.box-shadow
       (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light.border-bottom
         (dom/div :.container
           (dom/a :.navbar-brand.d-flex.align-items-center
