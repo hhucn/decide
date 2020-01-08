@@ -257,8 +257,8 @@
                         :root/current-session {}}}
   (let [current-tab (some-> (dr/current-route this this) first keyword)]
     (div :.container-md.border.mt-md-3.bg-light.box-shadow
-      (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light.border-bottom
-        (dom/div :.container
+      (dom/nav :.navbar.navbar-expand-sm.navbar-light.bg-light.border-bottom.pl-1
+        (dom/div :.container.p-0
           (dom/a :.navbar-brand.d-flex.align-items-center
             (dom/picture :.mr-2 dbas-logo)
             "decide")

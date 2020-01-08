@@ -134,14 +134,12 @@
     (div :.spacer-frame)
     (div :.modal-dialog
       (div :.modal-content
-        (div :.modal-body
-          (div {:style {:width "auto"}}
-            (button :.close
-              {:style        {:position "absolute"
-                              :top      "1rem"
-                              :right    "1.8rem"}
-               :data-dismiss "modal"} (IoMdClose))
-            children))))))
+        (div :.modal-body children)
+        (button :.close
+          {:style        {:position "absolute"
+                          :top      "1rem"
+                          :right    "1.8rem"}
+           :data-dismiss "modal"} (IoMdClose))))))
 
 (defsc ProposalCard [this {:keys          [>/proposal-details]
                            :proposal/keys [id] :as props}]
@@ -223,7 +221,8 @@
     (div
       (form-dummy-proposal-card {:argument/text    (with-placeholder title "Es sollte ein Wasserspender im Flur aufgestellt werden.")
                                  :proposal/cost    (with-placeholder cost "0")
-                                 :proposal/details (with-placeholder short-summary "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben.")})
+                                 :proposal/details (with-placeholder short-summary "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben.")
+                                 :process/currency "€"})
       (form :.p-5
         {:onSubmit (fn [e]
                      (evt/prevent-default! e)
@@ -307,7 +306,7 @@
   (let [logged-in? (get-in props [session-ident :session/valid?])
         {:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
     (div :.container-md
-      (div :.btn-toolbar.justify-content-between.mb-3
+      (div :.row.btn-toolbar.justify-content-between.mb-3
         {:classes [(when-not logged-in? :.d-none)]}
         (div :.btn-group
           (button :.btn.btn-primary
@@ -338,6 +337,6 @@
               (ui-new-proposal-form new-proposal-form {:close-modal #(m/toggle! this :ui/show-new-proposal?)})))))
 
       (let [filtered-proposals (remove (comp neg? :vote/utility) all-proposals)]
-        (div :.card-deck.row-cols-1.row-cols-lg-2
+        (div :.row.card-deck.row-cols-1.row-cols-lg-2
           {:classes [proposal-deck]}
           (map ui-proposal-card (if hide-declined? filtered-proposals all-proposals)))))))
