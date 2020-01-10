@@ -21,8 +21,8 @@ cljs-test:
   stage: test
   before_script:
     - npm install
-  script:
     - npx shadow-cljs compile ci-tests
+  script:
     - npx karma start --single-run
 
 clj-test:
