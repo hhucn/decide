@@ -21,7 +21,7 @@ cljs-test:
   stage: test
   before_script:
     - npm install
-    - npx shadow-cljs compile ci-tests
+    - clojure -Sdeps '{:mvn/local-repo ".m2"}' -A:shadow-cljs:dev compile ci-tests
   script:
     - npx karma start --single-run
 
