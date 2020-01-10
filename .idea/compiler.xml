@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <wildcardResourcePatterns>
+      <entry name="!dev-resources:*" />
+      <entry name="!resources:*" />
       <entry name="!?*.java" />
       <entry name="!?*.form" />
       <entry name="!?*.class" />
