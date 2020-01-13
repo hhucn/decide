@@ -178,7 +178,6 @@
                           :ui/pro?         pro?
                           :ui/open?        open?
                           :ui/new-subtype  :support})}
-  (log/info "stuff?" props)
   (div :.collapse.container.border.p-4.my-3
     {:classes [(when open? "show")]
      :id      (str "collapse-" id)}
@@ -234,7 +233,7 @@
 
 
 (defn ui-new-argument-button [type new-argument-fn]
-  (button :.btn
+  (button :.btn.btn-sm
     {:classes [(if (= type :pro) "btn-success" "btn-danger")]
      :onClick #(new-argument-fn (= type :pro))}
     "Argument hinzufügen"))
@@ -252,32 +251,40 @@
    :initial-state (fn [{:keys [id] :as argument}]
                     (merge #:argument{:id id, :pros [], :cons []} argument))}
   (let [logged-in? (session/get-logged-in? props)]
-    (div :.row
+    (div :.row.pt-1
       (div :.col-6
         {:style {:display       "flex"
                  :flexDirection "column"}}
-        (div :.argumentation-header.bg-success.px-3.pt-2
-          (dom/h6 "Pro Argumente")
-          (when logged-in? (ui-new-argument-button :pro new-argument-fn)))
+        (div :.row.m-sm-0.ml-1.alert.alert-success.d-flex.justify-content-between.align-items-center
+          "Pro Argumente"
+          (button :.btn.btn-sm.btn-success
+            {:title    (str "Füge ein Argument dafür hinzu. " (when-not logged-in? "Man muss eingeloggt sein"))
+             :onClick  #(new-argument-fn true)
+             :disabled (not logged-in?)}
+            "Argument hinzufügen"))
         (if (empty? pros)
           (p :.p-3.text-muted "Es gibt noch keine Pro-Argumente. "
-            (a {:onClick (fn [e]
-                           (evt/prevent-default! e)
-                           (new-argument-fn true))} "Füge eins hinzu!"))
+            #_(a {:onClick (fn [e]
+                             (evt/prevent-default! e)
+                             (new-argument-fn true))} "Füge eins hinzu!"))
           (map #(ui-argument % computed) pros)))
 
       (div :.col-6
         {:style {:display       "flex"
                  :flexDirection "column"}}
-        (div :.argumentation-header.bg-danger.px-3.pt-2
-          (dom/h6 "Contra Argumente")
-          (when logged-in? (ui-new-argument-button :con new-argument-fn)))
+        (div :.row.m-sm-0.mr-1.alert.alert-danger.d-flex.justify-content-between.align-items-center
+          "Contra Argumente"
+          (button :.btn.btn-sm.btn-danger
+            {:title    (str "Füge ein Gegenargument hinzu. " (when-not logged-in? "Man muss eingeloggt sein"))
+             :onClick  #(new-argument-fn false)
+             :disabled (not logged-in?)}
+            "Argument hinzufügen"))
         (if (empty? cons)
           (p :.p-3.text-muted "Es gibt noch keine Contra-Argumente. "
-            (a {:href    ""
-                :onClick (fn [e]
-                           (evt/prevent-default! e)
-                           (new-argument-fn false))} "Füge eins hinzu!"))
+            #_(a {:href    ""
+                  :onClick (fn [e]
+                             (evt/prevent-default! e)
+                             (new-argument-fn false))} "Füge eins hinzu!"))
           (map #(ui-argument % computed) cons))))))
 
 (def ui-procon (comp/computed-factory ProCon {:keyfn (util/prefixed-keyfn :procon :argument/id)}))
