@@ -15,7 +15,9 @@
             [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
             [taoensso.timbre :as log]
             [com.fulcrologic.fulcro.data-fetch :as df]
-            ["bootstrap/js/dist/dropdown"]))
+            ["bootstrap/js/dist/dropdown"]
+            [decide.model.session :as session]
+            [com.fulcrologic.fulcro.application :as app]))
 
 
 (s/def :argument/id (some-fn uuid? tempid/tempid?))
@@ -176,6 +178,7 @@
                           :ui/pro?         pro?
                           :ui/open?        open?
                           :ui/new-subtype  :support})}
+  (log/info "stuff?" props)
   (div :.collapse.container.border.p-4.my-3
     {:classes [(when open? "show")]
      :id      (str "collapse-" id)}
@@ -236,36 +239,46 @@
      :onClick #(new-argument-fn (= type :pro))}
     "Argument hinzufügen"))
 
-(defsc ProCon [_this {:argument/keys [pros cons]}
+(defsc ProCon [this {:argument/keys [pros cons] :as props}
                {:keys [new-argument-fn] :as computed
                 :or   {new-argument-fn #()}}]
-  {:query         #(into [:argument/id
-                          {:argument/pros (comp/get-query Argument)}
-                          {:argument/cons (comp/get-query Argument)}]
+  {:query         #(into
+                     [:argument/id
+                      {:argument/pros (comp/get-query Argument)}
+                      {:argument/cons (comp/get-query Argument)}
+                      session/valid?-query]
                      (comp/get-query Argument))
    :ident         :argument/id
    :initial-state (fn [{:keys [id] :as argument}]
                     (merge #:argument{:id id, :pros [], :cons []} argument))}
-  (div :.row
-    (div :.col-6
-      {:style {:display       "flex"
-               :flexDirection "column"}}
-      (div :.argumentation-header.bg-success.px-3.pt-2
-        (dom/h6 "Pro Argumente")
-        (ui-new-argument-button :pro new-argument-fn))
-      (if (empty? pros)
-        (p :.p-3.text-muted "Es gibt noch keine Pro-Argumente. Füge eins hinzu!")
-        (map #(ui-argument % computed) pros)))
+  (let [logged-in? (session/get-logged-in? props)]
+    (div :.row
+      (div :.col-6
+        {:style {:display       "flex"
+                 :flexDirection "column"}}
+        (div :.argumentation-header.bg-success.px-3.pt-2
+          (dom/h6 "Pro Argumente")
+          (when logged-in? (ui-new-argument-button :pro new-argument-fn)))
+        (if (empty? pros)
+          (p :.p-3.text-muted "Es gibt noch keine Pro-Argumente. "
+            (a {:onClick (fn [e]
+                           (evt/prevent-default! e)
+                           (new-argument-fn true))} "Füge eins hinzu!"))
+          (map #(ui-argument % computed) pros)))
 
-    (div :.col-6
-      {:style {:display       "flex"
-               :flexDirection "column"}}
-      (div :.argumentation-header.bg-danger.px-3.pt-2
-        (dom/h6 "Contra Argumente")
-        (ui-new-argument-button :con new-argument-fn))
-      (if (empty? cons)
-        (p :.p-3.text-muted "Es gibt noch keine Contra-Argumente. Füge eins hinzu!")
-        (map #(ui-argument % computed) cons)))))
+      (div :.col-6
+        {:style {:display       "flex"
+                 :flexDirection "column"}}
+        (div :.argumentation-header.bg-danger.px-3.pt-2
+          (dom/h6 "Contra Argumente")
+          (when logged-in? (ui-new-argument-button :con new-argument-fn)))
+        (if (empty? cons)
+          (p :.p-3.text-muted "Es gibt noch keine Contra-Argumente. "
+            (a {:href    ""
+                :onClick (fn [e]
+                           (evt/prevent-default! e)
+                           (new-argument-fn false))} "Füge eins hinzu!"))
+          (map #(ui-argument % computed) cons))))))
 
 (def ui-procon (comp/computed-factory ProCon {:keyfn (util/prefixed-keyfn :procon :argument/id)}))
 

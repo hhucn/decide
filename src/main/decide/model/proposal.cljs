@@ -34,6 +34,7 @@
 
 (defmutation initial-load [{:keys [id]}]
   (action [{:keys [state app]}]
+    (js/console.log "BÄM" (comp/initial-state arg/Argumentation {:proposal/id id}))
     (swap! state mrg/merge-component arg/Argumentation
       (comp/initial-state arg/Argumentation {:proposal/id id})
       :replace [:proposal/id id :>/argumentation])
@@ -54,6 +55,8 @@
                    :process/currency
                    {:>/argumentation (comp/get-query arg/Argumentation)}]
    :ident         :proposal/id
+   :initial-state (fn [_] {:>/argumentation (comp/initial-state arg/Argumentation nil)})
+
    :route-segment ["proposal" :proposal/id]
    :will-enter    (fn [app {id :proposal/id}]
                     (let [id (uuid id)]
@@ -138,12 +141,15 @@
 
 (defsc ProposalCard [this {:keys          [>/proposal-details]
                            :proposal/keys [id]}]
-  {:query [:proposal/id :argument/text :proposal/details :proposal/cost
-           :vote/utility
-           :process/currency
-           session/valid?-query
-           {:>/proposal-details (comp/get-query ProposalDetails)}]
-   :ident :proposal/id}
+  {:query         [:proposal/id :argument/text :proposal/details :proposal/cost
+                   :vote/utility
+                   :process/currency
+                   session/valid?-query
+                   {:>/proposal-details (comp/get-query ProposalDetails)}]
+   :ident         :proposal/id
+   :initial-state (fn [_] {:process/currency   "€"
+                           :vote/utility       0
+                           :>/proposal-details (comp/initial-state ProposalDetails nil)})}
   (div
     (proposal-card this)
     (bottomsheet id
