@@ -92,8 +92,8 @@
                            :border          "0"
                            :zIndex          "100"}
            :data-toggle   "dropdown"
-           :aria-expanded "false"}
-          ;:onClick       (fn [e] (evt/stop-propagation! e))}
+           :aria-expanded "false"
+           :onClick       (fn [e] (evt/stop-propagation! e))}
           (IoMdMore))
         (div :.dropdown-menu.dropdown-menu-right.border
           (h6 :.dropdown-header "Aktionen")
