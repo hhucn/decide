@@ -300,8 +300,9 @@
 (def ui-top-chrome (comp/factory TopChrome))
 
 (defsc Root [this {:root/keys [top-chrome]}]
-  {:query             [{:root/top-chrome (comp/get-query TopChrome)}]
-   :initial-state     {:root/top-chrome {}}}
+  {:query                 [{:root/top-chrome (comp/get-query TopChrome)}]
+   :initial-state         {:root/top-chrome {}}
+   :shouldComponentUpdate (fn [_ _ _] true)}
   (ui-top-chrome top-chrome))
 
 
