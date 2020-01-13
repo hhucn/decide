@@ -11,6 +11,19 @@
     [com.fulcrologic.guardrails.core :refer [>defn => | <-]]))
 
 (def session-ident [:component/id :session])
+(def valid?-query {session-ident [:session/valid?]})
+
+(>defn get-logged-in?
+  "Returns whether a user is logged in or not.
+  Make sure to query with `valid?-query`."
+  [props]
+  [map? => boolean?]
+  (get-in props [session-ident :session/valid?] false))
+
+(>defn get-user-id-from-state [state]
+  [map? => any?]
+  (get-in state (into session-ident [:>/current-user 1])))
+
 
 (defn clear [env]
   (uism/assoc-aliased env :error ""))

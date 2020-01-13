@@ -12,7 +12,7 @@
             [clojure.string :as str]
             [taoensso.timbre :as log]
             [decide.model.argument :as arg]
-            [decide.model.session :refer [session-ident]]
+            [decide.model.session :as session]
             [decide.util :as util]
             ["react-icons/io" :refer [IoMdMore IoIosCheckmarkCircleOutline IoIosCloseCircleOutline IoMdClose IoMdEye IoMdEyeOff]]
             ["bootstrap/js/dist/modal"]
@@ -82,8 +82,7 @@
           params (:params ast)]
       (-> env
         (m/with-params
-          (assoc params :account/id
-                        (get-in s [:component/id :session :>/current-user 1])))))))
+          (assoc params :account/id (session/get-user-id-from-state s)))))))
 
 (defn proposal-card [comp]
   (let [{:proposal/keys [id details cost]
@@ -91,7 +90,7 @@
          :process/keys  [currency]
          :keys          [vote/utility]
          :as            props} (comp/props comp)
-        logged-in? (get-in props [[:component/id :session] :session/valid?])]
+        logged-in? (session/get-logged-in? props)]
     (div :.proposal
       (div :.proposal-buttons.btn-group-toggle
         (button :.btn.btn-outline-success
@@ -138,11 +137,11 @@
            :data-dismiss "modal"} (IoMdClose))))))
 
 (defsc ProposalCard [this {:keys          [>/proposal-details]
-                           :proposal/keys [id] :as props}]
+                           :proposal/keys [id]}]
   {:query [:proposal/id :argument/text :proposal/details :proposal/cost
            :vote/utility
            :process/currency
-           {[:component/id :session] [:session/valid?]}
+           session/valid?-query
            {:>/proposal-details (comp/get-query ProposalDetails)}]
    :ident :proposal/id}
   (div
@@ -276,7 +275,7 @@
                         {:new-proposal-form (comp/get-query EnterProposal)}
                         :ui/show-new-proposal?
                         :ui/hide-declined?
-                        {session-ident [:session/valid?]}]
+                        session/valid?-query]
    :initial-state      (fn [_] {:all-proposals     []
                                 :new-proposal-form (comp/initial-state EnterProposal nil)
                                 :ui/hide-declined? false})
@@ -299,7 +298,7 @@
                              (if (:ui/show-new-proposal? (comp/props this))
                                "show" "hide"))))
    :css                [[:.proposal-deck [:>* {:padding "5px"}]]]}
-  (let [logged-in? (get-in props [session-ident :session/valid?])
+  (let [logged-in? (session/get-logged-in? props)
         {:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
     (div :.container-md
       (div :.row.btn-toolbar.justify-content-between.mb-3
