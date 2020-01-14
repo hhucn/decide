@@ -66,8 +66,7 @@
     (div :.row.justify-content-between.m-4
       (h2 :.detail-card__header text)
       (big-price-tag cost budget currency))
-    (p (str/split-lines details))
-    #_(p (interpose (br) (str/split-lines details)))
+    (p :.proposal__details details)
     (arg/ui-argumentation (comp/computed argumentation {:argumentation-root this}))))
 
 (def ui-proposal-detail (comp/factory ProposalDetails {:keyfn (util/prefixed-keyfn :proposal-detail :proposal/id)}))
@@ -94,7 +93,7 @@
          :keys          [vote/utility]
          :as            props} (comp/props comp)
         logged-in? (session/get-logged-in? props)]
-    (div :.proposal
+    (div :.proposal__card
       (div :.proposal-buttons.btn-group-toggle
         (button :.btn.btn-outline-success
           {:type     "radio"
@@ -150,7 +149,7 @@
    :initial-state (fn [_] {:process/currency   "€"
                            :vote/utility       0
                            :>/proposal-details (comp/initial-state ProposalDetails nil)})}
-  (div
+  (div :.proposal
     (proposal-card this)
     (bottomsheet id
       (when proposal-details (ui-proposal-detail proposal-details)))))

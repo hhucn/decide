@@ -4,22 +4,28 @@
 @import "../node_modules/bootstrap/scss/buttons";
 
 .proposal {
-  @extend .bg-white;
-  max-width: 655px;
-  height: 200px;
-  border: 2px solid $secondary;
-  border-radius: 10px;
-  display: flex;
-  position: relative;
-  overflow: hidden;
+  &__details {
+    white-space: pre-line;
+  }
 
-  .options {
-    @extend .btn;
-    @extend .btn-light;
-    position: absolute;
-    right: 0;
-    top: 0;
-    padding: 0.2rem 0;
+  &__card {
+    @extend .bg-white;
+    max-width: 655px;
+    height: 200px;
+    border: 2px solid $secondary;
+    border-radius: 10px;
+    display: flex;
+    position: relative;
+    overflow: hidden;
+
+    .options {
+      @extend .btn;
+      @extend .btn-light;
+      position: absolute;
+      right: 0;
+      top: 0;
+      padding: 0.2rem 0;
+    }
   }
 }
 
