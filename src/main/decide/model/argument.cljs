@@ -154,18 +154,18 @@
   (action [{:keys [state ref]}]
     (swap! state update-in ref assoc :ui/new-argument "")))
 
-(defn pro-con-toggle [comp]
-  (if (:ui/pro? (comp/props comp))
-    (a :.text-success
-      {:title   "Wechsle zwischen dafür/dagegen"
-       :style   {:textDecoration "underline"}
-       :href    "#"
-       :onClick #(m/toggle! comp :ui/pro?)} "für")
-    (a :.text-danger
-      {:title   "Wechsle zwischen dafür/dagegen"
-       :style   {:textDecoration "underline"}
-       :href    "#"
-       :onClick #(m/toggle! comp :ui/pro?)} "gegen")))
+(>defn pro-con-toggle [comp]
+  [comp/component? => dom/element?]
+  (let [pro?  (:ui/pro? (comp/props comp))
+        class (if pro? :.text-success :.text-danger)
+        text  (if pro? "für" "gegen")]
+    (a {:title   "Wechsle zwischen dafür/dagegen"
+        :classes [class]
+        :role    "button"
+        :style   {:textDecoration "underline"
+                  :cursor         "pointer"}
+        :onClick #(m/toggle! comp :ui/pro?)}
+      text)))
 
 (defsc NewArgumentForm [this {:keys    [>/current-argument proposal/id]
                               :ui/keys [open? new-argument new-subtype pro?]
