@@ -112,20 +112,34 @@
 
 (def ui-argument (comp/computed-factory Argument {:keyfn (util/prefixed-keyfn :argument :argument/id)}))
 
-(defn select [comp attribute options current-value]
-  (dom/select :.form-control
-    {:onChange #(m/set-value! comp attribute (keyword (evt/target-value %)))
-     :value current-value}
+#_(>defn select [on-change options current-value]
+    [[any? => any?] (s/map-of any? dom/element?) string? => dom/element?]
+    (dom/select :.form-control
+      {:onChange on-change
+       :value    current-value}
+      (for [[type label] options
+            :let [value (name type)]]
+        (option {:key   type
+                 :value value}
+          label))))
+
+(>defn select [on-change options current-value]
+  [[any? => any?] (s/map-of any? dom/element?) string? => dom/element?]
+  (dom/div
+    {:onChange on-change}
     (for [[type label] options
           :let [value (name type)]]
-      (option {:key type
-               :value value}
-        label))))
+      (dom/li :.form-check {:key type}
+        (input :.form-check-input
+          {:type    "radio"
+           :value   value
+           :checked (= value current-value)})
+        (dom/label :.form-check-label label)))))
 
 (defn argument [id text type subtype]
-  #:argument{:id id
-             :text text
-             :type type
+  #:argument{:id      id
+             :text    text
+             :type    type
              :subtype subtype})
 
 (defmutation new-argument [{:argument/keys [id text type subtype parent]}]
@@ -143,20 +157,22 @@
 (defn pro-con-toggle [comp]
   (if (:ui/pro? (comp/props comp))
     (a :.text-success
-      {:style   {:textDecoration "underline"}
+      {:title   "Wechsle zwischen dafür/dagegen"
+       :style   {:textDecoration "underline"}
        :href    "#"
-       :onClick #(m/toggle! comp :ui/pro?)} "dafür")
+       :onClick #(m/toggle! comp :ui/pro?)} "für")
     (a :.text-danger
-      {:style   {:textDecoration "underline"}
+      {:title   "Wechsle zwischen dafür/dagegen"
+       :style   {:textDecoration "underline"}
        :href    "#"
-       :onClick #(m/toggle! comp :ui/pro?)} "dagegen")))
+       :onClick #(m/toggle! comp :ui/pro?)} "gegen")))
 
 (defsc NewArgumentForm [this {:keys    [>/current-argument proposal/id]
                               :ui/keys [open? new-argument new-subtype pro?]
                               :as      props
                               :or      {new-argument ""}}]
   {:query              [:proposal/id
-                        :>/current-argument
+                        {:>/current-argument (comp/get-query Argument)}
                         :ui/open?
                         :ui/new-argument :ui/new-subtype :ui/pro?
                         {[:component/id :session] [:>/current-user]}
@@ -191,7 +207,6 @@
     (form
       {:onSubmit (fn submit [e]
                    (evt/prevent-default! e)
-                   (log/info current-argument)
                    (comp/transact! this
                      [(new-argument
                         #:argument{:id      (tempid/tempid)
@@ -202,25 +217,36 @@
                                    :author  (get-in props [[:component/id :session] :>/current-user])})
                       (reset-new-argument-form nil)
                       (m/toggle {:field :ui/open?})]))}
+      (dom/p "Du bist " (pro-con-toggle this) ": ")
+      (dom/p
+        {:data-subtype (:argument/type current-argument)
+         :classes      [(case (:argument/type current-argument)
+                          :position "text-info"
+                          :pro "text-success"
+                          :con "text-danger"
+                          "")]}
+        (:argument/text current-argument))
+
+      (when (and
+              (not pro?)
+              (not= :position (:argument/type current-argument)))
+        (div :.form-group
+          #_(label " Wieso nennst du dieses Argument?")
+          (select #(m/set-value! this :ui/new-subtype (keyword (evt/target-value %)))
+            {:undermine (dom/span "Du findest \"" (dom/i (:argument/text current-argument)) "\" ist nicht richtig.")
+             :undercut  (dom/span "\"" (dom/i (:argument/text current-argument)) "\" hat nichts mit dem Argument davor zu tun.")}
+            (name (or new-subtype "")))))
+
       (div :.form-group
-        (label "Dein neues Argument " (pro-con-toggle this) ":")
+        (label "Dein Grund ist: ")
         (input :.form-control
           {:type     "text"
            :value    new-argument
            :onChange #(m/set-string! this :ui/new-argument :event %)}))
 
-      (when-not pro?
-        (div :.form-group
-          (label " Wieso nennst du dieses Argument?")
-          (select this
-            :ui/new-subtype
-            {:undermine "Undermine"
-             :undercut  "Undercut"}
-            (name (or new-subtype "")))))
-
       (button :.btn.btn-primary
         {:type "submit"}
-        "Submit"))))
+        "Fertig"))))
 
 (def ui-new-argument (comp/factory NewArgumentForm))
 
@@ -230,13 +256,6 @@
       assoc
       :ui/pro? pro?
       :ui/open? true)))
-
-
-(defn ui-new-argument-button [type new-argument-fn]
-  (button :.btn.btn-sm
-    {:classes [(if (= type :pro) "btn-success" "btn-danger")]
-     :onClick #(new-argument-fn (= type :pro))}
-    "Argument hinzufügen"))
 
 (defsc ProCon [this {:argument/keys [pros cons] :as props}
                {:keys [new-argument-fn] :as computed
