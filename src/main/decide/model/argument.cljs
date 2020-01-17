@@ -65,37 +65,39 @@
            {:argument/pros 1}
            {:argument/cons 1}]
    :ident :argument/id
-   :css   [[:.argument {:position      "relative"
-                        :border        "1px solid black"
-                        :border-radius "10px"
-                        :padding       "24px"
-                        :text-align    "left"
-                        :cursor        "pointer"}]
-           [:.sublayers {:display     "inline-block"
-                         :position    "absolute"
-                         :bottom      "0"
-                         :right       "0"
-                         :padding     "5px 10px"
-                         :width       "auto"
-                         :margin-left "auto"}]]}
-  (let [{:keys [argument sublayers]} (css/get-classnames Argument)]
-    (div :.btn.btn-light.my-1
-      {:classes      [argument]
-       :onMouseEnter #(df/load! this [:argument/id id] Argument)
-       :onClick      #(comp/transact! argumentation-root [(navigate-forward {:argument/id id})])}
-      text
-      (div :.btn-group
-        {:style {:position "absolute" :top "0px" :right "0px"
-                 :padding  "0"}}
+   :css   [[:.argument-card {:min-height "5em"}]
+           [:.argument-body {:padding ".75rem 1.9rem .75rem .75rem"}]
+           [:.options-btn {:width     "1.2em"
+                           :height    "1.2em"
+                           :border    "0"
+                           :padding   "0"
+                           :font-size "calc(1.275rem + 0.3vw)"
+                           :z-index   "10000"}]]}
+  (let [{:keys [argument-card argument-body options-btn]} (css/get-classnames Argument)]
+    (div :.mx-0.card.bg-light.rounded.border.border-secondary
+      {:classes [argument-card]}
+      (div :.card-body.text-left
+        {:classes [argument-body]}
+        (div :.card-text text))
+      (div :.card-footer.border-0.bg-transparent.p-1.pr-2.d-flex.align-items-center.justify-content-between
+        (button :.btn.btn-sm.btn-link.stretched-link
+          {:onMouseEnter #(df/load! this [:argument/id id] Argument)
+           :onClick      #(comp/transact! argumentation-root [(navigate-forward {:argument/id id})])}
+          "Mehr Argumente")
+        (div :.float-right
+          (span :.badge.badge-success.badge-pill.mr-1 "Pro " (MdSubdirectoryArrowRight) (str (count pros)))
+          (span :.badge.badge-danger.badge-pill "Con " (MdSubdirectoryArrowRight) (str (count cons)))))
+      (div :.p-1
+        {:classes [options-btn]
+         :style   {:position "absolute" :top "0px" :right "0px"
+                   :padding  "0"}}
         (button :.close
-          {:style         {:backgroundColor "transparent"
-                           :border          "0"
-                           :zIndex          "100"}
-           :data-toggle   "dropdown"
+          {:data-toggle   "dropdown"
            :aria-expanded "false"
-           :onClick       (fn [e] (evt/stop-propagation! e))}
+           :onClick       evt/stop-propagation!}
           (IoMdMore))
         (div :.dropdown-menu.dropdown-menu-right.border
+          {:onClick evt/stop-propagation!}
           (h6 :.dropdown-header "Aktionen")
           (when-not author
             (a :.dropdown-item.disabled
@@ -103,11 +105,7 @@
                (fn [e]
                  (evt/stop-propagation! e)
                  (comp/transact! this [(retract-argument {:argument/id id})]))}
-              "Löschen"))))
-      (small
-        {:classes [sublayers]}
-        (span :.text-success.pr-2 (MdSubdirectoryArrowRight) (str (count pros)))
-        (span :.text-danger (MdSubdirectoryArrowRight) (str (count cons)))))))
+              "Löschen")))))))
 
 
 (def ui-argument (comp/computed-factory Argument {:keyfn (util/prefixed-keyfn :argument :argument/id)}))
@@ -271,10 +269,10 @@
                     (merge #:argument{:id id, :pros [], :cons []} argument))}
   (let [logged-in? (session/get-logged-in? props)]
     (div :.row.pt-1
-      (div :.col-6
+      (div :.col-6.card-columns
         {:style {:display       "flex"
                  :flexDirection "column"}}
-        (div :.row.m-sm-0.ml-1.alert.alert-success.d-flex.justify-content-between.align-items-center
+        (div :.row.mx-sm-0.ml-0.alert.alert-success.d-flex.justify-content-between.align-items-center.mb-2
           "Pro Argumente"
           (button :.btn.btn-sm.btn-success
             {:title    (str "Füge ein Argument dafür hinzu. " (when-not logged-in? "Man muss eingeloggt sein"))
@@ -288,10 +286,10 @@
                              (new-argument-fn true))} "Füge eins hinzu!"))
           (map #(ui-argument % computed) pros)))
 
-      (div :.col-6
+      (div :.col-6.card-columns
         {:style {:display       "flex"
                  :flexDirection "column"}}
-        (div :.row.m-sm-0.mr-1.alert.alert-danger.d-flex.justify-content-between.align-items-center
+        (div :.row.mx-sm-0.mr-1.alert.alert-danger.d-flex.justify-content-between.align-items-center.mb-2
           "Contra Argumente"
           (button :.btn.btn-sm.btn-danger
             {:title    (str "Füge ein Gegenargument hinzu. " (when-not logged-in? "Man muss eingeloggt sein"))
