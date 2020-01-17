@@ -94,7 +94,7 @@
          :as            props} (comp/props comp)
         logged-in? (session/get-logged-in? props)]
     (div :.proposal__card
-      (div :.proposal-buttons.btn-group-toggle
+      (div :.proposal__buttons.btn-group-toggle
         (button :.btn.btn-outline-success
           {:type     "radio"
            :title    "Zustimmen"
@@ -113,17 +113,17 @@
                                                        :vote/utility (if (neg? utility) 0 -1)})]
                         {:refresh [(comp/get-ident ProposalCollection nil)]})}
           (IoIosCloseCircleOutline #js {:size "calc(2rem + 1vw)"})))
-      (div :.proposal-price
-        (span :.proposal-price__text (str cost) currency))
+      (div :.proposal__price
+        (span :.proposal__price__text (str cost) currency))
       (button :.options.disabled.invisible
         {:title "Optionen"}
         (IoMdMore #js {:size "24px"}))
-      (div :.proposal-content
+      (div :.proposal__content
         {:data-toggle  "modal"
          :data-target  (str "#modal-" id)
          :onMouseEnter #(df/load-field! comp :>/proposal-details {})}
-        (dom/h6 :.proposal-title text)
-        (div :.proposal-details (split-details details))))))
+        (dom/h6 :.proposal__title text)
+        (div :.proposal__details (split-details details))))))
 
 (defn bottomsheet [id & children]
   (div :.modal.fade.bottom-sheet

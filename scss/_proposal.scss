@@ -27,73 +27,74 @@
       padding: 0.2rem 0;
     }
   }
-}
 
-.proposal-content {
-  @extend .btn-light;
-  background-color: $white;
-  cursor: pointer;
-}
-
-.proposal-buttons {
-  height: 100%;
-  max-width: 70px;
-  flex: none;
-  border-right: 1px solid theme-color("secondary");
-
-  display: flex;
-  flex-direction: column;
-
-  .btn {
+  &__buttons {
+    $border-color: theme-color("secondary");
     height: 100%;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .spacer {
-    border-top: .5px solid theme-color("secondary");
+    max-width: 70px;
     flex: none;
-  }
-}
+    border-right: 1px solid $border-color;
 
-.proposal-title {
-  line-height: 1.5;
-  padding: 10px 5px 10px 10px;
-  margin-right: 1.5rem;
-}
+    display: flex;
+    flex-direction: column;
 
-.proposal-price {
-  $color: theme-color("primary");
+    .btn {
+      height: 100%;
+      border: 0;
+      border-radius: 0;
+    }
 
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  min-width: calc(100px + .3vw);
-  padding: 0.333rem calc(1rem + .3vw) 0.333rem calc(1rem + .3vw);
-
-  display: flex;
-  align-items: center;
-  text-align: center;
-
-  &__text {
-    width: 100%;
-    color: color-yiq($color);
-    font-size: calc(1rem + .3vw);
-    line-height: 1.75rem;
+    .spacer {
+      border-top: .5px solid $border-color;
+      flex: none;
+    }
   }
 
-  background-color: $color;
-  border-top-left-radius: 20px;
+  &__content {
+    @extend .btn-light;
+    background-color: $white;
+    cursor: pointer;
+  }
+
+  &__title {
+    line-height: 1.5;
+    padding: 10px 5px 10px 10px;
+    margin-right: 1.5rem;
+  }
+
+  &__price {
+    $color: theme-color("primary");
+
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    min-width: calc(100px + .3vw);
+    padding: 0.333rem calc(1rem + .3vw) 0.333rem calc(1rem + .3vw);
+
+    display: flex;
+    align-items: center;
+    text-align: center;
+
+    &__text {
+      width: 100%;
+      color: color-yiq($color);
+      font-size: calc(1rem + .3vw);
+      line-height: 1.75rem;
+    }
+
+    background-color: $color;
+    border-top-left-radius: 20px;
+  }
+
+  &__details {
+    padding: 10px;
+    font-size: calc(0.8rem + .3vw);
+  }
 }
 
 //
 // Details
 //
-
-.proposal-details {
-  padding: 10px;
-  font-size: calc(0.8rem + .3vw);
-}
 
 .price-tag-big {
   $price-tag-border-radius: 20px;
