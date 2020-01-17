@@ -21,7 +21,9 @@
            org.clojars.pntblnk/clj-ldap      {:mvn/version "0.0.16"}
 
            ring/ring-core                    {:mvn/version "1.8.0"}
-           ring/ring-defaults                {:mvn/version "0.3.2"}}
+           ring/ring-defaults                {:mvn/version "0.3.2"}
+
+           nrepl                             {:mvn/version "0.6.0"}}
 
  :aliases {:clj-tests   {:extra-paths ["src/test"]
                          :main-opts   ["-m" "kaocha.runner"]
