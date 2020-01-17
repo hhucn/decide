@@ -112,18 +112,18 @@
 
 (def ui-argument (comp/computed-factory Argument {:keyfn (util/prefixed-keyfn :argument :argument/id)}))
 
-#_(>defn select [on-change options current-value]
-    [[any? => any?] (s/map-of any? dom/element?) string? => dom/element?]
-    (dom/select :.form-control
-      {:onChange on-change
-       :value    current-value}
-      (for [[type label] options
-            :let [value (name type)]]
-        (option {:key   type
-                 :value value}
-          label))))
-
 (>defn select [on-change options current-value]
+  [[any? => any?] (s/map-of any? dom/element?) string? => dom/element?]
+  (dom/select :.form-control
+    {:onChange on-change
+     :value    current-value}
+    (for [[type label] options
+          :let [value (name type)]]
+      (option {:key   type
+               :value value}
+        label))))
+
+(>defn radio-select [on-change options current-value]
   [[any? => any?] (s/map-of any? dom/element?) string? => dom/element?]
   (dom/div
     {:onChange on-change}
@@ -232,7 +232,7 @@
               (not= :position (:argument/type current-argument)))
         (div :.form-group
           #_(label " Wieso nennst du dieses Argument?")
-          (select #(m/set-value! this :ui/new-subtype (keyword (evt/target-value %)))
+          (radio-select #(m/set-value! this :ui/new-subtype (keyword (evt/target-value %)))
             {:undermine (dom/span "Du findest \"" (dom/i (:argument/text current-argument)) "\" ist nicht richtig.")
              :undercut  (dom/span "\"" (dom/i (:argument/text current-argument)) "\" hat nichts mit dem Argument davor zu tun.")}
             (name (or new-subtype "")))))
