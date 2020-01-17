@@ -76,4 +76,4 @@
       (update :argument/pros (partial mapv util/str-id->uuid-id))
       (update :argument/cons (partial mapv util/str-id->uuid-id)))))
 
-(def resolvers [new-argument resolve-argument retract-argument])
+(def resolvers [new-argument resolve-argument])

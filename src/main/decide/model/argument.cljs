@@ -98,7 +98,7 @@
         (div :.dropdown-menu.dropdown-menu-right.border
           (h6 :.dropdown-header "Aktionen")
           (when-not author
-            (a :.dropdown-item.text-danger
+            (a :.dropdown-item.disabled
               {:onClick
                (fn [e]
                  (evt/stop-propagation! e)
