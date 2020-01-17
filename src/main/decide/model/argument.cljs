@@ -168,17 +168,17 @@
       text)))
 
 (defsc NewArgumentForm [this {:keys    [>/current-argument proposal/id]
-                              :ui/keys [open? new-argument new-subtype pro?]
+                              :ui/keys [open? new-argument-text new-subtype pro?]
                               :as      props
-                              :or      {new-argument ""}}]
+                              :or      {new-argument-text ""}}]
   {:query              [:proposal/id
                         {:>/current-argument (comp/get-query Argument)}
                         :ui/open?
-                        :ui/new-argument :ui/new-subtype :ui/pro?
+                        :ui/new-argument-text :ui/new-subtype :ui/pro?
                         {[:component/id :session] [:>/current-user]}
                         fs/form-config-join]
    :ident              [:argumentation/id :proposal/id]
-   :form-fields        #{:ui/new-argument :ui/new-subtype :ui/pro?}
+   :form-fields        #{:ui/new-argument-text :ui/new-subtype :ui/pro?}
    :componentDidUpdate (fn [this _prev-props _prev-state]
                          (let [{:ui/keys [new-subtype pro?]} (comp/props this)]
                            (if (#{:undermine :undercut} new-subtype) ;; TODO Merge this with the Toggle Button!
@@ -189,11 +189,11 @@
    :initial-state      (fn [{:keys [proposal/id pro? open?]
                              :or   {pro?  true
                                     open? false}}]
-                         {:proposal/id     id
-                          :ui/new-argument ""
-                          :ui/pro?         pro?
-                          :ui/open?        open?
-                          :ui/new-subtype  :support})}
+                         {:proposal/id          id
+                          :ui/new-argument-text ""
+                          :ui/pro?              pro?
+                          :ui/open?             open?
+                          :ui/new-subtype       :support})}
   (div :.collapse.container.border.p-4.my-3
     {:classes [(when open? "show")]
      :id      (str "collapse-" id)}
@@ -210,7 +210,7 @@
                    (comp/transact! this
                      [(new-argument
                         #:argument{:id      (tempid/tempid)
-                                   :text    new-argument
+                                   :text    new-argument-text
                                    :type    (if pro? :pro :con)
                                    :subtype new-subtype
                                    :parent  current-argument
@@ -241,8 +241,8 @@
         (label "Dein Grund ist: ")
         (input :.form-control
           {:type     "text"
-           :value    new-argument
-           :onChange #(m/set-string! this :ui/new-argument :event %)}))
+           :value    new-argument-text
+           :onChange #(m/set-string! this :ui/new-argument-text :event %)}))
 
       (button :.btn.btn-primary
         {:type "submit"}
