@@ -1,12 +1,14 @@
-$blue: #006AB3;
+@import "hhu-colors";
+
+// Theme color
+$blue: $hhu-blue;
 $dark-gray: #6C6C6C;
 $green: #30B110;
-//$yellow: #BDBF09; // looks dirty
-$red: #BE0A26;
+$secondary: $hhu-darkblue-55;
+$red: $hhu-red;
 
 $enable-responsive-font-sizes: true;
 
-//$secondary: $gray-500;
 @import "../node_modules/bootstrap/scss/bootstrap";
 @import "proposal";
 @import "bottom_sheet";
