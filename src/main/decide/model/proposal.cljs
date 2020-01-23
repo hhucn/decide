@@ -102,7 +102,7 @@
            :disabled (not logged-in?)
            :onClick  #(comp/transact! comp [(set-vote {:proposal/id  id
                                                        :vote/utility (if (pos? utility) 0 1)})])}
-          (IoIosCheckmarkCircleOutline #js {:size "calc(2rem + 1vw)"}))
+          (IoIosCheckmarkCircleOutline #js {:size "100%"}))
         (div :.spacer)
         (button :.btn.btn-outline-danger
           {:type     "radio"
@@ -112,7 +112,7 @@
            :onClick  #(comp/transact! comp [(set-vote {:proposal/id  id
                                                        :vote/utility (if (neg? utility) 0 -1)})]
                         {:refresh [(comp/get-ident ProposalCollection nil)]})}
-          (IoIosCloseCircleOutline #js {:size "calc(2rem + 1vw)"})))
+          (IoIosCloseCircleOutline #js {:size "100%"})))
       (div :.proposal__price
         (span :.proposal__price__text (str cost) currency))
       (button :.options.disabled.invisible

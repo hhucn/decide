@@ -31,6 +31,7 @@
   &__buttons {
     $border-color: theme-color("secondary");
     height: 100%;
+    width: calc(2rem + 10vw);
     max-width: 70px;
     flex: none;
     border-right: 1px solid $border-color;
