@@ -11,7 +11,7 @@
             [clojure.spec.alpha :as s]
             [com.fulcrologic.fulcro.dom.events :as evt]
             ["react-icons/io" :refer [IoMdAdd IoMdClose IoMdMore IoMdUndo]]
-            ["react-icons/md" :refer [MdSubdirectoryArrowRight]]
+            ["react-icons/md" :refer [MdSubdirectoryArrowRight MdModeComment]]
             [com.fulcrologic.fulcro.algorithms.tempid :as tempid]
             [taoensso.timbre :as log]
             [com.fulcrologic.fulcro.data-fetch :as df]
@@ -56,6 +56,31 @@
   (action [{:keys [ref state]}]
     (swap! state update-in ref *navigate-forward [:argument/id id])))
 
+(def argument-card-bottom-decoration
+  (small :.container-fluid                                  ;.border.border-secondary.rounded-bottom
+    {:style {:position "absolute"
+             :bottom   "-5px"
+             :height   "5px"
+             :left     "1%"
+             :width    "98%"}}
+    (div :.row.text-center
+      (div :.col-6.px-1
+        (div :.border.border-secondary.rounded-bottom
+          {:style {:minHeight "5px"}}))
+      (div :.col-6.px-1
+        (div :.border.border-secondary.rounded-bottom
+          {:style {:minHeight "5px"}})))))
+
+(>defn seperate-subargument-display [pros cons]
+  [coll? coll? => dom/element?]
+  (comp/fragment
+    (span :.text-success.mr-1 "Pro " (MdSubdirectoryArrowRight) (str (count pros)))
+    (span :.text-danger "Con " (MdSubdirectoryArrowRight) (str (count cons)))))
+
+(>defn subargument-display [pros cons]
+  [coll? coll? => dom/element?]
+  (span :.text-muted (MdModeComment) " " (str (+ (count pros) (count cons)))))
+
 (defsc Argument [this {:argument/keys [id text pros cons author]} {:keys [argumentation-root]}]
   {:query [:argument/id
            :argument/text
@@ -67,30 +92,24 @@
    :ident :argument/id
    :css   [[:.argument-card {:min-height "5em"}]
            [:.argument-body {:padding ".75rem 1.9rem .75rem .75rem"}]
-           [:.options-btn {:width     "1.2em"
+           [:.options-btn {:position  "absolute" :top "0px" :right "0px"
+                           :width     "1.2em"
                            :height    "1.2em"
                            :border    "0"
-                           :padding   "0"
                            :font-size "calc(1.275rem + 0.3vw)"
                            :z-index   "10000"}]]}
   (let [{:keys [argument-card argument-body options-btn]} (css/get-classnames Argument)]
-    (div :.mx-0.card.bg-light.rounded.border.border-secondary
+    (div :.mx-0.card.bg-light.rounded.border.border-secondary.mb-3
       {:classes [argument-card]}
-      (div :.card-body.text-left
-        {:classes [argument-body]}
-        (div :.card-text text))
-      (div :.card-footer.border-0.bg-transparent.p-1.pr-2.d-flex.align-items-center.justify-content-between
+      (div :.card-body.text-left {:classes [argument-body]}
+        (span :.card-text text))
+      (div :.card-footer.border-0.bg-transparent.p-2.d-flex.align-items-center.justify-content-between
         (button :.btn.btn-sm.btn-link.stretched-link
           {:onMouseEnter #(df/load! this [:argument/id id] Argument)
            :onClick      #(comp/transact! argumentation-root [(navigate-forward {:argument/id id})])}
           "Mehr Argumente")
-        (div :.float-right
-          (span :.badge.badge-success.badge-pill.mr-1 "Pro " (MdSubdirectoryArrowRight) (str (count pros)))
-          (span :.badge.badge-danger.badge-pill "Con " (MdSubdirectoryArrowRight) (str (count cons)))))
-      (div :.p-1
-        {:classes [options-btn]
-         :style   {:position "absolute" :top "0px" :right "0px"
-                   :padding  "0"}}
+        (small :.float-right (subargument-display pros cons)))
+      (div :.p-1 {:classes [options-btn]}
         (button :.close
           {:data-toggle   "dropdown"
            :aria-expanded "false"
@@ -105,8 +124,8 @@
                (fn [e]
                  (evt/stop-propagation! e)
                  (comp/transact! this [(retract-argument {:argument/id id})]))}
-              "Löschen")))))))
-
+              "Löschen"))))
+      argument-card-bottom-decoration)))
 
 (def ui-argument (comp/computed-factory Argument {:keyfn (util/prefixed-keyfn :argument :argument/id)}))
 
@@ -211,7 +230,7 @@
                                    :text    new-argument-text
                                    :type    (if pro? :pro :con)
                                    :subtype new-subtype
-                                   :parent  current-argument
+                                   :parent  (comp/get-ident Argument current-argument)
                                    :author  (get-in props [[:component/id :session] :>/current-user])})
                       (reset-new-argument-form nil)
                       (m/toggle {:field :ui/open?})]))}
@@ -269,7 +288,7 @@
                     (merge #:argument{:id id, :pros [], :cons []} argument))}
   (let [logged-in? (session/get-logged-in? props)]
     (div :.row.pt-1
-      (div :.col-6.card-columns
+      (div :.col-6
         {:style {:display       "flex"
                  :flexDirection "column"}}
         (div :.row.mx-sm-0.ml-0.alert.alert-success.d-flex.justify-content-between.align-items-center.mb-2
@@ -286,7 +305,7 @@
                              (new-argument-fn true))} "Füge eins hinzu!"))
           (map #(ui-argument % computed) pros)))
 
-      (div :.col-6.card-columns
+      (div :.col-6
         {:style {:display       "flex"
                  :flexDirection "column"}}
         (div :.row.mx-sm-0.mr-1.alert.alert-danger.d-flex.justify-content-between.align-items-center.mb-2
