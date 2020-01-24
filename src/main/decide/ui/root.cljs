@@ -77,8 +77,6 @@
         (dom/button :.ui.primary.button {:onClick #(submit! true)}
           "Sign Up")))))
 
-(declare Session Account)
-
 (defn display-name-permutations [firstname]
   (let [names (str/split firstname #"\s+")]
     (map #(apply str (interpose " " (take (inc %) names))) (range (count names)))))
@@ -86,7 +84,7 @@
 (defsc Login [this {:account/keys [id]
                     :ui/keys      [error open?] :as props}]
   {:query         [:ui/open? :ui/error :account/id
-                   {[:component/id :session] (comp/get-query Session)}
+                   {session/session-ident (comp/get-query session/Session)}
                    [::uism/asm-id ::session/session]]
    :initial-state {:account/id "" :ui/error ""}
    :ident         (fn [] [:component/id :login])}
@@ -105,7 +103,7 @@
             (div :.btn-group
               (div :.btn-group
                 (dom/button :.btn.btn-outline-dark
-                  {:onMouseEnter #(df/load! this [:account/id current-user] Account)}
+                  {:onMouseEnter #(df/load! this [:account/id current-user] account/Account)}
                   (dom/span display-name))
                 #_(let [possible-display-names (into #{current-user} (display-name-permutations firstname))]
                     (div :.dropdown-menu.dropdown-menu-right.shadow
@@ -146,7 +144,6 @@
 
 (def ui-login (comp/factory Login))
 
-(declare Root)
 (defsc ProposalsMain [this {:keys [all-proposals detailed-proposals]}]
   {:query         [{:all-proposals (comp/get-query proposal/ProposalCard)}
                    {:detailed-proposals (comp/get-query proposal/ProposalDetails)}]
@@ -218,21 +215,6 @@
 
 (def ui-top-router (comp/factory TopRouter))
 
-(defsc Account [_ _]
-  {:query [:account/id :account/display-name :account/firstname :account/lastname :account/email]
-   :ident :account/id})
-
-(defsc Session
-  "Session representation. Used primarily for server queries. On-screen representation happens in Login component."
-  [this {:keys [:session/valid?] :as props}]
-  {:query         [:session/valid?
-                   {:>/current-user (comp/get-query Account)}]
-   :ident         (fn [] [:component/id :session])
-   :pre-merge     (fn [{:keys [data-tree]}]
-                    (merge {:session/valid? false :>/current-user {:account/id "" :account/display-name ""}}
-                      data-tree))
-   :initial-state {:session/valid? false :>/current-user {:account/id "" :account/display-name ""}}})
-
 (defn nav-link [label href]
   (dom/li :.nav-item (dom/a :.btn.btn-light {:href href} label)))
 
@@ -243,7 +225,7 @@
 (defsc TopChrome [this {:root/keys [router current-session login]
                         ::dr/keys [id]}]
   {:query              [{:root/router (comp/get-query TopRouter)}
-                        {:root/current-session (comp/get-query Session)}
+                        {:root/current-session (comp/get-query session/Session)}
                         [::uism/asm-id ::TopRouter]
                         [::dr/id '_]
                         {:root/login (comp/get-query Login)}]

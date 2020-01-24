@@ -25,7 +25,7 @@
   (log/info "Starting session machine.")
   (uism/begin! SPA session/session-machine ::session/session
     {:actor/login-form      root/Login
-     :actor/current-session root/Session}))
+     :actor/current-session session/Session}))
 
 
 (comment
@@ -33,6 +33,6 @@
   (comp/class->any SPA root/Root)
   (let [s (app/current-state SPA)]
     (fdn/db->tree [{[:component/id :login] [:ui/open? :ui/error :account/id
-                                            {[:root/current-session '_] (comp/get-query root/Session)}
+                                            {[:root/current-session '_] (comp/get-query session/Session)}
                                             [::uism/asm-id ::session/session]]}] {} s)))
 

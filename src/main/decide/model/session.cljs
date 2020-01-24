@@ -1,7 +1,9 @@
 (ns decide.model.session
   (:require
     [decide.application :refer [SPA]]
+    [decide.model.account :as account]
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.ui-state-machines :as uism]
     [taoensso.timbre :as log]
     [com.fulcrologic.fulcro.components :as comp]
@@ -12,6 +14,17 @@
 
 (def session-ident [:component/id :session])
 (def valid?-query {session-ident [:session/valid?]})
+
+(defsc Session
+  "Session representation. Used primarily for server queries. On-screen representation happens in Login component."
+  [_ _]
+  {:query         [:session/valid?
+                   {:>/current-user (comp/get-query account/Account)}]
+   :ident         (fn [] session-ident)
+   :pre-merge     (fn [{:keys [data-tree]}]
+                    (merge {:session/valid? false :>/current-user {:account/id "" :account/display-name ""}}
+                      data-tree))
+   :initial-state {:session/valid? false :>/current-user {:account/id "" :account/display-name ""}}})
 
 (>defn get-logged-in?
   "Returns whether a user is logged in or not.

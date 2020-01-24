@@ -1,6 +1,7 @@
 (ns decide.model.account
   (:require
     [taoensso.timbre :as log]
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
     [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]))
 
 (defn user-path
@@ -17,3 +18,7 @@
   (action [{:keys [state]}]
     (swap! state insert-user* params))
   (remote [_] true))
+
+(defsc Account [_ _]
+  {:query [:account/id :account/display-name :account/firstname :account/lastname :account/email]
+   :ident :account/id})
