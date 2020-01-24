@@ -15,7 +15,7 @@
            org.clojure/core.async            {:mvn/version "0.7.559"}
 
            ;; To simulate Datomic on the back-end
-           io.replikativ/datahike            {:mvn/version "0.2.1"}
+           io.replikativ/datahike            {:mvn/version "0.2.0"}
            io.replikativ/hasch               {:mvn/version "0.3.7"}
 
            org.clojars.pntblnk/clj-ldap      {:mvn/version "0.0.16"}
