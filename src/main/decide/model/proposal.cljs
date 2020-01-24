@@ -275,6 +275,22 @@
 
 (def ui-new-proposal-form (comp/computed-factory EnterProposal))
 
+(def not-logged-in-banner (div :.row.alert.alert-warning "Sie sind nicht eingeloggt. Sie können daher nichts hinzufügen."))
+
+(defn new-proposal-modal [comp {:keys [new-proposal-form modal-ref]}]
+  (div :.modal.fade
+    {:ref modal-ref}
+    (div :.modal-dialog.modal-lg
+      (div :.modal-content
+        (div :.modal-header
+          (dom/h5 :.modal-title "Neuer Vorschlag")
+          (button :.close
+            {:data-dismiss "modal"
+             :aria-label   "Close"}
+            (span {:aria-hidden "true"} (IoMdClose))))
+        (div :.modal-body
+          (ui-new-proposal-form new-proposal-form {:close-modal #(m/toggle! comp :ui/show-new-proposal?)}))))))
+
 (defsc ProposalCollection [this {:keys [all-proposals new-proposal-form ui/hide-declined?] :as props}]
   {:query              [{[:all-proposals '_] (comp/get-query ProposalCard)}
                         {:new-proposal-form (comp/get-query EnterProposal)}
@@ -305,7 +321,8 @@
    :css                [[:.proposal-deck [:>* {:padding "5px"}]]]}
   (let [logged-in? (session/get-logged-in? props)
         {:keys [proposal-deck]} (css/get-classnames ProposalCollection)]
-    (div :.container-md
+    (div :.container-md.py-2
+      (when-not logged-in? not-logged-in-banner)
       (div :.row.btn-toolbar.justify-content-between.mb-3
         {:classes [(when-not logged-in? :.d-none)]}
         (div :.btn-group
@@ -323,20 +340,25 @@
               (span (IoMdEyeOff) " Zeige Abgelehnte")
               (span (IoMdEye) " Verstecke Abgelehnte")))))
 
-      (div :.modal.fade
-        {:ref (comp/get-state this :modal-ref)}
-        (div :.modal-dialog.modal-lg
-          (div :.modal-content
-            (div :.modal-header
-              (dom/h5 :.modal-title "Neuer Vorschlag")
-              (button :.close
-                {:data-dismiss "modal"
-                 :aria-label   "Close"}
-                (span {:aria-hidden "true"} (IoMdClose))))
-            (div :.modal-body
-              (ui-new-proposal-form new-proposal-form {:close-modal #(m/toggle! this :ui/show-new-proposal?)})))))
+      (new-proposal-modal this {:new-proposal-form new-proposal-form
+                                :modal-ref         (comp/get-state this :modal-ref)})
 
-      (let [filtered-proposals (remove (comp neg? :vote/utility) all-proposals)]
-        (div :.row.card-deck.row-cols-1.row-cols-lg-2
-          {:classes [proposal-deck]}
-          (map ui-proposal-card (if hide-declined? filtered-proposals all-proposals)))))))
+      (let [filtered-proposals (remove (comp neg? :vote/utility) all-proposals)
+            proposals          (if hide-declined? filtered-proposals all-proposals)]
+        (if-not (empty? proposals)
+          (div :.row.card-deck.row-cols-1.row-cols-lg-2
+            {:classes [proposal-deck]}
+            (map ui-proposal-card proposals))
+
+          (dom/div :.pt-3.text-muted.text-center
+            (if (empty? all-proposals)
+              (dom/h3 "Noch gibt es keine Vorschläge.")
+              (dom/h4
+                (dom/p "Sie haben alle Vorschläge abgelehnt und ausgeblendet.")
+                (dom/button :.btn.btn-link
+                  {:onClick #(m/toggle! this :ui/hide-declined?)}
+                  "Einblenden")))
+            (when-not logged-in?
+              (comp/fragment
+                (dom/hr)
+                (dom/button :.btn.btn-link "Vorschlag hinzufügen")))))))))

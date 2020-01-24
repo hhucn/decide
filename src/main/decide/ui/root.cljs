@@ -288,7 +288,7 @@
             (dom/hr)
             (div :.right.menu
               (ui-login login)))))
-      (div :.py-5
+      (div :.py-2
         (ui-top-router router))
       (div :.border-top
         (dom/footer :.footer.container
