@@ -1,22 +1,27 @@
 (ns decide.ui.components
   (:require
-    [com.fulcrologic.fulcro.components :as prim :refer [defsc]]
-    [com.fulcrologic.fulcro.dom :as dom]))
+    [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
+    [com.fulcrologic.fulcro.dom :as dom]
+    ["bootstrap/js/dist/collapse"]
+    ["jquery" :as $]
+    [goog.object :as gobj]
+    [taoensso.timbre :as log]))
 
-(defsc PlaceholderImage
-  "Generates an SVG image placeholder of the given size and with the given label
-  (defaults to showing 'w x h'.
+(defn toggle-collapse [ref show?]
+  (.collapse ref
+    (if show? "show" "hide")))
 
-  ```
-  (ui-placeholder {:w 50 :h 50 :label \"avatar\"})
-  ```
-  "
-  [this {:keys [w h label]}]
-  (let [label (or label (str w "x" h))]
-    (dom/svg #js {:width w :height h}
-      (dom/rect #js {:width w :height h :style #js {:fill        "rgb(200,200,200)"
-                                                    :strokeWidth 2
-                                                    :stroke      "black"}})
-      (dom/text #js {:textAnchor "middle" :x (/ w 2) :y (/ h 2)} label))))
+(defsc Collapse [this _props]
+  {:query              [:ui/open?]
+   :initial-state      {:ui/open? false}
+   :initLocalState     (fn [this _props]
+                         {:refn (fn [r]
+                                  (gobj/set this "collapse" ($ r)))})
+   :componentDidMount  (fn [this]
+                         (some-> (comp/isoget this "collapse") (toggle-collapse (:ui/open? (comp/props this)))))
+   :componentDidUpdate (fn [this _ _ _]
+                         (some-> (comp/isoget this "collapse") (toggle-collapse (:ui/open? (comp/props this)))))}
+  (dom/div :.collapse {:ref (comp/get-state this :refn)}
+    (comp/children this)))
 
-(def ui-placeholder (prim/factory PlaceholderImage))
+(def collapse (comp/factory Collapse))

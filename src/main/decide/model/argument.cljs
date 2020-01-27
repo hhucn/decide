@@ -17,7 +17,8 @@
             [com.fulcrologic.fulcro.data-fetch :as df]
             ["bootstrap/js/dist/dropdown"]
             [decide.model.session :as session]
-            [com.fulcrologic.fulcro.application :as app]))
+            [com.fulcrologic.fulcro.application :as app]
+            [decide.ui.components :refer [collapse]]))
 
 
 (s/def :argument/id (some-fn uuid? tempid/tempid?))
@@ -157,7 +158,9 @@
   #:argument{:id      id
              :text    text
              :type    type
-             :subtype subtype})
+             :subtype subtype
+             :pros    []
+             :cons    []})
 
 (defmutation new-argument [{:argument/keys [id text type subtype parent]}]
   (action [{:keys [state]}]
@@ -184,13 +187,13 @@
         :onClick #(m/toggle! comp :ui/pro?)}
       text)))
 
-(defsc NewArgumentForm [this {:keys    [>/current-argument proposal/id]
-                              :ui/keys [open? new-argument-text new-subtype pro?]
+(defsc NewArgumentForm [this {:keys    [>/current-argument]
+                              :ui/keys [new-argument-text new-subtype pro?]
                               :as      props
-                              :or      {new-argument-text ""}}]
+                              :or      {new-argument-text ""}}
+                        {:keys [close]}]
   {:query              [:proposal/id
                         {:>/current-argument (comp/get-query Argument)}
-                        :ui/open?
                         :ui/new-argument-text :ui/new-subtype :ui/pro?
                         {[:component/id :session] [:>/current-user]}
                         fs/form-config-join]
@@ -209,17 +212,14 @@
                          {:proposal/id          id
                           :ui/new-argument-text ""
                           :ui/pro?              pro?
-                          :ui/open?             open?
                           :ui/new-subtype       :support})}
-  (div :.collapse.container.border.p-4.my-3
-    {:classes [(when open? "show")]
-     :id      (str "collapse-" id)}
+  (div :.container.border.p-4.my-3
     (dom/button :.close
       {:type    "button"
        :style   {:position "relative"
                  :top      "-1.2rem"
                  :right    "-1.2rem"}
-       :onClick #(m/toggle! this :ui/open?)}
+       :onClick close}
       (IoMdClose))
     (form
       {:onSubmit (fn submit [e]
@@ -232,8 +232,8 @@
                                    :subtype new-subtype
                                    :parent  (comp/get-ident Argument current-argument)
                                    :author  (get-in props [[:component/id :session] :>/current-user])})
-                      (reset-new-argument-form nil)
-                      (m/toggle {:field :ui/open?})]))}
+                      (reset-new-argument-form nil)])
+                   (close))}
       (dom/p "Du bist " (pro-con-toggle this) ": ")
       (dom/p
         {:data-subtype (:argument/type current-argument)
@@ -265,14 +265,11 @@
         {:type "submit"}
         "Fertig"))))
 
-(def ui-new-argument (comp/factory NewArgumentForm))
+(def ui-new-argument (comp/computed-factory NewArgumentForm))
 
 (defmutation open-add-new-argument [{:keys [pro?] :or {pro? true}}]
   (action [{:keys [state ref]}]
-    (swap! state update-in ref
-      assoc
-      :ui/pro? pro?
-      :ui/open? true)))
+    (swap! state update-in ref assoc :ui/pro? pro?)))
 
 (defsc ProCon [this {:argument/keys [pros cons] :as props}
                {:keys [new-argument-fn] :as computed
@@ -359,12 +356,13 @@
    [string? map-entry? => boolean?]
    (= ns (namespace (first map-entry)))))
 
-(defsc Argumentation [this {:keys               [proposal/id >/current-argument]
+(defsc Argumentation [this {:keys               [proposal/id >/current-argument ui/show-new-argument?]
                             :argumentation/keys [upstream new-argument]}]
   {:query         [:proposal/id
                    {:argumentation/upstream (comp/get-query UpstreamItem)}
                    {:>/current-argument (comp/get-query ProCon)}
-                   {:argumentation/new-argument (comp/get-query NewArgumentForm)}]
+                   {:argumentation/new-argument (comp/get-query NewArgumentForm)}
+                   :ui/show-new-argument?]
    :ident         [:argumentation/id :proposal/id]
    :initial-state (fn [{:proposal/keys [id] :as params}]
                     (let [argument (into {:argument/id id} (filter (ns? "argument")) params)]
@@ -380,10 +378,14 @@
           (ui-upstream-item props
             {:onClick #(comp/transact! this [(jump-backwards {:position i})])}))
         (concat upstream [current-argument])))
-    (ui-new-argument (merge {:proposal/id id} new-argument))
+    (collapse {:ui/open? show-new-argument?}
+      (ui-new-argument (merge {:proposal/id id} new-argument)
+        {:close #(m/toggle! this :ui/show-new-argument?)}))
     (when current-argument
       (ui-procon current-argument
         {:argumentation-root this
-         :new-argument-fn    (fn new-argument [pro?] (comp/transact! this [(open-add-new-argument {:pro? pro?})]))}))))
+         :new-argument-fn    (fn new-argument [pro?]
+                               (comp/transact! this [(open-add-new-argument {:pro? pro?})])
+                               (m/toggle! this :ui/show-new-argument?))}))))
 
 (def ui-argumentation (comp/factory Argumentation {:keyfn (util/prefixed-keyfn :argumentation :proposal/id)}))
