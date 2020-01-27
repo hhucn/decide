@@ -82,8 +82,8 @@
     (map #(apply str (interpose " " (take (inc %) names))) (range (count names)))))
 
 (defsc Login [this {:account/keys [id]
-                    :ui/keys      [error open?] :as props}]
-  {:query         [:ui/open? :ui/error :account/id
+                    :ui/keys      [error] :as props}]
+  {:query         [:ui/error :account/id
                    {session/session-ident (comp/get-query session/Session)}
                    [::uism/asm-id ::session/session]]
    :initial-state {:account/id "" :ui/error ""}
@@ -116,13 +116,14 @@
               (dom/button :.btn.btn-outline-dark
                 {:onClick #(uism/trigger! this ::session/session :event/logout)}
                 "Log out"))
-            (dom/div :.dropdown
+
+            (dom/div :#login-dropdown.dropdown
               (button :.btn.btn-outline-primary.btn-block
-                {:onClick #(uism/trigger! this ::session/session :event/toggle-modal)}
+                {:id          "login-dropdown"
+                 :data-toggle "dropdown"}
                 "Login")
-              (dom/div :.dropdown-menu.dropdown-menu-right
-                {:classes [(when open? "show")]
-                 :style   {:width "300px"}}
+              (dom/div :.dropdown-menu.dropdown-menu-right.shadow
+                {:style {:width "300px"}}
                 (dom/form :.px-4.py-3
                   {:classes  [(when (seq error) "error")]
                    :onSubmit (fn [e]
@@ -137,7 +138,7 @@
                           :type     "password"
                           :value    password
                           :onChange #(comp/set-state! this {:password (evt/target-value %)})})
-                  (div :.ui.error.message error)
+                  (dom/small :.text-danger error)
                   (dom/button :.btn.btn-primary
                     {:type    "submit"
                      :classes [(when loading? "loading")]} "Login"))))))))))

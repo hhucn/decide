@@ -66,14 +66,12 @@
       (dr/change-route SPA ["proposals"]))
     (cond-> (clear env)
       success? (->
-                 (uism/assoc-aliased :modal-open? false)
                  (uism/activate :state/logged-in))
       (not success?) (->
                        (uism/assoc-aliased :error error-message)
                        (uism/activate :state/logged-out)))))
 
-(def global-events
-  {:event/toggle-modal {::uism/handler (fn [env] (uism/update-aliased env :modal-open? not))}})
+(def global-events {})
 
 (uism/defstatemachine session-machine
   {::uism/actors
@@ -82,7 +80,6 @@
    ::uism/aliases
    {:username       [:actor/login-form :account/id]
     :error          [:actor/login-form :ui/error]
-    :modal-open?    [:actor/login-form :ui/open?]
     :session-valid? [:actor/current-session :session/valid?]
     :current-user   [:actor/current-session :>/current-user]}
 
