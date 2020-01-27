@@ -28,6 +28,13 @@
         (fn [tx] (parser {:ring/request request} tx)))
       (handler request))))
 
+(def loading-page
+  [:div.d-flex.flex-column
+   {:style "height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center;"}
+   [:div.spinner-border {:role "status"}
+    [:span.sr-only "Loading..."]]
+   [:p "Lade ..."]])
+
 ;; ================================================================================
 ;; Dynamically generated HTML. We do this so we can safely embed the CSRF token
 ;; in a js var for use by the client.
@@ -37,14 +44,14 @@
   (html5
     [:html {:lang "en"}
      [:head {:lang "en"}
-      [:title "Application · decide"]
+      [:title "decide"]
       [:meta {:charset "utf-8"}]
       [:meta {:name "viewport" :content "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"}]
       [:link {:rel "shortcut icon" :href "data:image/x-icon;," :type "image/x-icon"}]
       (include-css "/css/main.css")
       [:script (str "var fulcro_network_csrf_token = '" csrf-token "';")]]
      [:body
-      [:div#app]
+      [:div#app loading-page]
       (include-js "/js/main/main.js")]]))
 
 ;; ================================================================================

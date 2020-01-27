@@ -61,7 +61,7 @@
                     (let [id (uuid id)]
                       (dr/route-deferred [:proposal/id id]
                         #(comp/transact! app [(initial-load {:id id})]))))}
-  (div :.container
+  (div :.container-md
     (div :.row.justify-content-between.m-4
       (h2 :.detail-card__header text)
       (big-price-tag cost budget currency))
@@ -124,13 +124,19 @@
         (dom/h6 :.proposal__title text)
         (div :.proposal__details (split-details details))))))
 
+(def loading-spinner
+  (div :.mt-5.d-flex.justify-content-center.align-items-center
+    (div :.spinner-border {:role "status"}
+      (span :.sr-only "Loading..."))))
+
 (defn bottomsheet [id & children]
   (div :.modal.fade.bottom-sheet
     {:id (str "modal-" id)}
     (div :.spacer-frame)
     (div :.modal-dialog
       (div :.modal-content
-        (div :.modal-body children)
+        (div :.modal-body
+          children)
         (button :.close
           {:style        {:position "absolute"
                           :top      "1rem"
@@ -151,7 +157,9 @@
   (div :.proposal
     (proposal-card this)
     (bottomsheet id
-      (when proposal-details (ui-proposal-detail proposal-details)))))
+      (if proposal-details
+        (ui-proposal-detail proposal-details)
+        loading-spinner))))
 
 (def ui-proposal-card (comp/factory ProposalCard {:keyfn (util/prefixed-keyfn :proposal-card :proposal/id)}))
 
