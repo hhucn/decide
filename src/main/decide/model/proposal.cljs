@@ -34,9 +34,8 @@
 
 (defmutation initial-load [{:keys [id]}]
   (action [{:keys [state app]}]
-    (js/console.log "BÄM" (comp/initial-state arg/Argumentation {:proposal/id id}))
     (swap! state mrg/merge-component arg/Argumentation
-      (comp/initial-state arg/Argumentation {:proposal/id id})
+      (comp/get-initial-state arg/Argumentation {:proposal/id id})
       :replace [:proposal/id id :>/argumentation])
 
     (df/load! app [:proposal/id id] ProposalDetails
@@ -55,7 +54,7 @@
                    :process/currency
                    {:>/argumentation (comp/get-query arg/Argumentation)}]
    :ident         :proposal/id
-   :initial-state (fn [_] {:>/argumentation (comp/initial-state arg/Argumentation nil)})
+   :initial-state (fn [_] {:>/argumentation (comp/get-initial-state arg/Argumentation)})
 
    :route-segment ["proposal" :proposal/id]
    :will-enter    (fn [app {id :proposal/id}]
@@ -298,7 +297,7 @@
                         :ui/hide-declined?
                         session/valid?-query]
    :initial-state      (fn [_] {:all-proposals     []
-                                :new-proposal-form (comp/initial-state EnterProposal nil)
+                                :new-proposal-form (comp/get-initial-state EnterProposal)
                                 :ui/hide-declined? false})
    :ident              (fn [] [:component/id :proposals])
    :route-segment      ["proposals"]
