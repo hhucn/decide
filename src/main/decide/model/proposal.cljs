@@ -85,12 +85,11 @@
         (m/with-params
           (assoc params :account/id (session/get-user-id-from-state s)))))))
 
-(defn proposal-card [comp]
+(defn proposal-card [comp props]
   (let [{:proposal/keys [id details cost]
          :argument/keys [text]
          :process/keys  [currency]
-         :keys          [vote/utility]
-         :as            props} (comp/props comp)
+         :keys          [vote/utility]} props
         logged-in? (session/get-logged-in? props)]
     (div :.proposal__card
       (div :.proposal__buttons.btn-group-toggle
@@ -144,7 +143,7 @@
            :data-dismiss "modal"} (IoMdClose))))))
 
 (defsc ProposalCard [this {:keys          [>/proposal-details]
-                           :proposal/keys [id]}]
+                           :proposal/keys [id] :as props}]
   {:query         [:proposal/id :argument/text :proposal/details :proposal/cost
                    :vote/utility
                    :process/currency
@@ -155,7 +154,7 @@
                            :vote/utility       0
                            :>/proposal-details (comp/initial-state ProposalDetails nil)})}
   (div :.proposal
-    (proposal-card this)
+    (proposal-card this props)
     (bottomsheet id
       (if proposal-details
         (ui-proposal-detail proposal-details)
@@ -175,33 +174,6 @@
   (if (str/blank? value)
     placeholder
     value))
-
-(defn form-dummy-proposal-card [{:proposal/keys [details cost]
-                                 :argument/keys [text]
-                                 :process/keys  [currency]}]
-  (div :.proposal.mx-auto
-    (div :.proposal-buttons
-      (button :.btn.btn-outline-success
-        {:disabled true}
-        (IoIosCheckmarkCircleOutline #js {:size "3rem"}))
-      (div :.spacer)
-      (button :.btn.btn-outline-danger
-        {:disabled true}
-        (IoIosCloseCircleOutline #js {:size "3rem"})))
-
-    (div :.proposal-content
-      (div
-        {:style {:display        "flex"
-                 :padding        "10px 5px 10px 10px"
-                 :justifyContent "space-between"}}
-        (h4 :.proposal-title text))
-      (div
-        {:style {:display        "flex"
-                 :padding        "10px"
-                 :justifyContent "space-between"}}
-        (small :.proposal-details details)
-        (div :.proposal-price
-          (span :.proposal-price__text (str cost) currency))))))
 
 (defmutation new-proposal [params]
   (action [{:keys [state]}]
@@ -226,11 +198,14 @@
 
         short-summary       (split-details summary)]
     (div
-      (form-dummy-proposal-card {:argument/text    (with-placeholder title "Es sollte ein Wasserspender im Flur aufgestellt werden.")
-                                 :proposal/cost    (with-placeholder cost "0")
-                                 :proposal/details (with-placeholder short-summary "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben.")
-                                 :process/currency "€"})
-      (form :.p-5
+      (div :.d-flex.justify-content-center.mb-3
+        {:style {:pointerEvents "none"}}
+        (proposal-card this
+          {:argument/text    (with-placeholder title "Es sollte ein Wasserspender im Flur aufgestellt werden.")
+           :proposal/cost    (with-placeholder cost "0")
+           :proposal/details (with-placeholder short-summary "Ein Wasserspender sorgt dafür, dass alle Studenten und Mitarbeiter mehr trinken. Dies sorgt für ein gesünderes Leben.")
+           :process/currency "€"}))
+      (form :.p-md-3
         {:onSubmit (fn [e]
                      (evt/prevent-default! e)
                      (comp/transact! this [(new-proposal {:proposal/id      (tempid/tempid)
@@ -241,7 +216,7 @@
         (let [approaching-limit? (> (count title) title-warn-length)
               chars-exceeded?    (> (count title) title-max-length)]
           (div :.form-group
-            (label "Vorschlag")
+            (label "Titel")
             (input :.form-control
               {:placeholder "Es sollte ein Wasserspender im Flur aufgestellt werden."
                :value       title
@@ -277,8 +252,7 @@
                :classes [(when chars-exceeded? "text-danger")]}
               (str (count title) "/" title-max-length " Buchstaben")
               (when chars-exceeded? ". Bitte beschränken Sie sich auf das Limit!"))))
-
-        (button :.btn.btn-primary "Submit")))))
+        (button :.btn.btn-primary "Einreichen")))))
 
 (def ui-new-proposal-form (comp/computed-factory EnterProposal))
 
