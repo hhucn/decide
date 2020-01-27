@@ -62,8 +62,6 @@
 (>defn process-session-result [env error-message]
   [::uism/env string? => ::uism/env]
   (let [success? (uism/alias-value env :session-valid?)]
-    (when success?
-      (dr/change-route SPA ["proposals"]))
     (cond-> (clear env)
       success? (->
                  (uism/activate :state/logged-in))

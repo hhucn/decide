@@ -158,13 +158,19 @@
         (dom/div :.col-md-6
           (proposal/ui-proposal-card proposal (proposal/ui-proposal-detail detailed-proposals)))))))
 
-(defsc Main [this {:keys [proposal]}]
-  {:query         [{:proposal (comp/get-query proposal/ProposalDetails)}]
+(defsc Main [this {:keys []}]
+  {:query         []
    :ident         (fn [] [:component/id :main])
-   :route-segment ["main"]
+   :route-segment [""]
    :will-enter    (fn [_] (dr/route-immediate [:component/id :main]))}
-  (div :.container
-    #_(proposal/ui-proposal-detail proposal)))
+  (div :.jumbotron
+    (dom/h1 :.display-4 "Willkommen")
+    (dom/p :.lead "Deine Meinung zählt!")
+    (dom/hr :.my-4)
+
+    (dom/button :.btn.btn-primary.btn
+      {:onClick #(dr/change-route this (dr/path-to proposal/ProposalCollection))}
+      "Zu den Vorschlägen")))
 
 (defsc Settings1 [this props]
   {:query         []
@@ -207,7 +213,7 @@
   {:router-targets [Main proposal/ProposalCollection Settings proposal/ProposalDetails]}
   (case current-state
     :pending (dom/div :.d-flex.justify-content-center
-               (dom/div :.spinner-border.ml-auto {:role "status"}
+               (dom/div :.spinner-border {:role "status"}
                  (dom/span :.sr-only "Loading...")))
     :failed (dom/div
               (dom/div "Ooops!")

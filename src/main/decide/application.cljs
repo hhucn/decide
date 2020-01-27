@@ -18,10 +18,11 @@
                {;; This ensures your client can talk to a CSRF-protected server.
                 ;; See middleware.clj to see how the token is embedded into the HTML
                 ;:optimized-render! keyframe-render2/render!
-                :client-did-mount  #(dr/change-route SPA (rest (split js/document.location.pathname #"/")))
-                :remotes           {:remote (net/fulcro-http-remote
-                                              {:url                "/api"
-                                               :request-middleware secured-request-middleware})}}))
+                :client-did-mount (fn client-did-mount [app]
+                                    (routing/initial-route! app))
+                :remotes          {:remote (net/fulcro-http-remote
+                                             {:url                "/api"
+                                              :request-middleware secured-request-middleware})}}))
 
 (routing/start-history SPA)
 

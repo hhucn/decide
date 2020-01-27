@@ -1,11 +1,23 @@
 (ns decide.routing
   (:require
     [com.fulcrologic.fulcro.routing.dynamic-routing :as dr]
+    [com.fulcrologic.guardrails.core :refer [>defn =>]]
     [taoensso.timbre :as log]
     [goog.events :as events]
-    [clojure.string :refer [split]])
+    [clojure.string :refer [split]]
+    [cljs.spec.alpha :as s])
   (:import [goog.history Html5History EventType]))
 
+
+(>defn split-route [path]
+  [string? => (s/coll-of string?)]
+  (let [route (rest (split path #"/"))]
+    (if (empty? route)
+      [""]
+      route)))
+
+(defn initial-route! [app]
+  (dr/change-route app (split-route js/document.location.pathname)))
 
 (defn- make-history []
   (doto (Html5History.)
@@ -52,4 +64,4 @@
         (log/debug "onpopstate!" e)
         (log/debug :new-path new-path)
         (.setToken history new-path)
-        (dr/change-route app (rest (split new-path "/")))))))
+        (dr/change-route app (split-route new-path))))))
