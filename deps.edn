@@ -18,6 +18,8 @@
            io.replikativ/datahike            {:mvn/version "0.2.0"}
            io.replikativ/hasch               {:mvn/version "0.3.7"}
 
+           com.andrewmcveigh/cljs-time       {:mvn/version "0.5.2"}
+
            org.clojars.pntblnk/clj-ldap      {:mvn/version "0.0.16"}
 
            ring/ring-core                    {:mvn/version "1.8.0"}

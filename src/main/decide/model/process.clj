@@ -26,15 +26,31 @@
   (let [groups (group-by #(-> % :phase/starts (before? datetime)) phase-config)]
     (-> groups (get true) last)))
 
-(defresolver resolve-phase [{:keys [config]} _]
+(>defn get-phase-by-id [phases phase-id]
+  [(s/coll-of :phase/config) :phase/id => (? :phase/config)]
+  (first (filter (comp #{phase-id} :phase/id) phases)))
+
+
+(defresolver resolve-phase [{:keys [config]} {:phase/keys [id]}]
+  {::pc/input  #{:phase/id}
+   ::pc/output [:phase/id :phase/starts :phase/allowed]}
+  (get-phase-by-id (get-in config [:process :phases] []) id))
+
+
+(defresolver resolve-current-phase [{:keys [config]} _]
   {::pc/output [{:current-phase [:phase/id :phase/starts :phase/allowed]}]}
   (let [phase (get-phase (now) (get-in config [:process :phases]))
         {:phase/keys [id starts allowed]
          :or         {allowed #{}}} phase]
     {:current-phase
-     #:phase{:id      id
-             :starts  starts
-             :allowed (or allowed #{})}}))
+     (when phase
+       #:phase{:id      id
+               :starts  starts
+               :allowed (or allowed #{})})}))
+
+(defresolver resolve-all-phases [{:keys [config]} _]
+  {::pc/output [{:all-phases [:phase/id :phase/starts :phase/allowed]}]}
+  {:all-phases (get-in config [:process :phases] [])})
 
 (defresolver resolve-process [{:keys [config]} _]
   {::pc/output [:process/budget :process/currency]}
@@ -42,4 +58,6 @@
     #:process{:budget   budget
               :currency "€"}))
 
-(def resolvers [resolve-process resolve-phase])
+
+
+(def resolvers [resolve-process resolve-current-phase resolve-phase resolve-all-phases])

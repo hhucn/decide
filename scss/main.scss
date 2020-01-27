@@ -39,10 +39,16 @@ body {
   &[data-type=pro] {
     @extend .list-group-item-success;
   }
+
   &[data-type=con] {
     @extend .list-group-item-danger;
   }
+
   &[data-type=position] {
     @extend .list-group-item-info;
   }
+}
+
+.card-highlight {
+  z-index: 1000;
 }

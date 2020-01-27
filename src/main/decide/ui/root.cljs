@@ -13,7 +13,8 @@
     [decide.model.proposal :as proposal]
     [clojure.string :as str]
     [com.fulcrologic.fulcro.data-fetch :as df]
-    [decide.model.account :as account]))
+    [decide.model.account :as account]
+    [decide.ui.landing :as landing]))
 
 (defn field [{:keys [label valid? error-message] :as props}]
   (let [input-props (-> props (assoc :name label) (dissoc :label :valid? :error-message))]
@@ -158,19 +159,22 @@
         (dom/div :.col-md-6
           (proposal/ui-proposal-card proposal (proposal/ui-proposal-detail detailed-proposals)))))))
 
-(defsc Main [this {:keys []}]
-  {:query         []
+(defsc Main [this {:keys [cool-panel]}]
+  {:query         [{:cool-panel (comp/get-query landing/CoolPanel)}]
    :ident         (fn [] [:component/id :main])
+   :initial-state (fn [_] {:cool-panel (comp/get-initial-state landing/CoolPanel)})
    :route-segment [""]
-   :will-enter    (fn [_] (dr/route-immediate [:component/id :main]))}
+   :will-enter    #(dr/route-immediate [:component/id :main])}
   (div :.jumbotron
     (dom/h1 :.display-4 "Willkommen")
-    (dom/p :.lead "Deine Meinung zählt!")
+    (dom/p :.lead "Ihre Meinung zählt!")
     (dom/hr :.my-4)
 
     (dom/button :.btn.btn-primary.btn
       {:onClick #(dr/change-route this (dr/path-to proposal/ProposalCollection))}
-      "Zu den Vorschlägen")))
+      "Zu den Vorschlägen")
+    (dom/hr :.my-4)
+    (landing/ui-coolpanel cool-panel)))
 
 (defsc Settings1 [this props]
   {:query         []
