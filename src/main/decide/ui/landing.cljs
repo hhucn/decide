@@ -21,7 +21,6 @@
                    {[:current-phase '_] (comp/get-query Phase)}]
    :ident         (fn [] [:component/id :info-panel])
    :initial-state {}}
-  (log/info props)
   (let [{:phase/keys [id]} (get props :current-phase)
         now              (time/now)
         proposal-start   (tc/to-date-time (get-in props [[:phase/id :proposal] :phase/starts]))
@@ -56,7 +55,7 @@
                 (cond
                   (time/after? now vote-start) "Vorbei"
                   (time/after? now moderation-start) (dom/b "Aktuell!")
-                  :else (tf/unparse {:format-str "dd.MM.yyyy HH:mm"} proposal-start))))))
+                  :else (tf/unparse {:format-str "dd.MM.yyyy HH:mm"} moderation-start))))))
 
         (div :.col-sm-4.p-1
           (div :.card.bg-danger.text-white.text-center.h-100
@@ -70,7 +69,7 @@
                 (cond
                   (time/after? now over) "Vorbei"
                   (time/after? now vote-start) "Aktuell!"
-                  :else (tf/unparse {:format-str "dd.MM.yyyy HH:mm"} proposal-start)))))))
+                  :else (tf/unparse {:format-str "dd.MM.yyyy HH:mm"} vote-start)))))))
       (div :.row
         (div :.col-sm-12.p-1
           (div :.card.bg-primary.text-white.text-center
