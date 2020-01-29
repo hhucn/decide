@@ -1,11 +1,13 @@
-@import "hhu-colors";
+@use "hhu-colors" as hhu;
 
 // Theme color
-$blue: $hhu-blue;
+$blue: hhu.$blue;
 $dark-gray: #6C6C6C;
-$green: $hhu-green;
-$secondary: $hhu-darkblue-55;
-$red: $hhu-red;
+$green: hhu.$green;
+$orange: hhu.$orange;
+$teal: hhu.$turquoise;
+$secondary: hhu.$darkblue-55;
+$red: hhu.$red;
 
 $enable-responsive-font-sizes: true;
 
@@ -51,4 +53,22 @@ body {
 
 .card-highlight {
   z-index: 1000;
+}
+
+@mixin hero-card-variant($name, $color) {
+  &-#{$name} {
+    background-color: $color;
+    color: color-yiq($color);
+  }
+}
+
+.hero-card {
+  @extend .card;
+  text-align: center;
+  height: 100%;
+
+  @include hero-card-variant("proposal", hhu.$green);
+  @include hero-card-variant("moderation", hhu.$green-15);
+  @include hero-card-variant("vote", hhu.$green-15);
+  @include hero-card-variant("result", hhu.$blue);
 }

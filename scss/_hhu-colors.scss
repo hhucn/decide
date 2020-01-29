@@ -1,13 +1,52 @@
-$hhu-white: #FFF;
-$hhu-black: #000;
+$white: #FFF;
+$black: #000;
 
-$hhu-blue: #006AB3;
-$hhu-green: #78AC42; //#8cb110; // don't know why. But the original color looks off.
-$hhu-orange: #ee7f00;
-$hhu-red: #BE0A26;
-$hhu-turquoise: #57bab1;
-$hhu-darkblue: #003964;
-$hhu-iceblue: #b5cbd6;
+$blue: #006AB3;
+$green: #78AC42; //#8cb110; // don't know why. But the original color looks off.
+$orange: #ee7f00;
+$red: #BE0A26;
+$turquoise: #57bab1;
+$darkblue: #003964;
+$iceblue: #b5cbd6;
 
-$hhu-darkblue-75: mix($hhu-darkblue, white, 75%);
-$hhu-darkblue-55: mix($hhu-darkblue, white, 55%);
+$blue-100: mix($blue, white, 100%);
+$blue-75: mix($blue, white, 75%);
+$blue-55: mix($blue, white, 55%);
+$blue-35: mix($blue, white, 35%);
+$blue-15: mix($blue, white, 15%);
+$blue-15: mix($blue, white, 15%);
+
+$green-100: mix($green, white, 100%);
+$green-75: mix($green, white, 75%);
+$green-55: mix($green, white, 55%);
+$green-35: mix($green, white, 35%);
+$green-15: mix($green, white, 15%);
+
+$orange-100: mix($orange, white, 100%);
+$orange-75: mix($orange, white, 75%);
+$orange-55: mix($orange, white, 55%);
+$orange-35: mix($orange, white, 35%);
+$orange-15: mix($orange, white, 15%);
+
+$red-100: mix($red, white, 100%);
+$red-75: mix($red, white, 75%);
+$red-55: mix($red, white, 55%);
+$red-35: mix($red, white, 35%);
+$red-15: mix($red, white, 15%);
+
+$turquoise-100: mix($turquoise, white, 100%);
+$turquoise-75: mix($turquoise, white, 75%);
+$turquoise-55: mix($turquoise, white, 55%);
+$turquoise-35: mix($turquoise, white, 35%);
+$turquoise-15: mix($turquoise, white, 15%);
+
+$darkblue-100: mix($darkblue, white, 100%);
+$darkblue-75: mix($darkblue, white, 75%);
+$darkblue-55: mix($darkblue, white, 55%);
+$darkblue-35: mix($darkblue, white, 35%);
+$darkblue-15: mix($darkblue, white, 15%);
+
+$iceblue-100: mix($iceblue, white, 100%);
+$iceblue-75: mix($iceblue, white, 75%);
+$iceblue-50: mix($iceblue, white, 50%);
+$iceblue-30: mix($iceblue, white, 30%);
